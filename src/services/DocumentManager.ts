@@ -8,19 +8,56 @@
 
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
 import { Request, Response } from 'express';
+import Utils from '../services/Utils';
 
 let s3;
 declare const axel: any;
 
-const DocumenntManager = {
+const getStorage = (pathSuffix: string, filePrefix: string) => {
+  const destPath = path.join(process.cwd(), 'assets/data', pathSuffix);
+  fs.mkdirSync(destPath, { recursive: true });
+
+  return multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, destPath);
+    },
+    filename: (req, file, cb) => {
+      const fileName = file.originalname;
+      const fileNameParts = fileName.split('.');
+
+      cb(null, `${filePrefix}-${Utils.slugify(fileNameParts[0])}.${fileNameParts.pop()}`);
+    },
+  });
+};
+
+const DocumentManager = {
   storage: 'local',
   s3,
-  // UPLOAD OF STARTUP PRODUCT PICTURES
-  httpUpload(req: Request, options = { path: '' }) {
+  httpUpload(req: Request, res: Response, options = { path: '', filePrefix: '' }) {
     const promise = new Promise((resolve, reject) => {
       // don't allow the total upload size to exceed ~10MB
       // @ts-ignore
+      const storage = getStorage(options.path, options.filePrefix);
+
+      multer({
+        storage,
+        limits: {
+          fieldSize: 250 * 1024 * 1024,
+        },
+      }).single('file')(req, res, (err: any) => {
+        const fileName = req.file.originalname;
+        const fileNameParts = fileName.split('.');
+
+        resolve(
+          `${axel.config.appUrl}/data/${options.path}/${options.filePrefix}-${Utils.slugify(
+            fileNameParts[0],
+          )}.${fileNameParts.pop()}`,
+        );
+      });
+
+      /*
       req.file('file').upload(
         {
           dirname: path.resolve('assets/data', options.path),
@@ -37,6 +74,8 @@ const DocumenntManager = {
           resolve(uploadedFiles);
         },
       );
+      */
+
       //  adapter: require('skipper-s3'),
       // req.file('file').upload({
       //   maxBytes: req.body.maxSize || 2000000000,
@@ -195,4 +234,4 @@ const DocumenntManager = {
   },
 };
 
-export default DocumenntManager;
+export default DocumentManager;

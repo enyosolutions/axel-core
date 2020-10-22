@@ -159,7 +159,7 @@ export function hasAnyRole(user: { roles?: string[] }, _requiredRoles: string[] 
   } else {
     requiredRoles = _requiredRoles;
   }
-  let myRoles = (user && user.roles) || user;
+  let myRoles = user.roles;
   // Check if role exists
   for (let i = 0; i < requiredRoles.length; i++) {
     const role = requiredRoles[i];
