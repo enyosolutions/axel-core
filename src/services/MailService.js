@@ -1,7 +1,7 @@
 import _ from 'lodash';
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
-declare const axel: any;
+
 
 type recipientType =
   | string
@@ -14,31 +14,31 @@ const MailService = {
     title: '',
     layout: 'email-template',
   },
-  sendPasswordReset(email: string, data?: any) {
+  sendPasswordReset(email: string, data?) {
     const mergedData = _.merge({}, this.defaultData, data);
     mergedData.title = 'Mot de passe oublié';
-    return axel.renderView('emails/account-reset', mergedData, (err: Error, html: string) => {
+    return axel.renderView('emails/account-reset', mergedData, (err, html) => {
       if (err) return axel.logger.warn(err);
       MailService.sendMail(email, mergedData.title, html);
     });
   },
 
   sendUserCreated(user: { firstName: string; lastName: string; email: string }) {
-    const data: any = _.merge({}, this.defaultData);
+    const data = _.merge({}, this.defaultData);
     data.title = 'Bienvenue';
     data.user = user;
 
-    return axel.renderView('emails/account-created', data, (err: Error, html: string) => {
+    return axel.renderView('emails/account-created', data, (err, html) => {
       if (err) return axel.logger.warn(err);
       MailService.sendMail(user.email, data.title, html);
     });
   },
 
   sendEmailConfirmation(user: { firstname: string; lastname: string; email: string }) {
-    const data: any = _.merge({}, this.defaultData);
+    const data = _.merge({}, this.defaultData);
     data.title = 'Email address confirmation';
     data.user = user;
-    return axel.renderView('emails/account-reset', data, (err: Error, html: string) => {
+    return axel.renderView('emails/account-reset', data, (err, html) => {
       if (err) return axel.logger.warn(err);
       MailService.sendMail(user.email, data.title, html);
     });
@@ -50,7 +50,7 @@ const MailService = {
     // create Nodemailer SES transporter
     switch (axel.config.mail.transport) {
       case 'aws':
-        const sesTransport = require('nodemailer-ses-transport');
+        import sesTransport from 'nodemailer-ses-transport';
         transporter = nodemailer.createTransport(
           sesTransport({
             accessKeyId: axel.config.awsSES.auth.user,
@@ -60,7 +60,7 @@ const MailService = {
         );
         break;
       case 'sendgrid':
-        const sgTransport = require('nodemailer-sendgrid-transport');
+        import sgTransport from 'nodemailer-sendgrid-transport';
         transporter = nodemailer.createTransport(sgTransport(axel.config.sendgrid));
         break;
       case 'gmail':
@@ -96,7 +96,7 @@ const MailService = {
       };
       mailOptions = _.merge(mailOptions, options);
       try {
-        transporter.sendMail(mailOptions, (err: Error) => {
+        transporter.sendMail(mailOptions, (err) => {
           if (err) {
             console.log('[err] => ', err);
             // axel.logger.warn('error while sending Email');
@@ -123,28 +123,28 @@ const MailService = {
     });
   },
 
-  sendMailinglistThankyou(user: any, data?: any) {
+  sendMailinglistThankyou(user, data?) {
     return new Promise((resolve, reject) => {
       const mergedData = _.merge({}, this.defaultData, data);
       mergedData.title = 'Thank you';
       mergedData.layout = 'email-template';
       mergedData.user = user;
 
-      axel.renderView('emails/mailinglist-thankyou', mergedData, (err: Error, html: string) => {
+      axel.renderView('emails/mailinglist-thankyou', mergedData, (err, html) => {
         if (err) return axel.logger.warn(err) && reject(err);
         resolve(MailService.sendMail(user.email, mergedData.title, html));
       });
     });
   },
 
-  sendEnquiryConfirm(user: any, data?: any) {
+  sendEnquiryConfirm(user, data?) {
     return new Promise((resolve, reject) => {
       const mergedData = _.merge({}, this.defaultData, data);
       mergedData.title = 'Thank you';
       mergedData.layout = 'email-template';
       mergedData.user = user;
 
-      axel.renderView('emails/enquiry-confirm', mergedData, (err: Error, html: string) => {
+      axel.renderView('emails/enquiry-confirm', mergedData, (err, html) => {
         if (err) return axel.logger.warn(err) && reject(err);
         resolve(MailService.sendMail(user.email, mergedData.title, html));
       });

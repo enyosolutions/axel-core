@@ -1,6 +1,5 @@
 import _ from 'lodash';
 
-type ErrorTypeKeys = 'name' | 'code' | 'message' | 'errors';
 export class ExtendedError extends Error {
   /**
    *
@@ -8,11 +7,11 @@ export class ExtendedError extends Error {
    * @type {string}
    * @memberof ExtendedError
    */
-  name: string;
-  code?: string;
-  message: string;
-  errors?: Error[] | string[];
-  constructor(message: string | object) {
+  name;
+  code;
+  message;
+  errors;
+  constructor(message) {
     super('');
     if (!message || _.isString(message)) {
       super(message);
@@ -20,7 +19,7 @@ export class ExtendedError extends Error {
       this.message = message || '';
     } else {
       this.message = 'ExtendedError';
-      Object.keys(message).forEach((i: string) => {
+      Object.keys(message).forEach((i) => {
         // @ts-ignore
         this[i] = message[i];
       });
@@ -32,4 +31,6 @@ export class ExtendedError extends Error {
 
 
 // @ts-ignore
-global.ExtendedError = ExtendedError;
+global.ExtendedError = ExtendedError
+
+export default ExtendedError;

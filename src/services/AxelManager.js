@@ -1,16 +1,11 @@
-import async from 'async';
-import { axel, Axel } from '../axel';
-import { Request, Response, Application } from 'express';
-import Utils from './Utils';
-import SchemaValidator from './SchemaValidator';
-import _, { throttle } from 'lodash';
-import { generateController, generateModel, generateApi, generateRoute } from 'axel-cli/src/api';
+import { axel } from '../axel.js';
+import _ from 'lodash';
+import socketIO from 'socket.io';
+import axelCli from 'axel-cli';
+const { generateController, generateModel, generateApi, generateRoute } = axelCli;
 
-type WebserviceRequest = {
-  method: string;
-  query: { [key: string]: any };
-  body: { [key: string]: any };
-};
+
+
 /**
  * Contains all the code necessary for bootstrapping the code manager page.
  *
@@ -24,17 +19,17 @@ class AxelManager {
    * @returns {Promise<any>}
    * @memberof AxelAdmin
    */
-  init(app: Application): void {
+  init(app) {
     console.log('\n\n\n\n\n\n', 'WS for axelManager opening');
-    const io = require('socket.io')(app.locals.server);
+    const io = socketIO(app.locals.server);
     app.locals.io = io;
-    io.on('connect', function(socket: any) {
+    io.on('connect', function (socket) {
       console.log('WS client connected', socket.id);
       let counter = 0;
 
       socket.on(
         '/axel-manager/api',
-        async (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        async (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }
@@ -51,12 +46,12 @@ class AxelManager {
                   name,
                   type,
                   force,
-                  fields: fields && fields.map((f: any) => f.name),
+                  fields: fields && fields.map((f) => f.name),
                   withSchema,
                 });
                 let count = withSchema ? 4 : 3;
                 // catching api signals in order for the file to generate properly
-                process.on('SIGUSR2', function() {
+                process.on('SIGUSR2', function () {
                   console.log('Captured interruption signal....', count--);
 
                   if (count <= 0) {
@@ -76,15 +71,18 @@ class AxelManager {
 
       socket.on(
         '/axel-manager/models',
-        async (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        async (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }
           switch (req.method) {
             case 'GET':
             default:
+              if (!axel.sqldb) {
+                return (cb('sqldb_not_ready'))
+              }
               let tables = await axel.sqldb.query('show tables');
-              tables = tables.map((t: any) => Object.values(t)[0]);
+              tables = tables.map((t) => Object.values(t)[0]);
               cb(null, {
                 body: {
                   models: Object.keys(axel.models),
@@ -105,7 +103,7 @@ class AxelManager {
 
       socket.on(
         '/axel-manager/models/sync',
-        (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }
@@ -123,10 +121,10 @@ class AxelManager {
               const em = id === '$ALL' ? axel.sqldb : axel.models[id].em;
 
               em.sync({ force, alter })
-                .then((result: any) => {
+                .then((result) => {
                   cb(null, { body: 'OK' });
                 })
-                .catch((err: any) => {
+                .catch((err) => {
                   console.warn(err)
                   cb(err.message || 'See terminal for more details');
                 });
@@ -138,7 +136,7 @@ class AxelManager {
 
       socket.on(
         '/axel-manager/controllers',
-        (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }
@@ -165,8 +163,8 @@ class AxelManager {
                 if (err && err.name === 'SequelizeValidationError') {
                   cb({
                     //@ts-ignore
-                    errors: err.errors && err.errors.map((e: ExtendedError) => e.message),
-                    message: 'validation_error',
+                    errors: err.errors && err.errors.map((e) => e.message),
+                    message: 'sql_validation_error',
                   });
                   return false;
                 }
@@ -178,7 +176,7 @@ class AxelManager {
 
       socket.on(
         '/axel-manager/routes',
-        (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }
@@ -206,8 +204,8 @@ class AxelManager {
                 if (err && err.name === 'SequelizeValidationError') {
                   cb({
                     //@ts-ignore
-                    errors: err.errors && err.errors.map((e: ExtendedError) => e.message),
-                    message: 'validation_error',
+                    errors: err.errors && err.errors.map((e) => e.message),
+                    message: 'sql_validation_error',
                   });
                   return false;
                 }
@@ -219,7 +217,7 @@ class AxelManager {
 
       socket.on(
         '/axel-manager/restart-app',
-        (req: WebserviceRequest = { method: 'GET', query: {}, body: {} }, cb: Function) => {
+        (req = { method: 'GET', query: {}, body: {} }, cb) => {
           if (typeof req === 'function') {
             cb = req;
           }

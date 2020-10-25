@@ -1,38 +1,36 @@
-import express, { Application } from 'express';
+import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import http from 'http';
 import os from 'os';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-const debug = require('debug')('axel:server');
+import d from 'debug';
+const debug = d('axel:server');
 
-import l from './services/logger';
-import installValidator from './services/openapi';
-import { ServerInitFunction } from './axel';
-import { Obj } from './types/index';
+import l from './services/logger.js';
 
-declare const axel: any;
 
 console.time('STARTUP TIME');
 const app = express();
 const exit = process.exit;
-const root = path.normalize(__dirname + '/../..');
+const root = path.normalize(process.cwd());
+
 
 export class Server {
-  private routes: (app: Application) => void;
-  private modelsFn: ServerInitFunction;
-  private beforeFn: ServerInitFunction;
-  private afterFn: ServerInitFunction;
-  public app: Application = app;
-  public middlewares: Obj = {};
+  routes;
+  modelsFn;
+  beforeFn;
+  afterFn;
+  app = app;
+  middlewares = {};
 
   constructor() {
     axel.app = app;
     // app.set('appPath', root + 'client');
     app.set('appPath', root);
     if (this.middlewares) {
-      Object.keys(this.middlewares).forEach((m: string) => app.use(this.middlewares[m] as any));
+      Object.keys(this.middlewares).forEach((m) => app.use(this.middlewares[m]));
     }
 
     app.disable('x-powered-by');
@@ -54,46 +52,49 @@ export class Server {
         limit: process.env.REQUEST_LIMIT || '100mb',
       }),
     );
-    app.use(cors(axel.config.security.cors));
+    if (axel.config && axel.config.security && axel.config.security.cors) {
+      app.use(cors(axel.config.security.cors));
+    }
+
     app.use(cookieParser(process.env.SESSION_SECRET));
   }
 
-  setMiddlewares(middlewares: Obj): Server {
+  setMiddlewares(middlewares) {
     this.middlewares = middlewares;
     return this;
   }
 
-  router(routes: (app: Application) => void): Server {
+  router(routes) {
     this.routes = routes;
     return this;
   }
 
-  models(modelsFn: ServerInitFunction): Server {
+  models(modelsFn) {
     this.modelsFn = modelsFn;
     debug('models fn defined');
     return this;
   }
 
-  before(callback: ServerInitFunction): Server {
+  before(callback) {
     this.beforeFn = callback;
     debug('beforeFn fn defined');
     return this;
   }
 
-  after(callback: ServerInitFunction): Server {
+  after(callback) {
     this.afterFn = callback;
     return this;
   }
 
-  listen(port: number): Application {
-    const welcome = (p: number) => () => {
+  listen(port) {
+    const welcome = (p) => () => {
       l.info(
         `up and running in ${process.env.NODE_ENV ||
-          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
       );
       debug(
         `up and running in ${process.env.NODE_ENV ||
-          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
       );
       l.info('\n');
       l.info('__________________________________');
@@ -131,3 +132,4 @@ export class Server {
     return app;
   }
 }
+export default Server;

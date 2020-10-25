@@ -1,9 +1,8 @@
-import async from 'async';
 import { axel, Axel } from '../axel';
-const fs = require('fs');
-const _ = require('lodash');
-const colors = require('colors');
-const Sequelize = require('sequelize');
+import fs from 'fs';
+import _ from 'lodash';
+import colors from 'colors';
+import Sequelize from 'sequelize';
 
 async function loadSequelize() {
   if (axel.config.sqldb) {
@@ -40,6 +39,7 @@ async function loadSequelize() {
       return sequelize;
     } catch (err) {
       axel.logger.error('Unable to connect to the database:', err);
+      process.exit(-1);
     }
   }
   return;

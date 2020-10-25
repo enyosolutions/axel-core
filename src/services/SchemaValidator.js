@@ -1,18 +1,10 @@
-import { Axel } from '../axel';
-
 import Ajv from 'ajv';
 import _ from 'lodash';
 
-declare const axel: Axel;
-declare type ValidationState = {
-  isValid: boolean;
-  context: string;
-  errors?: any;
-  formatedErrors?: any;
-  rawErrors?: any;
-};
 
-function getGrammaticalSingular(type: string) {
+
+
+function getGrammaticalSingular(type) {
   switch (type) {
     case 'string':
       return 'a string';
@@ -33,7 +25,7 @@ function getGrammaticalSingular(type: string) {
   }
 }
 
-function getFieldName(error: Obj) {
+function getFieldName(error) {
   return (
     error.params.missingProperty ||
     error.params.additionalProperty ||
@@ -41,7 +33,7 @@ function getFieldName(error: Obj) {
   );
 }
 
-function getFormatErrorMessage(error: Obj) {
+function getFormatErrorMessage(error) {
   switch (error.params.format) {
     case 'date-time':
     case 'date':
@@ -59,7 +51,7 @@ function getFormatErrorMessage(error: Obj) {
   }
 }
 
-function getValidMessage(error: Obj) {
+function getValidMessage(error) {
   switch (error.keyword) {
     case 'required':
       return 'is required';
@@ -88,7 +80,7 @@ function getValidMessage(error: Obj) {
   }
 }
 
-function addMessage(fields: Obj, error: Obj, fieldName?: string) {
+function addMessage(fields, error, fieldName) {
   const field = fieldName || getFieldName(error);
   const message = getValidMessage(error);
 
@@ -99,10 +91,10 @@ function addMessage(fields: Obj, error: Obj, fieldName?: string) {
   fields[field].push(`${field} ${message}`);
 }
 
-function normaliseErrorMessages(errors: Obj) {
+function normaliseErrorMessages(errors) {
   axel.logger.log(errors);
   const fields = {};
-  errors.forEach((error: Obj) => {
+  errors.forEach((error) => {
     addMessage(fields, error);
   });
 
@@ -112,14 +104,14 @@ function normaliseErrorMessages(errors: Obj) {
 }
 
 class SchemaValidator {
-  ajv?: Obj = new Ajv({
+  ajv = new Ajv({
     useDefaults: true,
     coerceTypes: true,
     allErrors: true,
     removeAdditional: false,
     extendRefs: true,
   });
-  ajvStrict?: Obj = new Ajv({
+  ajvStrict = new Ajv({
     useDefaults: true,
     coerceTypes: true,
     allErrors: true,
@@ -127,10 +119,10 @@ class SchemaValidator {
     extendRefs: true,
   });
 
-  validators: Obj = {};
-  strictValidators: Obj = {};
-  missingSchemas: Obj = {};
-  initialized: boolean = false;
+  validators = {};
+  strictValidators = {};
+  missingSchemas = {};
+  initialized = false;
   init() {
     axel.logger.info('VALIDATOR: INIT');
     this.loadSchemas();
@@ -140,18 +132,18 @@ class SchemaValidator {
   loadSchemas() {
     /* eslint-disable */
 
-    let existingSchemas: number = Object.keys(axel.models).filter(i => axel.models[i].schema)
+    let existingSchemas = Object.keys(axel.models).filter(i => axel.models[i].schema)
       .length;
     axel.logger.info('VALIDATOR :: loading schemas', existingSchemas);
     if (!this.ajv) {
       throw new Error('error_missing_ajv_validator');
     }
     while (existingSchemas > Object.keys(this.validators).length) {
-      Object.keys(axel.models).forEach((key: string) => this.loadSchema(axel.models[key]));
+      Object.keys(axel.models).forEach((key) => this.loadSchema(axel.models[key]));
     }
   }
 
-  loadSchema(definition: Obj) {
+  loadSchema(definition) {
     const identity = definition.identity;
     axel.logger.verbose('VALIDATOR :: loading %s ', identity);
     if (!definition.schema) {
@@ -183,8 +175,8 @@ class SchemaValidator {
     axel.logger.verbose('VALIDATOR :: loading %s complete', identity);
   }
 
-  validate(data: Obj, model: string, options: Obj = { strict: false }): ValidationState {
-    let result: ValidationState = { isValid: true, context: model };
+  validate(data, model, options = { strict: false }) {
+    let result = { isValid: true, context: model };
     try {
       const validator =
         options && options.strict ? this.strictValidators[model] : this.validators[model];

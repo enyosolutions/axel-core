@@ -1,6 +1,4 @@
-import { axel } from '../..';
-
-module.exports = {
+export default {
   identity: 'axelModelConfig',
   collectionName: 'axel-model-config',
   url: '/axel-model-config', // url for front api

@@ -5,23 +5,20 @@
  * @help        :: See http://links.axel.s.org/docs/controllers
  */
 
-import { Request, Response } from 'express';
 import moment from 'moment';
 import _ from 'lodash';
 import Utils from '../services/Utils';
 import { ExtendedError } from '../index';
-import AuthService from '../services/AuthService';
+import AuthService from '../../axel/services/AuthService';
 import MailService from '../services/MailService';
 
-declare const axel: any;
-
-const primaryKey: string =
+const primaryKey =
   axel.models['user'] && axel.models['user'].em && axel.models['user'].em.primaryKeyField
     ? axel.models['user'].em.primaryKeyField
     : axel.config.framework.primaryKey;
 
-module.exports = {
-  initDefaultUser(req: Request, res: Response) {
+export default {
+  initDefaultUser(req, res) {
     if (['PROD', 'prod', 'production'].indexOf(axel.config.env) > -1) {
       res.json('NOPE');
       return;
@@ -58,8 +55,8 @@ module.exports = {
    *         schema:
    *           $ref: '#/definitions/User_ItemResponse'
    */
-  create(req: Request, res: Response) {
-    let token: string;
+  create(req, res) {
+    let token;
     if (!req.body.email) {
       return res.status(400).json({
         errors: ['error_missing_email'],
@@ -94,7 +91,7 @@ module.exports = {
           email: newUser.email,
         },
       })
-      .then((user: any) => {
+      .then(user => {
         if (user) {
           throw new ExtendedError({
             code: 400,
@@ -113,7 +110,7 @@ module.exports = {
 
         return AuthService.beforeCreate(newUser);
       })
-      .then((data: any) => {
+      .then(data => {
         if (data) {
           return axel.models.user.em.create(newUser, {
             raw: true,
@@ -121,7 +118,7 @@ module.exports = {
         }
         throw new Error('password_encoding_error');
       })
-      .then((result: any) => {
+      .then(result => {
         if (result && result.dataValues) {
           newUser = result.dataValues;
 
@@ -186,7 +183,7 @@ module.exports = {
           });
         }
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         axel.logger.warn(err && err.message ? err.message : err);
         Utils.errorCallback(err, res);
       });
@@ -195,7 +192,7 @@ module.exports = {
   /**
    *
    */
-  getByResetToken(req: Request, res: Response) {
+  getByResetToken(req, res) {
     const resetToken = req.param('resetToken');
 
     if (!resetToken) {
@@ -211,7 +208,7 @@ module.exports = {
           resetToken,
         },
       })
-      .then((data: any) => {
+      .then(data => {
         if (!data) {
           throw new ExtendedError({
             code: 401,
@@ -238,7 +235,7 @@ module.exports = {
           [primaryKey]: data[primaryKey],
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'global_error'],
           message: err.message || 'global_error',
@@ -246,7 +243,7 @@ module.exports = {
       });
   },
 
-  reset(req: Request, res: Response) {
+  reset(req, res) {
     const resetToken = req.param('resetToken');
 
     if (!resetToken) {
@@ -263,14 +260,14 @@ module.exports = {
       });
     }
 
-    let user: any;
+    let user;
     axel.models.user.em
       .findOne({
         where: {
           resetToken,
         },
       })
-      .then((u: any) => {
+      .then(u => {
         if (!u || u.length < 1) {
           throw new ExtendedError({
             code: 401,
@@ -294,13 +291,13 @@ module.exports = {
         user.password = req.body.password;
         return AuthService.beforeUpdate(user);
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'not_found'],
           message: err.message || 'not_found',
         });
       })
-      .then((result: any) => {
+      .then(result => {
         if (result) {
           user.resetToken = '';
           return axel.models.user.em.update(user, {
@@ -310,20 +307,20 @@ module.exports = {
           });
         }
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'update_error'],
           message: err.message || 'update_error',
         });
       })
-      .then((success: any) => {
+      .then(success => {
         if (success) {
           res.status(200).json({
             body: 'password_reset_success',
           });
         }
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         res.status(400).json({
           message: 'global_error',
           errors: [err.message],
@@ -331,7 +328,7 @@ module.exports = {
       });
   },
 
-  list(req: Request, resp: Response) {
+  list(req, resp) {
     const { listOfValues, startPage, limit } = Utils.injectPaginationQuery(req);
 
     const options = {
@@ -339,7 +336,7 @@ module.exports = {
       skip: startPage * limit,
     };
 
-    let query: any = Utils.injectQueryParams(req);
+    let query = Utils.injectQueryParams(req);
 
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req, query, {
@@ -355,10 +352,10 @@ module.exports = {
 
     axel.models.user.em
       .findAndCountAll({ where: query }, options)
-      .then((result: { count: number; rows: [] }) => {
+      .then(result => {
         let data;
         if (result && Array.isArray(result.rows)) {
-          data = result.rows.map((user: any) => {
+          data = result.rows.map(user => {
             delete user.encryptedPassword;
             if (user.roles && typeof user.roles === 'string') {
               try {
@@ -387,7 +384,7 @@ module.exports = {
           body: [],
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         resp.status(500).json({
           errors: [err.message],
           message: err.message,
@@ -395,7 +392,7 @@ module.exports = {
       });
   },
 
-  get(req: Request, resp: Response) {
+  get(req, resp) {
     const id = req.param('userId');
     if (axel.mongodb) {
       if (!Utils.checkIsMongoId(id, resp)) {
@@ -407,7 +404,7 @@ module.exports = {
       .findByPk({
         [primaryKey]: id,
       })
-      .then((doc?: any) => {
+      .then(doc => {
         if (!doc) {
           return resp.status(404).json({
             message: 'not_found',
@@ -438,7 +435,7 @@ module.exports = {
           body: doc,
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         resp.status(500).json({
           errors: [err],
           message: err.message,
@@ -446,7 +443,7 @@ module.exports = {
       });
   },
 
-  exists(req: Request, resp: Response) {
+  exists(req, resp) {
     const username = req.query.username;
     const email = req.query.email;
     if (!username && !email) {
@@ -457,7 +454,7 @@ module.exports = {
     }
     axel.models.user.em
       .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
-      .then((doc?: any) => {
+      .then(doc => {
         if (doc) {
           return resp.status(200).json({
             body: true,
@@ -467,15 +464,15 @@ module.exports = {
           body: false,
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         Utils.errorCallback(err, resp);
       });
   },
 
-  update(req: Request, res: Response) {
+  update(req, res) {
     let user;
     const newUser = req.body;
-    let data: any;
+    let data;
     const id = req.param('userId');
     if (axel.mongodb) {
       if (!Utils.checkIsMongoId(id, res)) {
@@ -504,7 +501,7 @@ module.exports = {
 
     axel.models.user.em
       .findByPk(id)
-      .then((u: any) => {
+      .then(u => {
         user = u;
         if (!user) {
           throw new ExtendedError({
@@ -561,7 +558,7 @@ module.exports = {
           });
         }
       })
-      .then((doc: any) => {
+      .then(doc => {
         if (doc) {
           if (data.roles && typeof data.roles === 'string') {
             try {
@@ -573,18 +570,18 @@ module.exports = {
         }
       })
       .then(() => axel.models.user.em.findByPk(parseInt(id)))
-      .then((userModel: any) => {
+      .then(userModel => {
         delete userModel.encryptedPassword;
         res.json({
           user: userModel,
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         Utils.errorCallback(err, res);
       });
   },
 
-  delete(req: Request, resp: Response) {
+  delete(req, resp) {
     const id = req.param('userId');
     if (!Utils.checkIsMongoId(id, resp)) {
       return false;
@@ -593,7 +590,7 @@ module.exports = {
     const collection = axel.models.user.em;
     collection
       .findByPk(id)
-      .then((user: any) => {
+      .then(user => {
         if (!user) {
           return resp.status(200).json({
             body: `User with id ${id} wasn't found`,
@@ -624,7 +621,7 @@ module.exports = {
             });
           });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         Utils.errorCallback(err, resp);
       });
   },

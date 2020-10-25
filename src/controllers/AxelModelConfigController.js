@@ -4,11 +4,10 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
-import { Request, Response } from 'express';
 import _ from 'lodash';
-import Utils from '../../common/services/Utils'; // adjust path as needed
-import { ExtendedError } from '..'; // adjust path as needed
-import AxelAdmin from '../services/AxelAdmin'; // adjust path as needed
+import Utils from '../services/Utils.js'; // adjust path as needed
+import { ExtendedError } from '../services/ExtendedError.js'; // adjust path as needed
+import AxelAdmin from '../services/AxelAdmin.js'; // adjust path as needed
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -19,8 +18,6 @@ Uncomment if you need the following features:
 // import DocumentManager from '../../services/DocumentManager';
 // import ExcelService from '../../services/ExcelService';
 
-declare const axel: any;
-
 const entity = 'axelModelConfig';
 const primaryKey =
   axel.models[entity] && axel.models[entity].primaryKeyField
@@ -28,9 +25,8 @@ const primaryKey =
     : axel.config.framework.primaryKey;
 
 class AxelModelConfigController {
-
-  list(req: Request, resp: Response) {
-    let items: Array<Obj> = [];
+  list(req, resp) {
+    let items = [];
 
     const { listOfValues, startPage, limit, offset, order } = Utils.injectPaginationQuery(req);
     let query = Utils.injectQueryParams(req);
@@ -52,16 +48,16 @@ class AxelModelConfigController {
         limit,
         offset,
       })
-      .then((result: { rows: Obj[]; count: number }) => {
+      .then(result => {
         items = result.rows;
-        items = items.map((item: any) =>
+        items = items.map(item =>
           AxelAdmin.mergeModels(
             AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
             item,
           ),
         );
         if (listOfValues) {
-          items = items.map((item: any) => ({
+          items = items.map(item => ({
             [primaryKey]: item[primaryKey],
             label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`,
           }));
@@ -69,7 +65,7 @@ class AxelModelConfigController {
         return result.count || 0;
       })
 
-      .then((totalCount?: number) =>
+      .then(totalCount =>
         resp.status(200).json({
           body: items,
           page: startPage,
@@ -77,12 +73,12 @@ class AxelModelConfigController {
           totalCount: totalCount,
         }),
       )
-      .catch((err: Error) => {
+      .catch(err => {
         Utils.errorCallback(err, resp);
       });
   }
 
-  get(req: Request, resp: Response) {
+  get(req, resp) {
     const id = req.params.id;
     if (!id) {
       return false;
@@ -93,13 +89,13 @@ class AxelModelConfigController {
     if (!repository) {
       return;
     }
-    const pKey: string = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
+    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
     repository
       .findOne({
         where: { [pKey]: id },
         raw: false,
       })
-      .catch((err: Error) => {
+      .catch(err => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -113,7 +109,7 @@ class AxelModelConfigController {
           message: err.message || 'not_found',
         });
       })
-      .then(async (item: any) => {
+      .then(async item => {
         if (item) {
           item = item.get();
           if (axel.models[item.identity]) {
@@ -150,12 +146,10 @@ class AxelModelConfigController {
           message: 'not_found',
         });
       })
-      .catch((err: Error) => {
+      .catch(err => {
         Utils.errorCallback(err, resp);
       });
   }
-
-
 
   /**
    * [put description]
@@ -165,7 +159,7 @@ class AxelModelConfigController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  put(req: Request, resp: Response) {
+  put(req, resp) {
     const id = req.params.id;
     const data = req.body;
 
@@ -175,7 +169,7 @@ class AxelModelConfigController {
     }
     repository
       .findByPk(id)
-      .catch((err: Error) => {
+      .catch(err => {
         throw new ExtendedError({
           code: 404,
           errors: [
@@ -186,7 +180,7 @@ class AxelModelConfigController {
           message: err.message || 'not_found',
         });
       })
-      .then((result: any) => {
+      .then(result => {
         if (result) {
           return repository.update(data, {
             where: {
@@ -201,7 +195,7 @@ class AxelModelConfigController {
         });
       })
       .then(() => repository.findByPk(id))
-      .then((result: any) => {
+      .then(result => {
         if (result) {
           return resp.status(200).json({
             body: result,
@@ -212,15 +206,15 @@ class AxelModelConfigController {
           message: 'not_found',
         });
       })
-      .catch((err: ExtendedError) => {
+      .catch(err => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
         if (err && err.name === 'SequelizeValidationError') {
           resp.status(400).json({
             //@ts-ignore
-            errors: err.errors && err.errors.map((e: ExtendedError) => e.message),
-            message: 'validation_error',
+            errors: err.errors && err.errors.map(e => e.message),
+            message: 'sql_validation_error',
           });
           return false;
         }
@@ -236,7 +230,7 @@ class AxelModelConfigController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  delete(req: Request, resp: Response) {
+  delete(req, resp) {
     const id = req.params.id;
 
     const repository = Utils.getEntityManager(entity, resp);
@@ -249,14 +243,14 @@ class AxelModelConfigController {
           [primaryKey]: id,
         },
       })
-      .catch((err: Error) => {
+      .catch(err => {
         throw new ExtendedError({
           code: 400,
           errors: [err || 'delete_error'],
           message: err.message || 'delete_error',
         });
       })
-      .then((a: any) => {
+      .then(a => {
         if (!a) {
           return resp.status(404).json();
         }
@@ -264,7 +258,7 @@ class AxelModelConfigController {
           status: 'OK',
         });
       })
-      .catch((err: Error) => {
+      .catch(err => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -273,7 +267,7 @@ class AxelModelConfigController {
   }
 
   /*
-  export(req: Request, resp: Response) {
+  export(req, resp) {
 
     let repository;
     const schema = axel.models[entity] && axel.models[entity].schema;
@@ -317,7 +311,7 @@ class AxelModelConfigController {
           message: 'not_found'
         });
       })
-      .catch((err: Error) => {
+      .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -325,7 +319,7 @@ class AxelModelConfigController {
       });
   }
 
-  getImportTemplate(req: Request, resp: Response) {
+  getImportTemplate(req, resp) {
 
 
     const repository = Utils.getEntityManager(entity, resp);
@@ -368,7 +362,7 @@ class AxelModelConfigController {
           message: 'not_found'
         });
       })
-      .catch((err: Error) => {
+      .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -376,7 +370,7 @@ class AxelModelConfigController {
       });
   }
 
-  import(req: Request, resp: Response) {
+  import(req, resp) {
     const repository = Utils.getEntityManager(entity, resp);
     if (!repository) {
       return;
@@ -384,12 +378,12 @@ class AxelModelConfigController {
 
     const properData: [] = [];
     const improperData: [] = [];
-    let doc: any;
+    let doc;
     DocumentManager.httpUpload(req, {
       path: 'updloads/excel'
     })
       // @ts-ignore
-      .then((document?: any[]) => {
+      .then((document?[]) => {
         if (document && document.length > 0) {
           doc = document[0];
           return ExcelService.parse(doc.fd, {
@@ -420,7 +414,7 @@ class AxelModelConfigController {
           errors: ['parse_error']
         });
       })
-      .catch((err: Error) => {
+      .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -434,7 +428,7 @@ class AxelModelConfigController {
         });
       })
       .then(() => DocumentManager.delete(doc[0].fd))
-      .catch((err: Error) => {
+      .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
@@ -455,7 +449,7 @@ class AxelModelConfigController {
           improperData
         })
       )
-      .catch((err: Error) => {
+      .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }

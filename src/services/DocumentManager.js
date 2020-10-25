@@ -9,13 +9,12 @@
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
-import { Request, Response } from 'express';
-import Utils from '../services/Utils';
+import Utils from '../services/Utils.js';
 
 let s3;
-declare const axel: any;
 
-const getStorage = (pathSuffix: string, filePrefix: string) => {
+
+const getStorage = (pathSuffix, filePrefix) => {
   const destPath = path.join(process.cwd(), 'assets/data', pathSuffix);
   fs.mkdirSync(destPath, { recursive: true });
 
@@ -32,10 +31,14 @@ const getStorage = (pathSuffix: string, filePrefix: string) => {
   });
 };
 
-const DocumentManager = {
+export const DocumentManager = {
   storage: 'local',
   s3,
-  httpUpload(req: Request, res: Response, options = { path: '', filePrefix: '' }) {
+  httpUpload(
+    req,
+    res,
+    options = { path: '', filePrefix: '' },
+  ) {
     const promise = new Promise((resolve, reject) => {
       // don't allow the total upload size to exceed ~10MB
       // @ts-ignore
@@ -46,7 +49,7 @@ const DocumentManager = {
         limits: {
           fieldSize: 250 * 1024 * 1024,
         },
-      }).single('file')(req, res, (err: any) => {
+      }).single('file')(req, res, (err) => {
         const fileName = req.file.originalname;
         const fileNameParts = fileName.split('.');
 
@@ -62,7 +65,7 @@ const DocumentManager = {
         {
           dirname: path.resolve('assets/data', options.path),
         },
-        (err: Error, uploadedFiles: []) => {
+        (err, uploadedFiles: []) => {
           if (err) {
             return reject(err);
           }
@@ -140,7 +143,7 @@ const DocumentManager = {
   },
 
   post(
-    document: any,
+    document,
     options = {
       storage: null,
       entity: null,
@@ -212,7 +215,7 @@ const DocumentManager = {
   //   });
   // },
 
-  delete(doc: string) {
+  delete(doc) {
     return new Promise((resolve, reject) => {
       if (doc.indexOf('assets') !== -1) {
         doc = doc.substr(doc.indexOf('assets') + 6);

@@ -1,27 +1,24 @@
-// const mongo = require('mongodb');
-import { Request, Response } from 'express';
-const crypto = require('crypto');
-const stringify = require('json-stringify-safe');
+// import mongo from 'mongodb';
+import crypto from 'crypto';
+import stringify from 'json-stringify-safe';
 import Sequelize from 'sequelize';
 import _ from 'lodash';
-import {ExtendedError} from './ExtendedError';
+import { ExtendedError } from './ExtendedError.js';
 
-// declare const Sequelize: any;
-declare const axel: any;
+// declare const Sequelize;
 
-const primaryKey = axel.config.framework.primaryKey;
 
 const Utils = {
-  md5(str: string) {
+  md5(str) {
     return crypto
       .createHash('md5')
       .update(str)
       .digest('hex');
   },
-  formUrlEncoded(x: string) {
-    return Object.keys(x).reduce((p, c: any) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
+  formUrlEncoded(x) {
+    return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
   },
-  slugify(text: string) {
+  slugify(text) {
     const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
     const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
     const p = new RegExp(a.split('').join('|'), 'g');
@@ -37,7 +34,7 @@ const Utils = {
       .trim();
   },
 
-  safeError(err: ExtendedError) {
+  safeError(err) {
     try {
       err = JSON.parse(stringify(err));
       return err;
@@ -51,7 +48,7 @@ const Utils = {
     }
   },
 
-  errorCallback(err: ExtendedError, response: Response) {
+  errorCallback(err, response) {
     if (!response.headersSent) {
       if (!err) {
         axel.logger.error(err);
@@ -60,7 +57,7 @@ const Utils = {
       if (err.name === 'SequelizeValidationError') {
         if (err.errors && Array.isArray(err.errors)) {
           //@ts-ignore
-          err.errors = err.errors.map((e: Error) => e.message);
+          err.errors = err.errors.map((e) => e.message);
         }
         err.message = 'validation_error';
       }
@@ -68,7 +65,7 @@ const Utils = {
       if (err.name === 'SequelizeDatabasExtendedError') {
         if (err.errors && Array.isArray(err.errors)) {
           //@ts-ignore
-          err.errors = err.errors.map((e: Error) => e.sqlMessage);
+          err.errors = err.errors.map((e) => e.sqlMessage);
         } else {
           //@ts-ignore
           err.errors = [err.sqlMessage || err.message];
@@ -79,21 +76,21 @@ const Utils = {
       if (err.message === 'Validation error') {
         if (err.errors && Array.isArray(err.errors)) {
           //@ts-ignore
-          err.errors = err.errors.map((e: any) => `${e.path}_${e.validatorKey}`);
+          err.errors = err.errors.map((e) => `${e.path}_${e.validatorKey}`);
         }
         err.message =
           err.errors && err.errors[0]
             ? _.isString(err.errors[0])
               ? err.errors[0]
               : err.errors[0].message
-            : 'validation_error';
+            : 'sql_validation_error';
       }
       let errors;
       if (err.errors && Array.isArray(err.errors)) {
         if (axel.config.env === 'production') {
           errors =
             //@ts-ignore
-            err.errors.map((e: any) => (_.isString(e) ? e : e.message));
+            err.errors.map((e) => (_.isString(e) ? e : e.message));
         } else {
           //@ts-ignore
           errors = err.errors.map(Utils.safeError);
@@ -125,7 +122,7 @@ const Utils = {
   /**
    * check that the id has the correct mongoID format
    */
-  checkIsMongoId: (id: string, resp: Response) => {
+  checkIsMongoId: (id, resp) => {
     if (!id) {
       return resp.status(404).json({
         errors: ['missing_id'],
@@ -147,7 +144,8 @@ const Utils = {
    *
    * Inject userId if required
    */
-  injectUserId(data: any, user: any) {
+  injectUserId(data, user) {
+    const primaryKey = axel.config.framework.primaryKey;
     if (!data.userId && user && user[primaryKey]) {
       data.userId = user[primaryKey];
     }
@@ -170,8 +168,8 @@ const Utils = {
    * @returns
    */
   injectQueryParams(
-    req: Request,
-    query: any = {
+    req,
+    query = {
       userId: undefined,
       filters: undefined,
       tags: undefined,
@@ -182,7 +180,7 @@ const Utils = {
     // filters from the ui. Ex table fields
     // @deprecated use _filters
     if (req.query.filters && _.isObject(req.query.filters)) {
-      const filters: Obj = req.query.filters;
+      const filters = req.query.filters;
       Object.keys(filters)
         .filter(f => filters[f])
         .forEach(i => {
@@ -196,7 +194,7 @@ const Utils = {
 
     // filters from the ui. Ex table fields
     if (req.query._filters && _.isObject(req.query._filters)) {
-      const filters: Obj = req.query._filters;
+      const filters = req.query._filters;
       Object.keys(filters)
         .filter(f => filters[f])
         .forEach(i => {
@@ -210,15 +208,15 @@ const Utils = {
       const tags = _.isArray(req.query.tags)
         ? req.query.tags
         : _.isString(req.query.tags)
-        ? req.query.tags.split(',')
-        : [];
+          ? req.query.tags.split(',')
+          : [];
       query.tags = {
         $all: tags,
       };
     }
 
     if (req.query.range && _.isObject(req.query.range)) {
-      const { startDate, endDate } = req.query.range as { startDate?: string; endDate?: string };
+      const { startDate, endDate } = req.query.range;
       if (startDate && (_.isString(startDate) || _.isNumber(startDate))) {
         if (!query.createdOn) {
           query.createdOn = {};
@@ -246,10 +244,10 @@ const Utils = {
     return query;
   },
 
-  injectSortParams(req: Request, options: any = {}) {
+  injectSortParams(req, options = {}) {
     if (!options.sort) {
       if (req.query.sort && _.isObject(req.query.sort)) {
-        const sort: Obj = req.query.sort;
+        const sort = req.query.sort;
         options.sort = {};
         Object.keys(sort).forEach(i => {
           options.sort[i] = parseInt(sort[i]);
@@ -264,19 +262,21 @@ const Utils = {
   },
 
   injectPaginationQuery(
-    req: Request,
-    options: { sort?: any; primaryKey?: string } = {
+    req,
+    options = {
       sort: null,
       primaryKey: '',
     },
-  ): any {
-    const isListOfValues: boolean = req.query.listOfValues ? !!req.query.listOfValues : false;
-    const startPage: number = req.query.page ? _.toNumber(req.query.page) : 0;
-    let limit: number = isListOfValues
+  ) {
+    const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
+    const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
+    const primaryKey = axel.config.framework.primaryKey;
+
+    let limit = isListOfValues
       ? axel.config.framework.defaultLovPagination
       : req.query.perPage
-      ? req.query.perPage
-      : axel.config.framework.defaultPagination;
+        ? req.query.perPage
+        : axel.config.framework.defaultPagination;
     limit = _.toNumber(limit);
     const offset = startPage * limit;
     const sortOptions = req.query.sort || options.sort;
@@ -292,7 +292,7 @@ const Utils = {
     };
   },
 
-  injectSearchParams(req: Request, query: Obj = {}) {
+  injectSearchParams(req, query = {}) {
     if (req.query.search) {
       if (typeof req.query.search === 'string') {
         req.query.search = req.query.search.trim();
@@ -307,9 +307,9 @@ const Utils = {
   },
 
   injectSqlSearchParams(
-    req: Request,
-    query: any = {},
-    options: { modelName?: string; fields?: [] } = {
+    req,
+    query = {},
+    options = {
       modelName: '',
       fields: undefined,
     },
@@ -344,7 +344,7 @@ const Utils = {
    * Removes undefiend fields from the object query since the cause sequelize to crash
    * @param query
    */
-  cleanSqlQuery(query: { [key: string]: any }) {
+  cleanSqlQuery(query) {
     if (!query) {
       return query;
     }
@@ -356,16 +356,16 @@ const Utils = {
     return query;
   },
 
-  removeAdditionalProperty(scheme: any, data: any) {
+  removeAdditionalProperty(scheme, data) {
     return _.pick(data, _.keys(scheme.schema.properties));
   },
 
-  dashedToNormal(str: string) {
+  dashedToNormal(str) {
     return str.replace(/\s+/g, '-').toLowerCase();
   },
 
   formatName(firstname = null, lastname = null, company = null, optional = false) {
-    let name: string | null = '';
+    let name = '';
     if (!firstname && !lastname && !company) {
       return name;
     }
@@ -382,7 +382,7 @@ const Utils = {
     return name ? name.trim() : '';
   },
 
-  objectTrim(item: any) {
+  objectTrim(item) {
     Object.keys(item).forEach(key => {
       if (_.isString(item[key])) {
         item[key] = item[key].trim();
@@ -391,7 +391,7 @@ const Utils = {
     return item;
   },
 
-  validateDate(date: string) {
+  validateDate(date) {
     const timestamp = Date.parse(date);
     if (Number.isNaN(timestamp) === true) {
       return false;
@@ -399,7 +399,7 @@ const Utils = {
     return true;
   },
 
-  getEntityManager(req: Request | string, res: Response) {
+  getEntityManager(req, res) {
     const endpoint = _.isString(req) ? req : req.params.endpoint;
     if (!axel.models[endpoint] || !axel.models[endpoint].repository) {
       console.warn('REQUESTED  ENDPOINT', endpoint, 'DOES NOT EXISTS');
@@ -412,7 +412,7 @@ const Utils = {
     return axel.models[endpoint].em;
   },
 
-  getRawObject(item: any): any {
+  getRawObject(item) {
     if (Array.isArray(item)) {
       return item.map(Utils.getRawObject);
     }
@@ -424,7 +424,7 @@ const Utils = {
     const output = item.get();
     /* eslint-disable no-underscore-dangle,no-unused-expressions */
     item._options.includeNames &&
-      item._options.includeNames.forEach((inc: string) => {
+      item._options.includeNames.forEach((inc) => {
         output[inc] = Utils.getRawObject(item[inc]);
       });
     return output;

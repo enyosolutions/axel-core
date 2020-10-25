@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   identity: 'axelModelFieldConfig',
   collectionName: 'axel-model-field-config',
   url: '/axel-model-field-config', // url for front api

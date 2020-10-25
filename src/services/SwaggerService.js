@@ -1,16 +1,16 @@
-const _ = require('lodash');
+import _ from 'lodash';
 import { Request, Response, Application, NextFunction } from 'express';
 import swagger from '../../config/swagger';
 
-const fs = require('fs');
-const url = require('url');
-const path = require('path');
-const chalk = require('chalk');
-const yaml = require('js-yaml');
-const express = require('express');
+import fs from 'fs';
+import url from 'url';
+import path from 'path';
+import chalk from 'chalk';
+import yaml from 'js-yaml';
+import express from 'express';
 const descriptor = {};
 
-declare const axel: any;
+
 
 class SwaggerService {
   /**
@@ -21,10 +21,10 @@ class SwaggerService {
    * @returns {void}
    * @memberof SwaggerService
    */
-  generateModels(swaggerDef: Obj): void {
+  generateModels(swaggerDef): void {
     const { primaryKey } = axel.config.framework;
     swaggerDef.definitions = swaggerDef.definitions || {};
-    _.each(axel.models, (model: any, key: string) => {
+    _.each(axel.models, (model, key) => {
       const modelKey = _.capitalize(_.camelCase(model.identity));
       // create definition
       const modelDefinition = model.schema || {
@@ -96,10 +96,10 @@ class SwaggerService {
    * @returns {Obj}
    * @memberof SwaggerService
    */
-  modelParser(attributes: Obj): Obj {
-    const attrs: Obj = {};
+  modelParser(attributes) {
+    const attrs = {};
 
-    _.each(attributes, function(val: any, key: string) {
+    _.each(attributes, function (val, key) {
       attrs[key] = {
         type: _.capitalize(val.type),
       };
@@ -110,7 +110,7 @@ class SwaggerService {
 
   idParameterDef = { name: 'id', required: true, in: 'path', type: 'string' };
 
-  generatePath(swaggerDef: Obj, model: Obj): void {
+  generatePath(swaggerDef, model): void {
     if (model.apiUrl && !swaggerDef.paths[model.apiUrl]) {
       const url = model.apiUrl.replace(swaggerDef.basePath, '');
       const modelKey = _.capitalize(_.camelCase(model.identity));
@@ -190,7 +190,7 @@ class SwaggerService {
     }
   }
   /*
-  generate(descriptor: any, opts, config = null) {
+  generate(descriptor, opts, config = null) {
     if (config) {
       this.options = config;
     }
@@ -232,9 +232,9 @@ class SwaggerService {
   */
 
   /*
-  options: Obj = {};
+  options = {};
 
-  setDefaultUrl(swaggerJSONUrl: string, swaggerUIPath: string) {
+  setDefaultUrl(swaggerJSONUrl: string, swaggerUIPath) {
     const path: string = swaggerUIPath + '/index.html';
     const index: string = fs.readFileSync(path, 'utf-8');
     const newIndex: string = index.replace(
@@ -329,8 +329,8 @@ class SwaggerService {
   }
 
 
-  init(app: Application, opt?: Obj) {
-    let swHandler: (req: Request, res: Response, next: NextFunction) => any;
+  init(app, opt?) {
+    let swHandler: (req, res, next) => any;
     let swaggerURL;
     let swaggerUI;
 
@@ -356,7 +356,7 @@ class SwaggerService {
     // Serve up swagger ui interface.
     swaggerURL = new RegExp('^' + this.options.swaggerURL + '(/.*)?$');
 
-    app.get(swaggerURL, function(req: Request, res: Response, next: NextFunction) {
+    app.get(swaggerURL, function(req, res, next) {
       // express static barfs on root url w/o trailing slash
       if (req.url === this.options.swaggerURL) {
         res.writeHead(302, { Location: req.url + '/' });
@@ -370,7 +370,7 @@ class SwaggerService {
       return swHandler(req, res, next);
     });
   }
-  middleware(req: Request, res: Response, next: NextFunction) {
+  middleware(req, res, next) {
     const regex = new RegExp('^' + this.options.fullSwaggerJSONPath + '(/.*)?$');
 
     const match = regex.exec(req.path);

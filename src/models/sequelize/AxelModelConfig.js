@@ -1,5 +1,5 @@
 /**
- * axel-entity-config
+ * axel-model-config
  *
  * @description :: This is model file that connects with sequelize.
  *                 TODO: You might write a short summary of

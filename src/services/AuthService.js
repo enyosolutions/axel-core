@@ -1,14 +1,13 @@
 import _ from 'lodash';
-import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
-import { VerifyCallback, VerifyErrors, sign, verify as jverify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+const { VerifyCallback, VerifyErrors, sign, verify: jverify } = jwt;
 
-declare const axel: any;
 
-const primaryKey: string = (axel.config.framework && axel.config.framework.primaryKey) || 'id';
+const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id';
 const saltRounds = 10;
 
-export const issue = (payload: string | Buffer | object, expiry = '7d') =>
+export const issue = (payload, expiry = '7d') =>
   sign(
     payload,
     axel.config.tokenSecret, // Token Secret that we sign it with
@@ -18,7 +17,7 @@ export const issue = (payload: string | Buffer | object, expiry = '7d') =>
   );
 
 // @fixme only id should be inserted in the token. The rest should fetched from the database / cache  with each request
-export const generateFor = (user: any) =>
+export const generateFor = (user) =>
   issue({
     [primaryKey]: user[primaryKey],
     username: user.username,
@@ -29,7 +28,7 @@ export const generateFor = (user: any) =>
   });
 
 // Verifies token on a request
-export function verify(token: string, callback: VerifyCallback) {
+export function verify(token, callback) {
   return jverify(
     token, // The token to be verified
     axel.config.tokenSecret, // Same token we used to sign
@@ -39,9 +38,9 @@ export function verify(token: string, callback: VerifyCallback) {
   );
 }
 
-export function beforeCreate(user: any) {
+export function beforeCreate(user) {
   return new Promise((resolve, reject) => {
-    bcrypt.hash(user.password, saltRounds, (error: Error, hash: string) => {
+    bcrypt.hash(user.password, saltRounds, (error, hash) => {
       if (error) {
         return reject(error);
       }
@@ -54,12 +53,12 @@ export function beforeCreate(user: any) {
   });
 }
 
-export function beforeUpdate(user: any) {
+export function beforeUpdate(user) {
   return new Promise((resolve, reject) => {
-    bcrypt.genSalt(saltRounds, (err: Error, salt: string) => {
+    bcrypt.genSalt(saltRounds, (err, salt) => {
       if (err) return reject(err);
       if (user.password) {
-        bcrypt.hash(user.password, salt, (err2: Error, hash: string) => {
+        bcrypt.hash(user.password, salt, (err2, hash) => {
           if (err2) {
             return reject(err2);
           }
@@ -76,12 +75,12 @@ export function beforeUpdate(user: any) {
   });
 }
 
-export function comparePassword(password: string, user: any) {
+export function comparePassword(password, user) {
   return new Promise((resolve, reject) => {
     if (!user || !user.encryptedPassword) {
       reject(new Error('error_invalid_credentials'));
     }
-    bcrypt.compare(password, user.encryptedPassword, (err: Error, match: boolean) => {
+    bcrypt.compare(password, user.encryptedPassword, (err, match) => {
       if (err) resolve(err);
       if (match) {
         resolve(true);
@@ -93,7 +92,7 @@ export function comparePassword(password: string, user: any) {
 }
 
 // @todo add support for injection of roles checking methods
-export function tokenDecryptMiddleware(req: Request, res: Response, next: NextFunction) {
+export function tokenDecryptMiddleware(req, res, next) {
   let hasHeader = false;
   if (
     req.headers &&
@@ -107,7 +106,7 @@ export function tokenDecryptMiddleware(req: Request, res: Response, next: NextFu
       if (/^Bearer$/i.test(scheme)) {
         const token = credentials;
         hasHeader = true;
-        verify(token, (err: VerifyErrors | null, decryptedToken: object | undefined) => {
+        verify(token, (err, decryptedToken) => {
           if (!err) {
             req.user = decryptedToken; // This is the decrypted token or the payload you provided
             // App.session.token = decryptedToken;
@@ -130,26 +129,26 @@ export function tokenDecryptMiddleware(req: Request, res: Response, next: NextFu
   }
 }
 
-export function getExtendedRoles(role: string) {
-  let myRoles: string[] = [];
+export function getExtendedRoles(role) {
+  let myRoles = [];
   if (
     axel.config.framework.roles[role] &&
     axel.config.framework.roles[role].inherits &&
     Array.isArray(axel.config.framework.roles[role].inherits)
   ) {
     myRoles = myRoles.concat(axel.config.framework.roles[role].inherits);
-    axel.config.framework.roles[role].inherits.forEach((r: string) => {
+    axel.config.framework.roles[role].inherits.forEach((r) => {
       myRoles = myRoles.concat(getExtendedRoles(r));
     });
   }
   return _.uniq(myRoles);
 }
 
-export function hasRole(user: { roles?: string[] }, role: string) {
+export function hasRole(user, role) {
   return user && user.roles && user.roles.indexOf(role) > -1;
 }
 
-export function hasAnyRole(user: { roles?: string[] }, _requiredRoles: string[] | string) {
+export function hasAnyRole(user, _requiredRoles) {
   if (!user || !user.roles) {
     return false;
   }
@@ -173,7 +172,7 @@ export function hasAnyRole(user: { roles?: string[] }, _requiredRoles: string[] 
     }
   }
 
-  myRoles.forEach((role: string) => {
+  myRoles.forEach((role) => {
     myRoles = myRoles.concat(getExtendedRoles(role));
   });
   let canAccess = false;

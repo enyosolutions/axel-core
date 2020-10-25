@@ -2,8 +2,45 @@
   "name": "axel-core",
   "version": "0.0.1",
   "description": "Axel: Express+Typescript+OhMyGoodness",
-  "main": "src/index.ts",
+  "main": "src/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:enyosolutions-team/axel-axel.git",
   "author": "fb@enyosolutions.com <fb@enyosolutions.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "cross-env TS_NODE_FILES=true npx tsc"
+  },
+  "dependencies": {
+    "axel-cli": "^0.0.13",
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "debug": "^4.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "json-stringify-safe": "^5.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "multer": "^1.4.2",
+    "pino": "^6.7.0",
+    "pino-pretty": "^4.3.0",
+    "socket.io": "^2.3.0",
+    "xlsx": "^0.16.8"
+  },
+  "devDependencies": {
+    "@types/async": "^3.2.3",
+    "@types/bcrypt": "^3.0.0",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/cors": "^2.8.8",
+    "@types/express": "^4.17.8",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/lodash": "^4.14.162",
+    "@types/multer": "^1.4.4",
+    "@types/node": "^14.14.2",
+    "@types/pino": "^6.3.3",
+    "cross-env": "^7.0.2"
+  }
 }

@@ -1,11 +1,11 @@
 
-const _ = require('lodash');
+import _ from 'lodash';
 import { Request, Response } from 'express';
 
-declare const axel : any;
+
 
 const RolesService = {
-  getExtendedRoles(role: string) {
+  getExtendedRoles(role) {
     let myRoles: string[] = [];
     if (
       axel.config.framework.roles[role] &&
@@ -13,18 +13,18 @@ const RolesService = {
       Array.isArray(axel.config.framework.roles[role].inherits)
     ) {
       myRoles = myRoles.concat(axel.config.framework.roles[role].inherits);
-      axel.config.framework.roles[role].inherits.forEach((r: string) => {
+      axel.config.framework.roles[role].inherits.forEach((r) => {
         myRoles = myRoles.concat(RolesService.getExtendedRoles(r));
       });
     }
     return _.uniq(myRoles);
   },
 
-  userIs(req: Request, role: string) {
+  userIs(req, role) {
     return req.user && req.user.roles && req.user.roles.indexOf(role) > -1;
   },
 
-  hasAccess(user: any, requiredRoles: string[]) {
+  hasAccess(user, requiredRoles: string[]) {
     if (!user) {
       return false;
     }
@@ -45,7 +45,7 @@ const RolesService = {
       }
     }
 
-    myRoles.forEach((role: string) => {
+    myRoles.forEach((role) => {
       myRoles = myRoles.concat(RolesService.getExtendedRoles(role));
     });
     let canAccess = false;

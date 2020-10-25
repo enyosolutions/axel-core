@@ -1,19 +1,18 @@
 /**
- * axel-entity-config
+ * axel-model-config
  *
  * @description :: This is model file that connects with sequelize.
  *                 TODO: You might write a short summary of
  *                 how this model works and what it represents here.
  */
 
-const Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 import {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook,
 } from '../../../common/services/SequelizeHooks';
-
 
 const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
@@ -97,7 +96,7 @@ const AxelModelFieldConfig = {
       ],
     },
     // Create relations
-    associations: (models: Obj): void => {
+    associations: models => {
       console.log(Object.keys(models));
       models.axelModelFieldConfig.belongsTo(models.axelModelConfig, {
         targetKey: 'identity',
@@ -106,7 +105,7 @@ const AxelModelFieldConfig = {
     },
     // define default join
     // @ts-ignore
-    defaultScope: (models: Obj): void => ({}),
+    defaultScope: models => ({}),
   },
 };
 

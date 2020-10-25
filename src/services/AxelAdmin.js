@@ -1,8 +1,6 @@
-import async from 'async';
-import { axel, Axel } from '../axel';
-import { Request, Response, Application } from 'express';
-import Utils from './Utils';
-import SchemaValidator from './SchemaValidator';
+import { axel } from '../axel.js';
+import Utils from './Utils.js';
+import SchemaValidator from './SchemaValidator.js';
 import _ from 'lodash';
 
 /**
@@ -18,7 +16,7 @@ class AxelAdmin {
    * @returns {Promise<any>}
    * @memberof AxelAdmin
    */
-  init(app: Application): Promise<any> {
+  init(app) {
     if (!axel.sqldb) {
       return Promise.reject('missing_sqldb');
     }
@@ -27,7 +25,7 @@ class AxelAdmin {
     }
     return axel.models.axelModelConfig.em
       .findAll()
-      .then((savedConfig: any[]) => {
+      .then((savedConfig) => {
         const insertions = Object.keys(axel.models).map(modelKey => {
           const model = axel.models[modelKey];
           const savedModel = savedConfig.find(elm => elm.identity === model.identity);
@@ -52,41 +50,41 @@ class AxelAdmin {
    * @returns {Promise<void>}
    * @memberof AxelAdmin
    */
-  updateFieldsConfig(model: Obj): Promise<void> {
+  updateFieldsConfig(model) {
     if (!model.schema) {
       return Promise.resolve();
     }
-      return axel.models.axelModelFieldConfig.em
-        .findAll({
-          where: {
-            parentIdentity: model.identity,
-          },
-        })
-        .then((savedFields: Obj[]) => {
-          return savedFields
-            .map(field => `${field.parentIdentity}-${field.name}`)
-            .reduce((acc: any, f: any) => {
-              acc[f] = f;
-              return acc;
-            }, {});
-        })
-        .then((savedFields: Obj) => {
-          return Promise.all(
-            Object.keys(model.schema.properties).map(prop => {
-              const field = model.schema.properties[prop];
-              const key = `${model.identity}-${prop}`;
-              if (savedFields[key]) {
-                return Promise.resolve();
-              }
-              return axel.models.axelModelFieldConfig.em.create({
-                parentIdentity: model.identity,
-                ...field,
-                name: prop,
-                title: field.title || _.startCase(prop),
-              });
-            }),
-          );
-        });
+    return axel.models.axelModelFieldConfig.em
+      .findAll({
+        where: {
+          parentIdentity: model.identity,
+        },
+      })
+      .then((savedFields) => {
+        return savedFields
+          .map(field => `${field.parentIdentity}-${field.name}`)
+          .reduce((acc, f) => {
+            acc[f] = f;
+            return acc;
+          }, {});
+      })
+      .then((savedFields) => {
+        return Promise.all(
+          Object.keys(model.schema.properties).map(prop => {
+            const field = model.schema.properties[prop];
+            const key = `${model.identity}-${prop}`;
+            if (savedFields[key]) {
+              return Promise.resolve();
+            }
+            return axel.models.axelModelFieldConfig.em.create({
+              parentIdentity: model.identity,
+              ...field,
+              name: prop,
+              title: field.title || _.startCase(prop),
+            });
+          }),
+        );
+      });
   }
 
   createConfigTables() {
@@ -104,7 +102,7 @@ class AxelAdmin {
    * @returns {Obj}
    * @memberof AxelAdmin
    */
-  jsonSchemaToFrontModel(model: Obj): Obj {
+  jsonSchemaToFrontModel(model) {
     return {
       identity: model.identity,
       name: _.get(model, 'admin.name', model.name) || model.identity,
@@ -123,8 +121,8 @@ class AxelAdmin {
     };
   }
 
-  mergeModels(...args: any) {
-    return _.mergeWith(args[0], args[1], (a: any, b: any) => {
+  mergeModels(...args) {
+    return _.mergeWith(args[0], args[1], (a, b) => {
       if (_.isArray(a) && b !== null && b !== undefined) {
         return a;
       }
@@ -141,22 +139,22 @@ class AxelAdmin {
    * @returns {string} url
    * @memberof AxelAdmin
    */
-  prefixUrl(url: string): string {
+  prefixUrl(url) {
     const formatedUrl =
       axel.config.framework.automaticApi &&
-      url &&
-      url.indexOf(axel.config.framework.automaticApiPrefix) === -1
+        url &&
+        url.indexOf(axel.config.framework.automaticApiPrefix) === -1
         ? axel.config.framework.automaticApiPrefix + '/' + url
         : url;
     return formatedUrl ? formatedUrl.replace(/\\/g, '/') : url;
   }
 
-  serveModels(req: Request, res: Response): void {
-    const mappedSavedConfig: Obj = {};
+  serveModels(req, res) {
+    const mappedSavedConfig = {};
     axel.models.axelModelConfig.em
       .findAll()
-      .then((savedConfig: any[]) => {
-        savedConfig.forEach((config: Obj) => {
+      .then((savedConfig) => {
+        savedConfig.forEach((config) => {
           delete config.id;
           delete config.createdOn;
           delete config.lastModifiedOn;
@@ -170,8 +168,8 @@ class AxelAdmin {
               axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1 &&
               axel.models[key].schema,
           )
-          .map((modelId: string) => {
-            const model: Obj = axel.models[modelId];
+          .map((modelId) => {
+            const model = axel.models[modelId];
             const merged = this.mergeModels(
               this.jsonSchemaToFrontModel(model),
               mappedSavedConfig[axel.models[modelId].identity] || {},
@@ -194,7 +192,7 @@ class AxelAdmin {
           body: models,
         });
       })
-      .catch((err: Error) => Utils.errorCallback(err, res));
+      .catch((err) => Utils.errorCallback(err, res));
   }
 }
 

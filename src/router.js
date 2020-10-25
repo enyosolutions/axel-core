@@ -3,20 +3,21 @@
  */
 import fs, { createWriteStream } from 'fs';
 import _ from 'lodash';
-import express, { Application, Request, Response, NextFunction, IRoute } from 'express';
-import { Obj } from './types/index';
-const debug = require('debug')('axel:router');
+import express from 'express';
+import d from 'debug'
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 
-type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
+const debug = d('axel:router');
 
-declare const global: any;
-const axel = global.axel;
-
-async function connectRoute(app: Application, source: string, _target: any) {
-  let verb: VerbTypes = 'all';
-  let route: string;
-  let policies: (string | Function)[] = [];
-  let target: any = {};
+async function connectRoute(app, source, _target) {
+  let verb = 'all';
+  let route;
+  let policies = [];
+  let target = {};
   const _source = source.split(' ');
   if (typeof _target === 'string') {
     const [controller, action] = _target.split('.');
@@ -25,13 +26,12 @@ async function connectRoute(app: Application, source: string, _target: any) {
   } else {
     target = _target;
     if (target.controller) {
-      target.controller = `${target.controller}${
-        _.endsWith(target.controller, 'Controller') ? '' : 'Controller'
-      }`;
+      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'
+        }`;
     }
   }
   if (_source.length === 2) {
-    verb = _source[0].toLowerCase() as VerbTypes;
+    verb = _source[0].toLowerCase();
     route = _source[1];
   } else {
     route = _source[0];
@@ -84,7 +84,7 @@ async function connectRoute(app: Application, source: string, _target: any) {
   }
 
   if (target.view) {
-    app[verb](route, routePolicies, (req: Request, res: Response) => {
+    app[verb](route, routePolicies, (req, res) => {
       res.render(target.view, {
         axel,
       });
@@ -97,18 +97,20 @@ async function connectRoute(app: Application, source: string, _target: any) {
   }
 
   // Replace aliased routes
-  const controllerRoute =
+  let controllerRoute =
     target.controller[0] === '@'
-      ? `${__dirname}/${target.controller.replace('@axel', '').replace('@app', '..')}`
-      : `${__dirname}/../api/controllers/${target.controller}`;
+      ? `${__dirname}${target.controller.replace('@axel', '').replace('@app', '..')}.js`
+      : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
   axel.logger.trace('[ROUTING] connecting route', route, verb.toUpperCase(), {
     ...target,
     controllerRoute,
   });
 
+  // controllerRoute = controllerRoute.replace(/\\\\/g, '/');
+
   const prom = axel.controllers[target.controller]
     ? Promise.resolve(axel.controllers[target.controller])
-    : import(controllerRoute);
+    : import(path.resolve(controllerRoute));
   prom
     .then(c => {
       if (c && c.default) {
@@ -127,17 +129,17 @@ async function connectRoute(app: Application, source: string, _target: any) {
         );
       }
     })
-    .catch((err: Error) => {
-      axel.logger.warn('[ROUTING]', err.message, controllerRoute);
-
+    .catch((err) => {
+      axel.logger.warn('[ROUTING] Error while loading', controllerRoute,  err.message, err);
       throw err;
+      process.exit(-1);
     });
   return prom;
 }
 
 function loadPolicies() {
   return new Promise((resolve, reject) => {
-    const folder = `${__dirname}/../api/policies`;
+    const folder = `${process.cwd()}/src/api/policies`;
     fs.readdir(folder, (err, files) => {
       if (err) {
         return reject(err);
@@ -156,13 +158,13 @@ function loadPolicies() {
   });
 }
 
-const loadEndpointMiddleware = (endpoint: string) => {
+const loadEndpointMiddleware = (endpoint) => {
   debug('loadEndpointMiddleware', endpoint);
   if (!endpoint) {
     throw new Error('endpoint_not_provided');
   }
 
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req, res, next) => {
     if (!axel.config.framework.automaticApi) {
       res.status(403).json({ message: 'automatic_api_disabled' });
       return;
@@ -185,21 +187,21 @@ const loadEndpointMiddleware = (endpoint: string) => {
   };
 };
 
-function injectAxelAdminConfig(): void {
+function injectAxelAdminConfig() {
   debug('injectAxelAdminConfig');
   if (!axel.config.framework || !axel.config.framework.axelAdmin) {
     return;
   }
-  axel.config.routes['GET /api/automatic/axel-entity-config'] = '@axel/controllers/AxelModelConfigController.list';
-  axel.config.routes['GET /api/automatic/axel-entity-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
-  axel.config.routes['PUT /api/automatic/axel-entity-config/:id'] =
-  '@axel/controllers/AxelModelConfigController.put';
-  axel.config.routes['DELETE /api/automatic/axel-entity-config/:id'] =
-  '@axel/controllers/AxelModelConfigController.delete';
+  axel.config.routes['GET /api/automatic/axel-models-config'] = '@axel/controllers/AxelModelConfigController.list';
+  axel.config.routes['GET /api/automatic/axel-models-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
+  axel.config.routes['PUT /api/automatic/axel-models-config/:id'] =
+    '@axel/controllers/AxelModelConfigController.put';
+  axel.config.routes['DELETE /api/automatic/axel-model-config/:id'] =
+    '@axel/controllers/AxelModelConfigController.delete';
   axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.models';
 }
 
-function injectCrudRoutesConfig(): void {
+function injectCrudRoutesConfig() {
   debug('injectCrudRoutesConfig');
   if (!axel.config.framework || !axel.config.framework.automaticApi) {
     return;
@@ -207,7 +209,7 @@ function injectCrudRoutesConfig(): void {
 
   // axel.controllers['@axel/controllers/CrudSqlController'] = CrudSqlController;
 
-  const crudRoutes: Obj = {
+  const crudRoutes = {
     'GET {routeUrl}/stats': {
       controller: '@axel/controllers/CrudSqlController',
       action: 'stats',
@@ -235,7 +237,7 @@ function injectCrudRoutesConfig(): void {
   };
   Object.keys(axel.models).forEach(key => {
     const model = axel.models[key];
-    let routeUrl: string = model.url || model.identity;
+    let routeUrl = model.url || model.identity;
     routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${routeUrl}`;
     routeUrl = routeUrl.replace(/\/\//g, '/');
     axel.logger.trace('[ROUTING] WIRING', model.identity, routeUrl);
@@ -257,8 +259,11 @@ function injectCrudRoutesConfig(): void {
   });
 }
 
-export function router(app: Application): void {
+export function router(app) {
   debug('connecting router');
+  if (!axel.config.routes) {
+    axel.config.routes = {}
+  }
   loadPolicies()
     .then(injectAxelAdminConfig)
     .then(injectCrudRoutesConfig)
@@ -268,9 +273,12 @@ export function router(app: Application): void {
       });
 
       app.use(express.static(`${app.get('appPath')}/public`));
+      app.use(express.static(`${app.get('appPath')}/assets`));
       return Promise.all(promises);
     })
-    .catch((err: Error) => {
+    .catch((err) => {
       throw err;
     });
 }
+
+export default router;

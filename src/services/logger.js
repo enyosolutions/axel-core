@@ -1,6 +1,4 @@
 import pino from 'pino';
-import chalk from 'chalk';
-import config from '../../config';
 
 const l = pino({
   prettyPrint: true,
@@ -8,7 +6,7 @@ const l = pino({
   level: process.env.LOG_LEVEL || 'info',
   // @ts-ignore
   hooks: {
-    logMethod: function(args: any, method: any) {
+    logMethod: function (args, method) {
       if (args.length > 1) {
         let interpolation = '';
         for (let i = 1; i < args.length; i++) {

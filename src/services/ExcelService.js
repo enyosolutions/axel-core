@@ -1,15 +1,7 @@
-const XLSX = require('xlsx');
-const _ = require('lodash');
-const path = require('path');
-declare const axel: any;
+import XLSX from 'xlsx';
+import _ from 'lodash';
+import path from 'path';
 
-interface ExcelServiceOptions {
-      sheet?: number;
-      header?: boolean;
-      columns?: any;
-      eager?: boolean;
-      parser?: 'json' | 'html' | 'json' | 'csv' | 'txt';
-  }
 
 
 const ExcelService = {
@@ -21,10 +13,10 @@ const ExcelService = {
    * @param  {[Object]} options [formating rules : columns dictionary and eager filtering or not]
    * @return {[Object]}         [a formatted json object]
    */
-  formatJson(json: JSON[], options: ExcelServiceOptions = {}) {
-    return json.map((item: any) => {
+  formatJson(json, options = {}) {
+    return json.map((item) => {
       if (options.columns && Object.keys(options.columns).length) {
-        const newObject: any = {};
+        const newObject = {};
         Object.keys(item).forEach(key => {
           let newKey = options.columns && options.columns[key];
           if (newKey || options.eager) {
@@ -39,7 +31,7 @@ const ExcelService = {
     });
   },
 
-  parse(url: string, options: ExcelServiceOptions = { sheet: 0 }) {
+  parse(url, options = { sheet: 0 }) {
     const defaultOptions = {
       sheet: 0, // default to first sheet
       header: true, // if the excel has a header
@@ -78,7 +70,7 @@ const ExcelService = {
     }
   },
 
-  export(data: any, url: string, options: ExcelServiceOptions = {}) {
+  export(data, url, options = {}) {
     const defaultOptions = {
       sheet: 0, // default to first sheet
       header: true, // if the excel has a header
