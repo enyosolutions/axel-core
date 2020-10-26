@@ -1,4 +1,11 @@
-export { axel } from './axel.js';
+
+/**
+ * Axel Framework module.
+ * The axel framework is a library for implementing some sensible default on expressjs
+ * @module axel-core
+ */
+
+import  axel  from './axel.js';
 export { Server } from './Server.js';
 export { router } from './router.js';
 export { models } from './models.js';
@@ -15,8 +22,9 @@ export {default as AuthService, tokenDecryptMiddleware} from './services/AuthSer
 export { ExtendedError } from './services/ExtendedError.js';
 export * from './services/AxelAdmin.js';
 
-// @ts-ignore
-global.axel = axel;
-// @ts-ignore
+if (!axel.init) {
+  axel.init();
+}
+
 
 export default axel;

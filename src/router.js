@@ -249,7 +249,7 @@ function injectCrudRoutesConfig() {
           // Todo turn this into an array to support next function loading
           axel.config.routes[localRoute] = {
             ...crudRoutes[route],
-            policies: [loadEndpointMiddleware(model.identity)],
+            policies: [loadEndpointMiddleware(model.identity)], // @todo cache the middleware for better perf
           };
         }
       });
@@ -264,7 +264,7 @@ export function router(app) {
   if (!axel.config.routes) {
     axel.config.routes = {}
   }
-  loadPolicies()
+  return loadPolicies()
     .then(injectAxelAdminConfig)
     .then(injectCrudRoutesConfig)
     .then(() => {

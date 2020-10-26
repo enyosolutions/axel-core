@@ -8,9 +8,6 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 const debug = d('axel:models');
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 
 export const loadSchemaModels = () => {
   debug('loadSchemaModels');
@@ -20,43 +17,43 @@ export const loadSchemaModels = () => {
     return next();
   }
   */
-    axel.logger.info('ORM :: loading schema models');
-    const modelsLocation = `${process.cwd()}/src/api/models/schema`;
+  axel.logger.info('ORM :: loading schema models');
+  const modelsLocation = `${process.cwd()}/src/api/models/schema`;
 
-    if (!axel.models) {
-      axel.models = {};
+  if (!axel.models) {
+    axel.models = {};
+  }
+  fs.readdir(modelsLocation, (err, files) => {
+    if (err) {
+      axel.logger.warn(err);
+      return reject(err);
     }
-    fs.readdir(modelsLocation, (err, files) => {
-      if (err) {
-        axel.logger.warn(err);
-        return reject(err);
-      }
-      files = files.filter(
-        (file) => _.endsWith(file, '.js') || _.endsWith(file, '.ts')
+    files = files.filter(
+      (file) => _.endsWith(file, '.js') || _.endsWith(file, '.ts')
       );
-      axel.logger.info('ORM :: found %s schemas files', files.length);
-      debug('Loading schema models: ', files.length, 'files');
-      async.each(
-        files,
-        (file, cb) => {
-          const filePath = `${modelsLocation}/${file}`;
-          axel.logger.verbose('ORM :: loading schema model', filePath);
-          loadSchemaModel(filePath);
-          cb();
-        },
-        (errAsync) => {
-          axel.logger.debug('ORM :: schema final callback');
-          debug('ORM :: schema final callback');
-          if (errAsync) {
-            axel.logger.warn(errAsync);
-            debug(errAsync);
-            return reject(errAsync);
-          }
-          resolve(err);
+    axel.logger.info('ORM :: found %s schemas files', files.length);
+    debug('Loading schema models: ', files.length, 'files');
+    async.each(
+      files,
+      (file, cb) => {
+        const filePath = `${modelsLocation}/${file}`;
+        axel.logger.verbose('ORM :: loading schema model', filePath);
+        loadSchemaModel(filePath);
+        cb();
+      },
+      (errAsync) => {
+        axel.logger.debug('ORM :: schema final callback');
+        debug('ORM :: schema final callback');
+        if (errAsync) {
+          axel.logger.warn(errAsync);
+          debug(errAsync);
+          return reject(errAsync);
         }
+        resolve();
+      }
       );
-    });
   });
+});
 };
 
 export const loadSchemaModel = async (filePath) => {
@@ -79,49 +76,55 @@ export const loadSchemaModel = async (filePath) => {
   axel.models[model.identity] = model;
 };
 
-export const loadSqlModel = (filePath, sequelize) => {
+export const loadSqlModel = async (filePath, sequelize) => {
   if (sequelize) {
     axel.logger.verbose('ORM :: loading sequelize model  %s', filePath);
     /* eslint-disable */
-    let model = require(filePath);
-    /* eslint-enable */
-    const tableName =
-      model.entity &&
-      model.entity.options &&
-      model.entity.options &&
-      model.entity.options.tableName;
-    axel.logger.verbose('Loading identity', model);
-    debug('Loading entity', model.identity);
-    if (!model.identity) {
-      console.log(model);
-      throw new Error(`ORM ::  missing sql identity for ${filePath}`);
-    }
+    let model;
+    try {
+     model = await import(filePath);
+   } catch(err) {
+    console.warn('[WARN] ', filePath, err);
+  }
+  model = model.default || model;
+  /* eslint-enable */
+  const tableName =
+  model.entity &&
+  model.entity.options &&
+  model.entity.options &&
+  model.entity.options.tableName;
+  axel.logger.verbose('Loading identity', model);
+  debug('Loading entity', model.identity);
+  if (!model.identity) {
+    console.log(model);
+    throw new Error(`ORM ::  missing sql identity for ${filePath}`);
+  }
 
-    if (!model.entity) {
-      throw new Error(`ORM ::  missing sql entity for ${filePath}`);
-    }
+  if (!model.entity) {
+    throw new Error(`ORM ::  missing sql entity for ${filePath}`);
+  }
 
-    if (!tableName) {
-      throw new Error(`ORM ::  missing sql tableName for ${filePath}`);
-    }
+  if (!tableName) {
+    throw new Error(`ORM ::  missing sql tableName for ${filePath}`);
+  }
 
-    if (!model.entity.options) {
-      model.entity.options = {};
-    }
-    model.entity.options = _.merge(
-      {
-        freezeTableName: true,
-        query: {
-          raw: true,
-        },
-      },
-      model.entity.options
-    );
+  if (!model.entity.options) {
+    model.entity.options = {};
+  }
+  model.entity.options = _.merge(
+  {
+    freezeTableName: true,
+    query: {
+      raw: true,
+    },
+  },
+  model.entity.options
+  );
 
-    const SqlModel = sequelize.define(
-      _.upperFirst(_.camelCase(model.identity)),
-      model.entity.attributes,
-      model.entity.options
+  const SqlModel = sequelize.define(
+    _.upperFirst(_.camelCase(model.identity)),
+    model.entity.attributes,
+    model.entity.options
     );
     // SqlModel.sequelize = Sequelize;
 
@@ -146,16 +149,15 @@ export const loadSqlModels = () => {
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
     debug('ORM : loading sql models');
-    debug('ORM : loading sql models', axel.config);
-    console.log('ORM : loading sql models', axel.config);
+    console.log('ORM : loading sql models');
     if (!(axel.config && axel.config.sqldb && axel.config.sqldb.host)) {
-      debug('ORM : no sql configured');
+      debug('ORM : ⚠️ no sql configured');
       return resolve();
     }
     debug('boom');
     let sequelize;
     try {
-      sequelize = require('./services/SqlDB');
+      sequelize = await import('./services/SqlDB.js');
 
       axel.sqldb = sequelize.default || sequelize;
       if (axel.sqldb.then) {
@@ -168,7 +170,7 @@ export const loadSqlModels = () => {
     }
     debug('bye bye');
 
-    const modelsLocation = `${__dirname}/../api/models/sequelize`;
+    const modelsLocation = `${process.cwd()}/src/api/models/sequelize`;
     debug('ORM :: sql models location', modelsLocation);
     if (!axel.models) {
       axel.models = {};
@@ -181,7 +183,7 @@ export const loadSqlModels = () => {
       }
       files = files.filter(
         (file) => _.endsWith(file, '.js') || _.endsWith(file, '.ts')
-      );
+        );
       axel.logger.info('ORM :: found %s sequelize models files', files.length);
       debug('MODELS :: found %s sequelize models files', files.length);
       async.each(
@@ -225,8 +227,8 @@ export const loadSqlModels = () => {
                       }
                     );
                     */
-                }
-              });
+                  }
+                });
             }
             if (model.entity && model.entity.associations) {
               model.entity.associations(sqlModels);
@@ -235,21 +237,21 @@ export const loadSqlModels = () => {
               model.entity &&
               model.entity.defaultScope &&
               model.entity.defaultScope instanceof Function
-            ) {
+              ) {
               model.repository.addScope(
                 'defaultScope',
                 model.entity.defaultScope(sqlModels),
                 {
                   override: true,
                 }
-              );
-            }
-          });
+                );
+          }
+        });
 
           axel.logger.verbose('ORM :: sequelize final callback');
           resolve();
         }
-      );
+        );
     });
   });
 };
@@ -349,17 +351,17 @@ function unifyEntityManagers() {
       model.em.unifiedFindOneAndUpdate = function (
         query,
         options,
-      ) {
+        ) {
         return model.em.unifiedUpdate(query, options);
       };
 
       // COUNT
       model.em.unifiedCount = function (query, options) {
         return model.em.count(
-          {
-            where: query,
-          },
-          options,
+        {
+          where: query,
+        },
+        options,
         );
       };
 
@@ -368,7 +370,7 @@ function unifyEntityManagers() {
         query,
         options,
         moreOptions,
-      ) {
+        ) {
         return this.create(query, options, moreOptions);
       };
 

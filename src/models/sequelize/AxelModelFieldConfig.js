@@ -12,9 +12,9 @@ import {
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook,
-} from '../../../common/services/SequelizeHooks';
+} from '../../services/SequelizeHooks.js';
 
-const AxelModelFieldConfig = {
+export const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
   entity: {
     attributes: {
@@ -97,7 +97,6 @@ const AxelModelFieldConfig = {
     },
     // Create relations
     associations: models => {
-      console.log(Object.keys(models));
       models.axelModelFieldConfig.belongsTo(models.axelModelConfig, {
         targetKey: 'identity',
         foreignKey: 'parentIdentity',
@@ -109,4 +108,4 @@ const AxelModelFieldConfig = {
   },
 };
 
-module.exports = AxelModelFieldConfig;
+export default AxelModelFieldConfig;

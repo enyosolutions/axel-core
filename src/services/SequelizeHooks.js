@@ -1,4 +1,4 @@
-export const jsonStringifyHook = (fields: string | string[], defaultValue) => (item) => {
+export const jsonStringifyHook = (fields, defaultValue) => (item) => {
   if (!item) {
     return;
   }
@@ -15,7 +15,7 @@ export const jsonStringifyHook = (fields: string | string[], defaultValue) => (i
   }
   return item;
 };
-export const bulkJsonStringifyHook = (fields: string | string[], defaultValue) => (
+export const bulkJsonStringifyHook = (fields, defaultValue) => (
   items,
 ) => {
   if (!items) {
@@ -33,7 +33,7 @@ export const bulkJsonStringifyHook = (fields: string | string[], defaultValue) =
   return items;
 };
 
-export const jsonParseHook = (fields: string | string[], defaultValue) => (item) => {
+export const jsonParseHook = (fields, defaultValue) => (item) => {
   if (!item) {
     return;
   }
@@ -52,7 +52,7 @@ export const jsonParseHook = (fields: string | string[], defaultValue) => (item)
   }
 };
 
-export const bulkJsonParseHook = (fields: string | string[], defaultValue?) => (
+export const bulkJsonParseHook = (fields, defaultValue) => (
   items,
 ) => {
   if (!items) {

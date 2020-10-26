@@ -1,6 +1,7 @@
-import { axel } from '../axel.js';
+import  axel  from '../axel.js';
 import Utils from './Utils.js';
 import SchemaValidator from './SchemaValidator.js';
+import { loadSqlModel, loadSchemaModel } from '../models.js';
 import _ from 'lodash';
 
 /**
@@ -16,15 +17,32 @@ class AxelAdmin {
    * @returns {Promise<any>}
    * @memberof AxelAdmin
    */
-  init(app) {
+  async init(app) {
     if (!axel.sqldb) {
       return Promise.reject('missing_sqldb');
     }
+    const m1 =  await loadSqlModel('../src/models/sequelize/AxelModelConfig.js', axel.sqldb);
+    const m2 = await loadSqlModel('../src/models/sequelize/AxelModelFieldConfig.js', axel.sqldb);
+
+    // console.log(m1)
+    // console.log(m2)
+
+    loadSchemaModel('../src/models/schema/AxelModelConfig.js');
+    loadSchemaModel('../src/models/schema/AxelModelFieldConfig.js');
+
+
     if (!axel.models.axelModelConfig) {
       return Promise.reject('missing_axelModelConfig');
     }
-    return axel.models.axelModelConfig.em
-      .findAll()
+
+    return
+    Promise.all([
+    m1.em.sync(),
+    m2.em.sync(),
+])
+    .then(() =>
+    axel.models.axelModelConfig.em
+      .findAll())
       .then((savedConfig) => {
         const insertions = Object.keys(axel.models).map(modelKey => {
           const model = axel.models[modelKey];

@@ -73,9 +73,9 @@ export default {
 
   /**
    * [description]
-   * @param  {[type]}
-   * @param  {[type]}
-   * @return {[type]}
+   * @param  req
+   * @param  res
+   * @return void
    *
    * @swagger
    *

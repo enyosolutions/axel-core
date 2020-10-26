@@ -10,7 +10,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "cross-env TS_NODE_FILES=true npx tsc"
+    "build": "cross-env TS_NODE_FILES=true npx tsc",
+    "docs": "node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "dependencies": {
     "axel-cli": "^0.0.13",
@@ -41,6 +42,8 @@
     "@types/multer": "^1.4.4",
     "@types/node": "^14.14.2",
     "@types/pino": "^6.3.3",
-    "cross-env": "^7.0.2"
+    "cross-env": "^7.0.2",
+    "docdash": "^1.2.0",
+    "jsdoc": "^3.6.6"
   }
 }

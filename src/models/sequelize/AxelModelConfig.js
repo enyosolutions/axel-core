@@ -6,13 +6,14 @@
  *                 how this model works and what it represents here.
  */
 
-import { DataTypes } from 'sequelize';
-import {
+import Sequelize from 'sequelize';
+
+ import {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook,
-} from '../../../common/services/SequelizeHooks';
+} from '../../services/SequelizeHooks.js';
 /*
   // event hooks => http://docs.sequelizejs.com/manual/tutorial/hooks.html
   const eventCallback = () => { // items, options
@@ -21,47 +22,47 @@ import {
 */
 
 const jsonFields = ['options', 'layout', 'formOptions', 'kanbanOptions', 'listOptions'];
-const AxelModelConfig = {
+export const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {
     attributes: {
       id: {
-        type: DataTypes.INTEGER,
+        type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
       },
 
       identity: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       namePlural: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
       },
       name: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       pageTitle: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
       },
       icon: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
       },
       options: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
       },
       actions: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
       },
       formOptions: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
       },
       kanbanOptions: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
       },
       listOptions: {
-        type: DataTypes.TEXT,
+        type: Sequelize.TEXT,
       },
     },
     options: {
@@ -70,7 +71,7 @@ const AxelModelConfig = {
       // if you don't want that, set the following
       freezeTableName: true,
       // Table Name
-      tableName: 'axel-entity-config',
+      tableName: 'axel-model-config',
       // Enable TimeStamp
       timestamps: true,
       // createdAt should be createdOn
@@ -111,4 +112,5 @@ const AxelModelConfig = {
   },
 };
 
-module.exports = AxelModelConfig;
+
+export default AxelModelConfig;

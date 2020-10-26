@@ -1,4 +1,4 @@
-import { axel } from '../axel.js';
+import  axel  from '../axel.js';
 import _ from 'lodash';
 import socketIO from 'socket.io';
 import axelCli from 'axel-cli';

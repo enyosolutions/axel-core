@@ -2,9 +2,7 @@ import _ from 'lodash';
 
 export class ExtendedError extends Error {
   /**
-   *
-   *
-   * @type {string}
+   * @type string
    * @memberof ExtendedError
    */
   name;

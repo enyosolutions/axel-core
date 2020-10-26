@@ -9,7 +9,7 @@ type recipientType =
   | { email: string; name?: string }
   | Array<{ email: string; name?: string }>;
 
-const MailService = {
+export const MailService = {
   defaultData: {
     title: '',
     layout: 'email-template',
