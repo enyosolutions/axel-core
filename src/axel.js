@@ -14,7 +14,7 @@ const debug = d('axel:config');
 
 async function loadConfig() {
   const dir = `${process.cwd()}/src/config/`;
-  const files = readdirSync(dir);
+  const files = readdirSync(path.resolve(dir));
   const fileToMerge = files
   .filter(
     file =>
