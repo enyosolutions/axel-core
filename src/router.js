@@ -139,7 +139,7 @@ async function connectRoute(app, source, _target) {
 
 function loadPolicies() {
   return new Promise((resolve, reject) => {
-    const folder = `file://${process.cwd()}/src/api/policies`;
+    const folder = `${process.cwd()}/src/api/policies`;
     fs.readdir(folder, (err, files) => {
       if (err) {
         return reject(err);
@@ -147,7 +147,7 @@ function loadPolicies() {
       const promises = files
         .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.js'))
         .map(file => {
-          return import(`${folder}/${file}`).then(func => {
+          return import(`file://${folder}/${file}`).then(func => {
             axel.policies[file.split('.')[0]] = func.default || func;
           });
         });

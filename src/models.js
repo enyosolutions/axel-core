@@ -34,25 +34,27 @@ export const loadSchemaModels = () => {
       );
       axel.logger.info('ORM :: found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
-      async.each(
-        files,
-        (file, cb) => {
+      const promises = files.map(file =>
+        (file) => {
           const filePath = `${modelsLocation}/${file}`;
           axel.logger.verbose('ORM :: loading schema model', filePath);
-          loadSchemaModel(filePath);
-          cb();
-        },
-        (errAsync) => {
-          axel.logger.debug('ORM :: schema final callback');
-          debug('ORM :: schema final callback');
-          if (errAsync) {
-            axel.logger.warn(errAsync);
-            debug(errAsync);
-            return reject(errAsync);
+          return loadSchemaModel(filePath);
+        });
+
+      Promise.all(promises)
+        .then(
+          () => {
+            axel.logger.debug('ORM :: schema final callback');
+            debug('ORM :: schema final callback');
+            resolve();
           }
-          resolve();
-        }
-      );
+        )
+        .catch(errAsync => {
+          axel.logger.warn(errAsync);
+          debug(errAsync);
+          return reject(errAsync);
+        })
+        ;
     });
   });
 };
@@ -63,7 +65,7 @@ export const loadSchemaModel = async (filePath) => {
   let model = await import(`file://${path.resolve(filePath)}`);
   model = model.default || model;
   /* eslint-enable */
-  debug('Loading schema model');
+
   if (!model.identity) {
     throw new Error(`ORM ::  missing identity for ${filePath}`);
   }
@@ -71,9 +73,9 @@ export const loadSchemaModel = async (filePath) => {
     console.log(model.collectionName);
     model.collection = axel.mongodb.get(model.collectionName);
   }
-  axel.logger.debug(model.identity);
-  debug(model.identity);
+  debug('Loaded schema model => ', model.identity);
   axel.models[model.identity] = model;
+  return axel.models[model.identity];
 };
 
 export const loadSqlModel = async (filePath, sequelize) => {
