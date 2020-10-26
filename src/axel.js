@@ -16,28 +16,28 @@ async function loadConfig() {
   const dir = `${process.cwd()}/src/config/`;
   const files = readdirSync(path.resolve(dir));
   const fileToMerge = files
-  .filter(
-    file =>
-    (file.endsWith('.js') || file.endsWith('.ts')) &&
-    !file.endsWith('index.ts')
+    .filter(
+      file =>
+        (file.endsWith('.js') || file.endsWith('.ts')) &&
+        !file.endsWith('index.ts')
     )
-  .sort((a, b) => {
-    if (a === 'local.js') {
-      return 1;
-    }
-    return -1;
-  });
+    .sort((a, b) => {
+      if (a === 'local.js') {
+        return 1;
+      }
+      return -1;
+    });
 
   let config = {};
   const proms = fileToMerge.map(async e => {
-    return import(path.resolve(dir, e))
-    .then(data => {
-      debug("merge", e);
-      config = _.merge(config, data.default || data);
-    }).catch(e => {
-      console.warn(e);
-      process.exit(-1);
-    })
+    return import(`file://${path.resolve(dir, e)}`)
+      .then(data => {
+        debug("merge", e);
+        config = _.merge(config, data.default || data);
+      }).catch(e => {
+        console.warn(e);
+        process.exit(-1);
+      })
   });
   await Promise.all(proms).catch(console.error)
   return config;
@@ -54,8 +54,8 @@ export const axel = {
   log: l,
   rootPath: path.resolve(process.cwd(), '..'),
   init: async () => {
-      debug('init requested');
-      let p;
+    debug('init requested');
+    let p;
     if (axel.init && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
     }
@@ -71,13 +71,13 @@ export const axel = {
     return axel.initPromise;
   },
   renderView: (relPath, ...args) =>
-  ejs.renderFile(
-    path.resolve(
-      process.cwd(),
-      'views',
-      relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`,
+    ejs.renderFile(
+      path.resolve(
+        process.cwd(),
+        'views',
+        relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`,
       ),
-    ...args,
+      ...args,
     ),
 };
 

@@ -1,8 +1,12 @@
-import  axel  from '../axel.js';
+import axel from '../axel.js';
 import Utils from './Utils.js';
 import SchemaValidator from './SchemaValidator.js';
 import { loadSqlModel, loadSchemaModel } from '../models.js';
 import _ from 'lodash';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -21,14 +25,14 @@ class AxelAdmin {
     if (!axel.sqldb) {
       return Promise.reject('missing_sqldb');
     }
-    const m1 =  await loadSqlModel('../src/models/sequelize/AxelModelConfig.js', axel.sqldb);
-    const m2 = await loadSqlModel('../src/models/sequelize/AxelModelFieldConfig.js', axel.sqldb);
+    const m1 = await loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
+    const m2 = await loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
 
     // console.log(m1)
     // console.log(m2)
 
-    loadSchemaModel('../src/models/schema/AxelModelConfig.js');
-    loadSchemaModel('../src/models/schema/AxelModelFieldConfig.js');
+    loadSchemaModel(`${__dirname}/../models/schema/AxelModelConfig.js`);
+    loadSchemaModel(`${__dirname}/../models/schema/AxelModelFieldConfig.js`);
 
 
     if (!axel.models.axelModelConfig) {
@@ -37,12 +41,12 @@ class AxelAdmin {
 
     return
     Promise.all([
-    m1.em.sync(),
-    m2.em.sync(),
-])
-    .then(() =>
-    axel.models.axelModelConfig.em
-      .findAll())
+      m1.em.sync(),
+      m2.em.sync(),
+    ])
+      .then(() =>
+        axel.models.axelModelConfig.em
+          .findAll())
       .then((savedConfig) => {
         const insertions = Object.keys(axel.models).map(modelKey => {
           const model = axel.models[modelKey];

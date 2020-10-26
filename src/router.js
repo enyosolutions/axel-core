@@ -110,7 +110,7 @@ async function connectRoute(app, source, _target) {
 
   const prom = axel.controllers[target.controller]
     ? Promise.resolve(axel.controllers[target.controller])
-    : import(path.resolve(controllerRoute));
+    : import(`file://${path.resolve(controllerRoute)}`);
   prom
     .then(c => {
       if (c && c.default) {
@@ -130,7 +130,7 @@ async function connectRoute(app, source, _target) {
       }
     })
     .catch((err) => {
-      axel.logger.warn('[ROUTING] Error while loading', controllerRoute,  err.message, err);
+      axel.logger.warn('[ROUTING] Error while loading', controllerRoute, err.message, err);
       throw err;
       process.exit(-1);
     });
@@ -139,7 +139,7 @@ async function connectRoute(app, source, _target) {
 
 function loadPolicies() {
   return new Promise((resolve, reject) => {
-    const folder = `${process.cwd()}/src/api/policies`;
+    const folder = `file://${process.cwd()}/src/api/policies`;
     fs.readdir(folder, (err, files) => {
       if (err) {
         return reject(err);
