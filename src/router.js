@@ -25,7 +25,7 @@ function connectRoute(app, source, _target) {
     target = _target;
     if (target.controller) {
       target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'
-        }`;
+      }`;
     }
   }
   if (sourceArray.length === 2) {

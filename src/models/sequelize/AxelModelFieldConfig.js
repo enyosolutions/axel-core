@@ -52,11 +52,9 @@ const AxelModelFieldConfig = {
       },
       column: {
         type: Sequelize.TEXT,
-        defaultValue: {},
       },
       field: {
         type: Sequelize.TEXT,
-        defaultValue: {},
       },
     },
     options: {

@@ -77,6 +77,8 @@ module.exports = {
         "allowForLoopAfterthoughts": true
       }
     ],
+    "class-methods-use-this": 0,
+    "no-case-declarations": 0,
     "max-len": [
       "error",
       {

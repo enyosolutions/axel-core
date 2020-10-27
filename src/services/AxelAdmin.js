@@ -1,11 +1,11 @@
-const axel = require('../axel.js');
-const Utils = require('./Utils.js');
-const SchemaValidator = require('./SchemaValidator.js');
-const { loadSqlModel, loadSchemaModel } = require('../models.js');
 const _ = require('lodash');
 const { dirname } = require('path');
 const { fileURLToPath } = require('url');
+const Utils = require('./Utils.js');
+const axel = require('../axel.js');
 
+const SchemaValidator = require('./SchemaValidator.js');
+const { loadSqlModel, loadSchemaModel } = require('../models.js');
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -22,10 +22,10 @@ class AxelAdmin {
    */
   async init(app) {
     if (!axel.sqldb) {
-      return Promise.reject('missing_sqldb');
+      return Promise.reject(new Error('missing_sqldb'));
     }
-    const m1 = await loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
-    const m2 = await loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
+    const m1 = loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
+    const m2 = loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
 
     // console.log(m1)
     // console.log(m2)
@@ -35,19 +35,17 @@ class AxelAdmin {
 
 
     if (!axel.models.axelModelConfig) {
-      return Promise.reject('missing_axelModelConfig');
+      return Promise.reject(new Error('missing_axelModelConfig'));
     }
 
-    return
     Promise.all([
       m1.em.sync(),
       m2.em.sync(),
     ])
-      .then(() =>
-        axel.models.axelModelConfig.em
-          .findAll())
+      .then(() => axel.models.axelModelConfig.em
+        .findAll())
       .then((savedConfig) => {
-        const insertions = Object.keys(axel.models).map(modelKey => {
+        const insertions = Object.keys(axel.models).map((modelKey) => {
           const model = axel.models[modelKey];
           const savedModel = savedConfig.find(elm => elm.identity === model.identity);
           if (savedModel) {
@@ -57,13 +55,12 @@ class AxelAdmin {
         });
         return Promise.all(insertions);
       })
-      .then(() => {
-        return Promise.all(
-          Object.entries(axel.models).map(([key, entry]) => this.updateFieldsConfig(entry)),
-        );
-      })
+      .then(() => Promise.all(
+        Object.entries(axel.models).map(([key, entry]) => this.updateFieldsConfig(entry)),
+      ))
       .catch(console.warn);
   }
+
   /**
    *
    *
@@ -81,31 +78,27 @@ class AxelAdmin {
           parentIdentity: model.identity,
         },
       })
-      .then((savedFields) => {
-        return savedFields
-          .map(field => `${field.parentIdentity}-${field.name}`)
-          .reduce((acc, f) => {
-            acc[f] = f;
-            return acc;
-          }, {});
-      })
-      .then((savedFields) => {
-        return Promise.all(
-          Object.keys(model.schema.properties).map(prop => {
-            const field = model.schema.properties[prop];
-            const key = `${model.identity}-${prop}`;
-            if (savedFields[key]) {
-              return Promise.resolve();
-            }
-            return axel.models.axelModelFieldConfig.em.create({
-              parentIdentity: model.identity,
-              ...field,
-              name: prop,
-              title: field.title || _.startCase(prop),
-            });
-          }),
-        );
-      });
+      .then(savedFields => savedFields
+        .map(field => `${field.parentIdentity}-${field.name}`)
+        .reduce((acc, f) => {
+          acc[f] = f;
+          return acc;
+        }, {}))
+      .then(savedFields => Promise.all(
+        Object.keys(model.schema.properties).map((prop) => {
+          const field = model.schema.properties[prop];
+          const key = `${model.identity}-${prop}`;
+          if (savedFields[key]) {
+            return Promise.resolve();
+          }
+          return axel.models.axelModelFieldConfig.em.create({
+            parentIdentity: model.identity,
+            ...field,
+            name: prop,
+            title: field.title || _.startCase(prop),
+          });
+        }),
+      ));
   }
 
   createConfigTables() {
@@ -161,12 +154,11 @@ class AxelAdmin {
    * @memberof AxelAdmin
    */
   prefixUrl(url) {
-    const formatedUrl =
-      axel.config.framework.automaticApi &&
-        url &&
-        url.indexOf(axel.config.framework.automaticApiPrefix) === -1
-        ? axel.config.framework.automaticApiPrefix + '/' + url
-        : url;
+    const formatedUrl = axel.config.framework.automaticApi
+      && url
+      && url.indexOf(axel.config.framework.automaticApiPrefix) === -1
+      ? `${axel.config.framework.automaticApiPrefix}/${url}`
+      : url;
     return formatedUrl ? formatedUrl.replace(/\\/g, '/') : url;
   }
 
@@ -185,9 +177,8 @@ class AxelAdmin {
       .then(() => {
         const models = Object.keys(axel.models)
           .filter(
-            key =>
-              axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1 &&
-              axel.models[key].schema,
+            key => axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1
+              && axel.models[key].schema,
           )
           .map((modelId) => {
             const model = axel.models[modelId];
@@ -213,7 +204,7 @@ class AxelAdmin {
           body: models,
         });
       })
-      .catch((err) => Utils.errorCallback(err, res));
+      .catch(err => Utils.errorCallback(err, res));
   }
 }
 

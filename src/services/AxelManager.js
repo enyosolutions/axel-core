@@ -1,9 +1,12 @@
-const axel = require('../axel.js');
+
 const _ = require('lodash');
 const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
-const { generateController, generateModel, generateApi, generateRoute } = axelCli;
+const axel = require('../axel.js');
 
+const {
+  generateController, generateModel, generateApi, generateRoute
+} = axelCli;
 
 
 /**
@@ -23,9 +26,9 @@ class AxelManager {
     console.log('\n\n\n\n\n\n', 'WS for axelManager opening');
     const io = socketIO(app.locals.server);
     app.locals.io = io;
-    io.on('connect', function (socket) {
+    io.on('connect', (socket) => {
       console.log('WS client connected', socket.id);
-      let counter = 0;
+      const counter = 0;
 
       socket.on(
         '/axel-manager/api',
@@ -35,9 +38,12 @@ class AxelManager {
           }
           switch (req.method) {
             case 'GET':
+            default:
               break;
             case 'POST':
-              const { name, type, force, fields, withSchema } = req.body;
+              const {
+                name, type, force, fields, withSchema
+              } = req.body;
               if (!name) {
                 return cb('missing_param_name');
               }
@@ -46,19 +52,18 @@ class AxelManager {
                   name,
                   type,
                   force,
-                  fields: fields && fields.map((f) => f.name),
+                  fields: fields && fields.map(f => f.name),
                   withSchema,
                 });
                 let count = withSchema ? 4 : 3;
                 // catching api signals in order for the file to generate properly
-                process.on('SIGUSR2', function () {
+                process.on('SIGUSR2', () => {
                   console.log('Captured interruption signal....', count--);
 
                   if (count <= 0) {
                     setTimeout(() => {
                       process.kill(process.pid, 'SIGUSR2');
                     }, 1000);
-
                   }
                 });
                 cb(null, { body: 'OK' });
@@ -75,14 +80,17 @@ class AxelManager {
           if (typeof req === 'function') {
             cb = req;
           }
+
+
           switch (req.method) {
             case 'GET':
             default:
               if (!axel.sqldb) {
-                return (cb('sqldb_not_ready'))
+                return (cb('sqldb_not_ready'));
               }
+              // eslint-disable-next-line
               let tables = await axel.sqldb.query('show tables');
-              tables = tables.map((t) => Object.values(t)[0]);
+              tables = tables.map(t => Object.values(t)[0]);
               cb(null, {
                 body: {
                   models: Object.keys(axel.models),
@@ -91,11 +99,16 @@ class AxelManager {
               });
               break;
             case 'POST':
-              const { name, type, force, fields } = req.body;
+              const {
+                name, type, force, fields
+              } = req.body;
               if (!name) {
                 return cb('missing_param_name');
               }
-              generateModel({ name, types: [type], force, fields });
+
+              generateModel({
+                name, types: [type], force, fields
+              });
               cb(null, { body: 'OK' });
           }
         },
@@ -119,13 +132,16 @@ class AxelManager {
                 return cb('missing_param_body');
               }
               const em = id === '$ALL' ? axel.sqldb : axel.models[id].em;
-
+              if (!em) {
+                console.log(`error_while_accessing_${id}`, axel.models[id]);
+                return cb(`error_while_accessing_${id}`);
+              }
               em.sync({ force, alter })
                 .then((result) => {
                   cb(null, { body: 'OK' });
                 })
                 .catch((err) => {
-                  console.warn(err)
+                  console.warn(err);
                   cb(err.message || 'See terminal for more details');
                 });
               break;
@@ -162,8 +178,8 @@ class AxelManager {
                 }
                 if (err && err.name === 'SequelizeValidationError') {
                   cb({
-                    //@ts-ignore
-                    errors: err.errors && err.errors.map((e) => e.message),
+                    // @ts-ignore
+                    errors: err.errors && err.errors.map(e => e.message),
                     message: 'sql_validation_error',
                   });
                   return false;
@@ -185,7 +201,7 @@ class AxelManager {
               cb(null, { body: axel.config.routes });
               break;
             case 'POST':
-              //cb(null, { body: axel.models });
+              // cb(null, { body: axel.models });
               const { name } = req.body;
 
               if (!name) {
@@ -203,8 +219,8 @@ class AxelManager {
                 }
                 if (err && err.name === 'SequelizeValidationError') {
                   cb({
-                    //@ts-ignore
-                    errors: err.errors && err.errors.map((e) => e.message),
+                    // @ts-ignore
+                    errors: err.errors && err.errors.map(e => e.message),
                     message: 'sql_validation_error',
                   });
                   return false;
@@ -225,7 +241,7 @@ class AxelManager {
             case 'GET':
               break;
             case 'POST':
-              //cb(null, { body: axel.models });
+              // cb(null, { body: axel.models });
               const { name } = req.body;
 
               if (!name) {
@@ -238,7 +254,7 @@ class AxelManager {
                   body: 'ok',
                 });
               } catch (err) {
-                cb(err)
+                cb(err);
               }
           }
         },
