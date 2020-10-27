@@ -1,4 +1,4 @@
-import { axel } from '../axel.js';
+import axel from '../axel.cjs';
 import fs from 'fs';
 import _ from 'lodash';
 import colors from 'colors';

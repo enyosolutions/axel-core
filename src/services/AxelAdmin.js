@@ -1,4 +1,4 @@
-import axel from '../axel.js';
+import axel from '../axel.cjs';
 import Utils from './Utils.js';
 import SchemaValidator from './SchemaValidator.js';
 import { loadSqlModel, loadSchemaModel } from '../models.js';

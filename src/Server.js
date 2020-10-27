@@ -26,42 +26,43 @@ export class Server {
   middlewares = {};
 
   constructor() {
+    console.log(axel.init);
     axel.init()
-    .then(()=> {
-      debug('', "init in server.js");
-      axel.app = app;
-    // app.set('appPath', root + 'client');
-    app.set('appPath', root);
-    if (this.middlewares) {
-      Object.keys(this.middlewares).forEach((m) => app.use(this.middlewares[m]));
-    }
+      .then(() => {
+        debug('', "init in server.js");
+        axel.app = app;
+        // app.set('appPath', root + 'client');
+        app.set('appPath', root);
+        if (this.middlewares) {
+          Object.keys(this.middlewares).forEach((m) => app.use(this.middlewares[m]));
+        }
 
-    app.disable('x-powered-by');
+        app.disable('x-powered-by');
 
-    app.set('view engine', 'ejs');
-    app.use(
-      bodyParser.json({
-        limit: process.env.REQUEST_LIMIT || '100mb',
-      }),
-      );
-    app.use(
-      bodyParser.urlencoded({
-        extended: true,
-        limit: process.env.REQUEST_LIMIT || '100mb',
-      }),
-      );
-    app.use(
-      bodyParser.text({
-        limit: process.env.REQUEST_LIMIT || '100mb',
-      }),
-      );
-    if (axel.config && axel.config.security && axel.config.security.cors) {
-      app.use(cors(axel.config.security.cors));
-    }
+        app.set('view engine', 'ejs');
+        app.use(
+          bodyParser.json({
+            limit: process.env.REQUEST_LIMIT || '100mb',
+          }),
+        );
+        app.use(
+          bodyParser.urlencoded({
+            extended: true,
+            limit: process.env.REQUEST_LIMIT || '100mb',
+          }),
+        );
+        app.use(
+          bodyParser.text({
+            limit: process.env.REQUEST_LIMIT || '100mb',
+          }),
+        );
+        if (axel.config && axel.config.security && axel.config.security.cors) {
+          app.use(cors(axel.config.security.cors));
+        }
 
-    app.use(cookieParser(process.env.SESSION_SECRET));
-  })
-    .catch(console.warn);
+        app.use(cookieParser(process.env.SESSION_SECRET));
+      })
+      .catch(console.warn);
 
   }
 
@@ -96,12 +97,12 @@ export class Server {
     const welcome = (p) => () => {
       l.info(
         `up and running in ${process.env.NODE_ENV ||
-          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
-          );
+        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+      );
       debug(
         `up and running in ${process.env.NODE_ENV ||
-          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
-          );
+        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+      );
       l.info('\n');
       l.info('__________________________________');
       l.info(`http://localhost:${p}`);
@@ -136,7 +137,7 @@ export class Server {
         exit(1);
       });
 
-      return app;
-    }
+    return app;
   }
-  export default Server;
+}
+export default Server;

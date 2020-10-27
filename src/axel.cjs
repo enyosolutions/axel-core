@@ -2,13 +2,11 @@
 @description Exports the global axel object.
 */
 
-
-import l from './services/logger.js';
-import ejs from 'ejs';
-import { readdirSync } from 'fs';
-import path from 'path';
-import _ from 'lodash';
-import d from 'debug';
+const ejs = require('ejs');
+const { readdirSync } = require('fs');
+const path = require('path');
+const _ = require('lodash');
+const d = require('debug');
 const debug = d('axel:config');
 
 
@@ -18,7 +16,11 @@ async function loadConfig() {
   const fileToMerge = files
     .filter(
       file =>
-        (file.endsWith('.js') || file.endsWith('.ts')) &&
+        (
+          file.endsWith('.mjs')
+          || file.endsWith('.js')
+          || file.endsWith('.ts')
+        ) &&
         !file.endsWith('index.ts')
     )
     .sort((a, b) => {
@@ -42,7 +44,7 @@ async function loadConfig() {
   await Promise.all(proms).catch(console.error)
   return config;
 }
-export const axel = {
+const axel = {
   port: 3333,
   config: {},
   models: {},
@@ -50,13 +52,13 @@ export const axel = {
   routes: {},
   services: {},
   policies: {},
-  logger: l,
-  log: l,
+  logger: null,
+  log: null,
   rootPath: path.resolve(process.cwd(), '..'),
   init: async () => {
     debug('init requested');
     let p;
-    if (axel.init && Object.keys(axel.config).length > 0) {
+    if (axel.initCompleted && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
     }
     if (axel.initPromise) {
@@ -65,7 +67,7 @@ export const axel = {
     axel.initPromise = loadConfig().then(config => {
       axel.config = config;
       debug('init completed');
-      axel.init = true;
+      axel.initCompleted = true;
       return config;
     });
     return axel.initPromise;
@@ -86,4 +88,6 @@ global.axel = axel;
 axel.init();
 
 
-export default axel;
+module.exports = axel;
+module.exports.axel = axel;
+

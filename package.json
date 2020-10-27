@@ -32,16 +32,14 @@
     "xlsx": "^0.16.8"
   },
   "devDependencies": {
-    "@types/async": "^3.2.3",
-    "@types/bcrypt": "^3.0.0",
-    "@types/cookie-parser": "^1.4.2",
-    "@types/cors": "^2.8.8",
-    "@types/express": "^4.17.8",
-    "@types/jsonwebtoken": "^8.5.0",
-    "@types/lodash": "^4.14.162",
+    "@babel/core": "^7.12.3",
+    "@babel/node": "^7.12.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
     "@types/multer": "^1.4.4",
     "@types/node": "^14.14.2",
     "@types/pino": "^6.3.3",
+    "babel-cli": "^7.12.1",
     "cross-env": "^7.0.2",
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.6"

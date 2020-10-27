@@ -100,7 +100,7 @@ async function connectRoute(app, source, _target) {
   let controllerRoute =
     target.controller[0] === '@'
       ? `${__dirname}${target.controller.replace('@axel', '').replace('@app', '..')}.js`
-      : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
+      : `${process.cwd()}/src/api/controllers/${target.controller}.mjs`;
   axel.logger.trace('[ROUTING] connecting route', route, verb.toUpperCase(), {
     ...target,
     controllerRoute,
@@ -145,7 +145,7 @@ function loadPolicies() {
         return reject(err);
       }
       const promises = files
-        .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.js'))
+        .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.mjs'))
         .map(file => {
           return import(`file://${folder}/${file}`).then(func => {
             axel.policies[file.split('.')[0]] = func.default || func;
