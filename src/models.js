@@ -30,7 +30,7 @@ export const loadSchemaModels = () => {
         return reject(err);
       }
       files = files.filter(
-        (file) => _.endsWith(file, '.js') || _.endsWith(file, '.ts')
+        (file) => _.endsWith(file, '.js') || _.endsWith(file, '.mjs')
       );
       axel.logger.info('ORM :: found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
@@ -180,7 +180,7 @@ export const loadSqlModels = () => {
     }
     let files = fs.readdirSync(modelsLocation);
     files = files.filter(
-      (file) => _.endsWith(file, '.js') || _.endsWith(file, '.ts')
+      (file) => _.endsWith(file, '.js') || _.endsWith(file, '.mjs')
     );
     axel.logger.info('ORM :: found %s sequelize models files', files.length);
     debug('MODELS :: found %s sequelize models files', files.length);

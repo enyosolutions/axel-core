@@ -4,6 +4,7 @@ node_modules
 api/.env
 api/.env.local
 api/src/config/local.js
+api/src/config/local.js
 api/src/config/local.ts
 
 
