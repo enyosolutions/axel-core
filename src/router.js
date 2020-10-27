@@ -1,24 +1,22 @@
 /**
  * Connects all the config in routes.ts to the express router.
  */
-import fs, { createWriteStream } from 'fs';
-import _ from 'lodash';
-import express from 'express';
-import d from 'debug'
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
+const fs = require('fs');
+const _ = require('lodash');
+const express = require('express');
+const d = require('debug');
+const { fileURLToPath } = require('url');
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 // type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
 const debug = d('axel:router');
 
-async function connectRoute(app, source, _target) {
+function connectRoute(app, source, _target) {
   let verb = 'all';
   let route;
   let policies = [];
   let target = {};
-  const _source = source.split(' ');
+  const sourceArray = source.split(' ');
   if (typeof _target === 'string') {
     const [controller, action] = _target.split('.');
     target.controller = controller;
@@ -30,13 +28,14 @@ async function connectRoute(app, source, _target) {
         }`;
     }
   }
-  if (_source.length === 2) {
-    verb = _source[0].toLowerCase();
-    route = _source[1];
+  if (sourceArray.length === 2) {
+    verb = sourceArray[0].toLowerCase();
+    route = sourceArray[1];
   } else {
-    route = _source[0];
+    route = sourceArray[0];
   }
-  debug('connecting route', _source);
+  debug('connecting route', sourceArray);
+  debug('axel.policies', axel.policies);
   // load security policy if enabled, unless its disabled specifically or that route.
   if (axel.config.security.secureAllEndpoints && target.secure !== false) {
     if (!axel.config.security.securityPolicy) {
@@ -44,7 +43,7 @@ async function connectRoute(app, source, _target) {
     } else {
       if (!axel.policies[axel.config.security.securityPolicy]) {
         throw new Error(
-          `Error policy ${axel.config.security.securityPolicy} is does not exists in the policy folder`,
+          `Error policy [${axel.config.security.securityPolicy}] does not exists in the policy folder`,
         );
       }
       policies.push(axel.config.security.securityPolicy);
@@ -97,10 +96,9 @@ async function connectRoute(app, source, _target) {
   }
 
   // Replace aliased routes
-  let controllerRoute =
-    target.controller[0] === '@'
-      ? `${__dirname}${target.controller.replace('@axel', '').replace('@app', '..')}.js`
-      : `${process.cwd()}/src/api/controllers/${target.controller}.mjs`;
+  const controllerRoute = target.controller[0] === '@'
+    ? `${__dirname}${target.controller.replace('@axel', '').replace('@app', '..')}.js`
+    : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
   axel.logger.trace('[ROUTING] connecting route', route, verb.toUpperCase(), {
     ...target,
     controllerRoute,
@@ -108,11 +106,13 @@ async function connectRoute(app, source, _target) {
 
   // controllerRoute = controllerRoute.replace(/\\\\/g, '/');
 
-  const prom = axel.controllers[target.controller]
-    ? Promise.resolve(axel.controllers[target.controller])
-    : import(`file://${path.resolve(controllerRoute)}`);
-  prom
-    .then(c => {
+
+  const controller = axel.controllers[target.controller]
+    ? axel.controllers[target.controller]
+    // eslint-disable-next-line
+    : require(`${path.resolve(controllerRoute)}`);
+  Promise.resolve(controller)
+    .then((c) => {
       if (c && c.default) {
         c = c.default;
       }
@@ -132,30 +132,21 @@ async function connectRoute(app, source, _target) {
     .catch((err) => {
       axel.logger.warn('[ROUTING] Error while loading', controllerRoute, err.message, err);
       throw err;
-      process.exit(-1);
     });
-  return prom;
 }
 
 function loadPolicies() {
-  return new Promise((resolve, reject) => {
-    const folder = `${process.cwd()}/src/api/policies`;
-    fs.readdir(folder, (err, files) => {
-      if (err) {
-        return reject(err);
-      }
-      const promises = files
-        .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.mjs'))
-        .map(file => {
-          return import(`file://${folder}/${file}`).then(func => {
-            axel.policies[file.split('.')[0]] = func.default || func;
-          });
-        });
-      Promise.all(promises)
-        .then(resolve)
-        .catch(reject);
+  const folder = `${process.cwd()}/src/api/policies`;
+  const files = fs.readdirSync(folder);
+
+  files
+    .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.js'))
+
+    .forEach((file) => {
+      // eslint-disable-next-line
+      const func = require(`${folder}/${file}`);
+      axel.policies[file.split('.')[0]] = func;
     });
-  });
 }
 
 const loadEndpointMiddleware = (endpoint) => {
@@ -179,7 +170,7 @@ const loadEndpointMiddleware = (endpoint) => {
     }
 
     if (!axel.models[endpoint]) {
-      axel.logger.trace('[ROUTING]  MODEL ' + `${endpoint} does not exists`);
+      axel.logger.trace(`[ROUTING]  MODEL ${endpoint} does not exists`);
       return;
     }
     req.params.endpoint = endpoint;
@@ -194,10 +185,8 @@ function injectAxelAdminConfig() {
   }
   axel.config.routes['GET /api/automatic/axel-models-config'] = '@axel/controllers/AxelModelConfigController.list';
   axel.config.routes['GET /api/automatic/axel-models-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
-  axel.config.routes['PUT /api/automatic/axel-models-config/:id'] =
-    '@axel/controllers/AxelModelConfigController.put';
-  axel.config.routes['DELETE /api/automatic/axel-model-config/:id'] =
-    '@axel/controllers/AxelModelConfigController.delete';
+  axel.config.routes['PUT /api/automatic/axel-models-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
+  axel.config.routes['DELETE /api/automatic/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
   axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.models';
 }
 
@@ -235,7 +224,7 @@ function injectCrudRoutesConfig() {
       action: 'delete',
     },
   };
-  Object.keys(axel.models).forEach(key => {
+  Object.keys(axel.models).forEach((key) => {
     const model = axel.models[key];
     let routeUrl = model.url || model.identity;
     routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${routeUrl}`;
@@ -243,7 +232,7 @@ function injectCrudRoutesConfig() {
     axel.logger.trace('[ROUTING] WIRING', model.identity, routeUrl);
     if (axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1) {
       model.apiUrl = routeUrl;
-      Object.keys(crudRoutes).forEach(route => {
+      Object.keys(crudRoutes).forEach((route) => {
         const localRoute = route.replace('{routeUrl}', routeUrl);
         if (!axel.config.routes[localRoute]) {
           // Todo turn this into an array to support next function loading
@@ -254,31 +243,24 @@ function injectCrudRoutesConfig() {
         }
       });
     } else {
-      axel.logger.trace('[ROUTING] SKIPPING MODEL ' + `${model.identity} because it's blacklisted`);
+      axel.logger.trace(`[ROUTING] SKIPPING MODEL ${model.identity} because it's blacklisted`);
     }
   });
 }
 
-export function router(app) {
+function router(app) {
   debug('connecting router');
   if (!axel.config.routes) {
-    axel.config.routes = {}
+    axel.config.routes = {};
   }
-  return loadPolicies()
-    .then(injectAxelAdminConfig)
-    .then(injectCrudRoutesConfig)
-    .then(() => {
-      const promises = Object.entries(axel.config.routes).map(entry => {
-        return connectRoute(app, entry[0], entry[1]);
-      });
+  loadPolicies();
+  injectAxelAdminConfig();
+  injectCrudRoutesConfig();
+  Object.entries(axel.config.routes).map(entry => connectRoute(app, entry[0], entry[1]));
 
-      app.use(express.static(`${app.get('appPath')}/public`));
-      app.use(express.static(`${app.get('appPath')}/assets`));
-      return Promise.all(promises);
-    })
-    .catch((err) => {
-      throw err;
-    });
+  app.use(express.static(`${app.get('appPath')}/public`));
+  app.use(express.static(`${app.get('appPath')}/assets`));
 }
 
-export default router;
+module.exports = router;
+module.exports.router = router;

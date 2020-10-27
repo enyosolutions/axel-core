@@ -1,6 +1,6 @@
 
-import _ from 'lodash';
-import { Request, Response } from 'express';
+const _ = require('lodash');
+const { Request, Response } = require('express');
 
 
 
@@ -61,4 +61,4 @@ const RolesService = {
   },
 };
 
-export default RolesService;
+module.exports = RolesService;

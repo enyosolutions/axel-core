@@ -1,20 +1,14 @@
-import _ from 'lodash';
-import nodemailer from 'nodemailer';
+const _ = require('lodash');
+const nodemailer = require('nodemailer');
 
 
 
-type recipientType =
-  | string
-  | string[]
-  | { email: string; name?: string }
-  | Array<{ email: string; name?: string }>;
-
-export const MailService = {
+const MailService = {
   defaultData: {
     title: '',
     layout: 'email-template',
   },
-  sendPasswordReset(email: string, data?) {
+  sendPasswordReset(email, data) {
     const mergedData = _.merge({}, this.defaultData, data);
     mergedData.title = 'Mot de passe oublié';
     return axel.renderView('emails/account-reset', mergedData, (err, html) => {
@@ -23,7 +17,7 @@ export const MailService = {
     });
   },
 
-  sendUserCreated(user: { firstName: string; lastName: string; email: string }) {
+  sendUserCreated(user) {
     const data = _.merge({}, this.defaultData);
     data.title = 'Bienvenue';
     data.user = user;
@@ -34,7 +28,7 @@ export const MailService = {
     });
   },
 
-  sendEmailConfirmation(user: { firstname: string; lastname: string; email: string }) {
+  sendEmailConfirmation(user) {
     const data = _.merge({}, this.defaultData);
     data.title = 'Email address confirmation';
     data.user = user;
@@ -50,7 +44,7 @@ export const MailService = {
     // create Nodemailer SES transporter
     switch (axel.config.mail.transport) {
       case 'aws':
-        import sesTransport from 'nodemailer-ses-transport';
+        const sesTransport = require('nodemailer-ses-transport');
         transporter = nodemailer.createTransport(
           sesTransport({
             accessKeyId: axel.config.awsSES.auth.user,
@@ -60,7 +54,7 @@ export const MailService = {
         );
         break;
       case 'sendgrid':
-        import sgTransport from 'nodemailer-sendgrid-transport';
+        const sgTransport = require('nodemailer-sendgrid-transport');
         transporter = nodemailer.createTransport(sgTransport(axel.config.sendgrid));
         break;
       case 'gmail':
@@ -83,7 +77,7 @@ export const MailService = {
     return transporter;
   },
 
-  sendMail(email: recipientType, subject: string, body: string, options = {}) {
+  sendMail(email, subject, body, options = {}) {
     return new Promise((resolve, reject) => {
       const transporter = MailService.getTransport();
 
@@ -123,7 +117,7 @@ export const MailService = {
     });
   },
 
-  sendMailinglistThankyou(user, data?) {
+  sendMailinglistThankyou(user, data) {
     return new Promise((resolve, reject) => {
       const mergedData = _.merge({}, this.defaultData, data);
       mergedData.title = 'Thank you';
@@ -137,7 +131,7 @@ export const MailService = {
     });
   },
 
-  sendEnquiryConfirm(user, data?) {
+  sendEnquiryConfirm(user, data) {
     return new Promise((resolve, reject) => {
       const mergedData = _.merge({}, this.defaultData, data);
       mergedData.title = 'Thank you';
@@ -152,4 +146,5 @@ export const MailService = {
   },
 };
 
-export default MailService;
+module.exports = MailService;
+module.exports.MailService = MailService;

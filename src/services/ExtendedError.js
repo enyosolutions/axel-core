@@ -1,6 +1,6 @@
-import _ from 'lodash';
+const _ = require('lodash');
 
-export class ExtendedError extends Error {
+class ExtendedError extends Error {
   /**
    * @type string
    * @memberof ExtendedError
@@ -31,4 +31,5 @@ export class ExtendedError extends Error {
 // @ts-ignore
 global.ExtendedError = ExtendedError
 
-export default ExtendedError;
+module.exports = ExtendedError;
+module.exports.ExtendedError = ExtendedError;

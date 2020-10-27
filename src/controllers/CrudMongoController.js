@@ -6,12 +6,12 @@
  * @help        :: See http://App.s.org/#!/documentation/concepts/Controllers
  */
 
-import Utils from '../services/Utils';
-import ExtendedError from '../services/ExtendedError';
+const Utils = require('../services/Utils');
+const ExtendedError = require('../services/ExtendedError');
 
 const primaryKey = axel.config.framework.primaryKey;
 
-export default {
+module.exports = {
   stats(req, resp) {
     const output = {};
     const endpoint = req.param('endpoint');

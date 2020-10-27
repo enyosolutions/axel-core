@@ -1,14 +1,13 @@
-import express from 'express';
-import path from 'path';
-import bodyParser from 'body-parser';
-import http from 'http';
-import os from 'os';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import d from 'debug';
-const debug = d('axel:server');
-
-import l from './services/logger.js';
+const express = require('express');
+const path = require('path');
+const _ = require('lodash');
+const bodyParser = require('body-parser');
+const http = require('http');
+const os = require('os');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const debug = require('debug')('axel:server');
+const l = require('./services/logger.js');
 
 
 console.time('STARTUP TIME');
@@ -17,24 +16,30 @@ const exit = process.exit;
 const root = path.normalize(process.cwd());
 
 
-export class Server {
-  routes;
-  modelsFn;
-  beforeFn;
-  afterFn;
-  app = app;
-  middlewares = {};
-
+class Server {
   constructor() {
+    this.modelsFn = null;
+    this.router = null;
+    this.beforeFn = null;
+    this.afterFn = null;
+    this.app = app;
+    this.middlewares = {};
+
     console.log(axel.init);
     axel.init()
       .then(() => {
-        debug('', "init in server.js");
+        debug('', 'init in server.js');
         axel.app = app;
         // app.set('appPath', root + 'client');
         app.set('appPath', root);
         if (this.middlewares) {
-          Object.keys(this.middlewares).forEach((m) => app.use(this.middlewares[m]));
+          Object.keys(this.middlewares).forEach((m) => {
+            debug('Loading middleware', m, this.middlewares[m]);
+            if (!this.middlewares[m] || !_.isFunction(this.middlewares[m])) {
+              throw new Error(`middleware ${m} is not a function`);
+            }
+            app.use(this.middlewares[m]);
+          });
         }
 
         app.disable('x-powered-by');
@@ -63,7 +68,6 @@ export class Server {
         app.use(cookieParser(process.env.SESSION_SECRET));
       })
       .catch(console.warn);
-
   }
 
   setMiddlewares(middlewares) {
@@ -71,8 +75,8 @@ export class Server {
     return this;
   }
 
-  router(routes) {
-    this.routes = routes;
+  setRouter(router) {
+    this.router = router;
     return this;
   }
 
@@ -94,14 +98,14 @@ export class Server {
   }
 
   async listen(port) {
-    const welcome = (p) => () => {
+    const welcome = p => () => {
       l.info(
-        `up and running in ${process.env.NODE_ENV ||
-        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+        `up and running in ${process.env.NODE_ENV
+        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
       );
       debug(
-        `up and running in ${process.env.NODE_ENV ||
-        'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+        `up and running in ${process.env.NODE_ENV
+        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
       );
       l.info('\n');
       l.info('__________________________________');
@@ -116,9 +120,11 @@ export class Server {
     };
 
     await axel.init();
+    console.log('this.router', this.router);
+
     this.modelsFn(app)
       // .then(() => installValidator(app, this.routes))
-      .then(() => this.routes(app))
+      .then(() => this.router(app))
       .then(async () => {
         if (!process.env.NODE_ENV) {
           process.env.NODE_ENV = 'development';
@@ -132,7 +138,7 @@ export class Server {
         app.locals.server = http.createServer(app);
         app.locals.server.listen(port, welcome(port));
       })
-      .catch(e => {
+      .catch((e) => {
         l.error(e);
         exit(1);
       });
@@ -140,4 +146,5 @@ export class Server {
     return app;
   }
 }
-export default Server;
+module.exports = Server;
+module.exports.Server = Server;

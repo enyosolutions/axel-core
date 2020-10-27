@@ -1,6 +1,6 @@
-import XLSX from 'xlsx';
-import _ from 'lodash';
-import path from 'path';
+const XLSX = require('xlsx');
+const _ = require('lodash');
+const path = require('path');
 
 
 
@@ -100,4 +100,4 @@ const ExcelService = {
   },
 };
 
-export default ExcelService;
+module.exports = ExcelService;

@@ -1,32 +1,32 @@
-
 /**
  * Axel Framework module.
  * The axel framework is a library for implementing some sensible default on expressjs
  * @module axel-core
  */
 
-import axel from './axel.cjs';
-export { Server } from './Server.js';
-export { router } from './router.js';
-export { models } from './models.js';
+const axel = require('./axel.js');
 
-export { default as SchemaValidator } from './services/SchemaValidator.js';
-export { default as AxelAdmin } from './services/AxelAdmin.js';
-export { default as AxelManager } from './services/AxelManager.js';
-export { default as DocumentManager } from './services/DocumentManager.js';
-import l from './services/logger.js';
+const AuthService = require('./services/AuthService.js');
 
-export { default as AuthService, tokenDecryptMiddleware } from './services/AuthService.js';
+console.log(AuthService);
 
-axel.logger = l;
-axel.log = l;
 
-export { ExtendedError } from './services/ExtendedError.js';
-export * from './services/AxelAdmin.js';
-
-if (!axel.init) {
+if (!axel.initCompleted) {
   axel.init();
 }
 
+module.exports = axel;
+module.exports.axel = axel;
 
-export default axel;
+module.exports.Server = require('./Server.js').Server;
+module.exports.router = require('./router.js').router;
+module.exports.modelsLoader = require('./models.js').modelsLoader;
+
+module.exports.SchemaValidator = require('./services/SchemaValidator.js');
+module.exports.AxelAdmin = require('./services/AxelAdmin.js');
+module.exports.AxelManager = require('./services/AxelManager.js');
+module.exports.DocumentManager = require('./services/DocumentManager.js');
+
+module.exports.AuthService = AuthService;
+module.exports.tokenDecryptMiddleware = AuthService.tokenDecryptMiddleware;
+module.exports.ExtendedError = require('./services/ExtendedError.js');

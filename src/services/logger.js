@@ -1,4 +1,4 @@
-import pino from 'pino';
+const pino = require('pino');
 
 const l = pino({
   prettyPrint: true,
@@ -22,4 +22,4 @@ const l = pino({
 l.log = l.info;
 l.verbose = l.trace;
 
-export default l;
+module.exports = l;

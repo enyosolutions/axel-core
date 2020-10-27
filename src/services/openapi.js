@@ -1,9 +1,9 @@
-import * as path from 'path';
-import express, { Application } from 'express';
-import errorHandler from '../../api/middlewares/error.handler';
-import { OpenApiValidator } from 'express-openapi-validator';
+const * as path = require('path');
+const express, { Application } = require('express');
+const errorHandler = require('../../api/middlewares/error.handler');
+const { OpenApiValidator } = require('express-openapi-validator');
 
-export default function (app, routes: (app) => void): Promise<void> {
+module.exports = function (app, routes: (app) => void): Promise<void> {
   const apiSpec = path.join(__dirname, 'api.yml');
   const validateResponses = !!(
     process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION &&

@@ -1,13 +1,13 @@
-import _ from 'lodash';
-import { Request, Response, Application, NextFunction } from 'express';
-import swagger from '../../config/swagger';
+const _ = require('lodash');
+const { Request, Response, Application, NextFunction } = require('express');
+const swagger = require('../../config/swagger');
 
-import fs from 'fs';
-import url from 'url';
-import path from 'path';
-import chalk from 'chalk';
-import yaml from 'js-yaml';
-import express from 'express';
+const fs = require('fs');
+const url = require('url');
+const path = require('path');
+const chalk = require('chalk');
+const yaml = require('js-yaml');
+const express = require('express');
 const descriptor = {};
 
 
@@ -387,4 +387,4 @@ class SwaggerService {
   */
 }
 
-export default new SwaggerService();
+module.exports = new SwaggerService();

@@ -4,12 +4,12 @@
  * @description :: Server-side logic for managing all endpoints
  * @help        :: See http://axel.s.org/#!/documentation/concepts/Controllers
  */
-import Utils from '../services/Utils.js';
-import { ExtendedError } from '../services/ExtendedError.js';
-import DocumentManager from '../services/DocumentManager.js';
-import ExcelService from '../services/ExcelService.js';
-import SchemaValidator from '../services/SchemaValidator.js';
-import d from 'debug';
+const Utils = require('../services/Utils.js');
+const { ExtendedError } = require('../services/ExtendedError.js');
+const DocumentManager = require('../services/DocumentManager.js');
+const ExcelService = require('../services/ExcelService.js');
+const SchemaValidator = require('../services/SchemaValidator.js');
+const d = require('debug');
 const debug = d('axel:CrudSqlController');
 
 class CrudSqlController {
@@ -589,4 +589,4 @@ class CrudSqlController {
   }
 }
 
-export default new CrudSqlController();
+module.exports = new CrudSqlController();

@@ -4,8 +4,8 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
-import _ from 'lodash';
-import AxelAdmin from '../services/AxelAdmin.js'; // adjust path as needed
+const _ = require('lodash');
+const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -13,8 +13,8 @@ Uncomment if you need the following features:
 - Export to excel
 */
 
-// import DocumentManager from '../../services/DocumentManager';
-// import ExcelService from '../../services/ExcelService';
+// const DocumentManager =  require('../../services/DocumentManager');
+// const ExcelService =  require('../../services/ExcelService');
 
 const entity = 'axelModelConfig';
 const primaryKey =
@@ -33,4 +33,4 @@ class AxelAdminController {
   }
 }
 
-export default new AxelAdminController();
+module.exports = new AxelAdminController();

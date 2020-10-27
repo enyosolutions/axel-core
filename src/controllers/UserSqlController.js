@@ -5,19 +5,19 @@
  * @help        :: See http://links.axel.s.org/docs/controllers
  */
 
-import moment from 'moment';
-import _ from 'lodash';
-import Utils from '../services/Utils';
-import { ExtendedError } from '../index';
-import AuthService from '../../axel/services/AuthService';
-import MailService from '../services/MailService';
+const moment = require('moment');
+const _ = require('lodash');
+const Utils = require('../services/Utils');
+const { ExtendedError } = require('../index');
+const AuthService = require('../../axel/services/AuthService');
+const MailService = require('../services/MailService');
 
 const primaryKey =
   axel.models['user'] && axel.models['user'].em && axel.models['user'].em.primaryKeyField
     ? axel.models['user'].em.primaryKeyField
     : axel.config.framework.primaryKey;
 
-export default {
+module.exports = {
   initDefaultUser(req, res) {
     if (['PROD', 'prod', 'production'].indexOf(axel.config.env) > -1) {
       res.json('NOPE');

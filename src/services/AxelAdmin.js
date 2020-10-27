@@ -1,12 +1,11 @@
-import axel from '../axel.cjs';
-import Utils from './Utils.js';
-import SchemaValidator from './SchemaValidator.js';
-import { loadSqlModel, loadSchemaModel } from '../models.js';
-import _ from 'lodash';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+const axel = require('../axel.js');
+const Utils = require('./Utils.js');
+const SchemaValidator = require('./SchemaValidator.js');
+const { loadSqlModel, loadSchemaModel } = require('../models.js');
+const _ = require('lodash');
+const { dirname } = require('path');
+const { fileURLToPath } = require('url');
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -218,4 +217,4 @@ class AxelAdmin {
   }
 }
 
-export default new AxelAdmin();
+module.exports = new AxelAdmin();

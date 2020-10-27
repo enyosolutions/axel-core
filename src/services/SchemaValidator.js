@@ -1,5 +1,5 @@
-import Ajv from 'ajv';
-import _ from 'lodash';
+const Ajv = require('ajv');
+const _ = require('lodash');
 
 
 
@@ -205,4 +205,4 @@ class SchemaValidator {
   }
 }
 
-export default new SchemaValidator();
+module.exports = new SchemaValidator();

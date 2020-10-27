@@ -6,15 +6,15 @@
  *                 how this model works and what it represents here.
  */
 
-import Sequelize from 'sequelize';
-import {
+const Sequelize = require('sequelize');
+const {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook,
-} from '../../services/SequelizeHooks.js';
+} = require('../../services/SequelizeHooks.js');
 
-export const AxelModelFieldConfig = {
+const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
   entity: {
     attributes: {
@@ -96,7 +96,7 @@ export const AxelModelFieldConfig = {
       ],
     },
     // Create relations
-    associations: models => {
+    associations: (models) => {
       models.axelModelFieldConfig.belongsTo(models.axelModelConfig, {
         targetKey: 'identity',
         foreignKey: 'parentIdentity',
@@ -108,4 +108,5 @@ export const AxelModelFieldConfig = {
   },
 };
 
-export default AxelModelFieldConfig;
+module.exports = AxelModelFieldConfig;
+module.exports.AxelModelFieldConfig = AxelModelFieldConfig;

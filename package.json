@@ -1,9 +1,8 @@
 {
   "name": "axel-core",
   "version": "0.0.7",
-  "description": "Axel: Express+Typescript+OhMyGoodness",
+  "description": "Axel: Express + OhMyGoodness",
   "main": "src/index.js",
-  "type": "module",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:enyosolutions-team/axel-axel.git",
   "author": "fb@enyosolutions.com <fb@enyosolutions.com>",
@@ -11,11 +10,17 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "cross-env TS_NODE_FILES=true npx tsc",
-    "docs": "node_modules/.bin/jsdoc -c jsdoc.json"
+    "docs": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "lint": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}'",
+    "lint:fix": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}' --fix --quiet",
+    "lint:watch": "nodemon --exec 'npm run lint:fix'"
+  },
+  "engines": {
+    "node": ">=10.0.0"
   },
   "dependencies": {
-    "axel-cli": "^0.0.13",
     "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "debug": "^4.2.0",
@@ -32,16 +37,19 @@
     "xlsx": "^0.16.8"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
+    "@babel/core": "^7.12.1",
     "@babel/node": "^7.12.1",
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
-    "@types/multer": "^1.4.4",
-    "@types/node": "^14.14.2",
-    "@types/pino": "^6.3.3",
-    "babel-cli": "^7.12.1",
+    "axel-cli": "^0.0.13",
     "cross-env": "^7.0.2",
     "docdash": "^1.2.0",
+    "eslint-config-airbnb": "^17.0.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^6.6.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "jsdoc": "^3.6.6"
   }
 }

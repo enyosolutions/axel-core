@@ -6,14 +6,14 @@
  *                 how this model works and what it represents here.
  */
 
-import Sequelize from 'sequelize';
+const Sequelize = require('sequelize');
 
- import {
+const {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook,
-} from '../../services/SequelizeHooks.js';
+} = require('../../services/SequelizeHooks.js');
 /*
   // event hooks => http://docs.sequelizejs.com/manual/tutorial/hooks.html
   const eventCallback = () => { // items, options
@@ -22,7 +22,7 @@ import Sequelize from 'sequelize';
 */
 
 const jsonFields = ['options', 'layout', 'formOptions', 'kanbanOptions', 'listOptions'];
-export const AxelModelConfig = {
+const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {
     attributes: {
@@ -100,7 +100,7 @@ export const AxelModelConfig = {
     },
     // Create relations
     // @ts-ignore
-    associations: models => {
+    associations: (models) => {
       models.axelModelConfig.hasMany(models.axelModelFieldConfig, {
         foreignKey: 'parentIdentity',
         sourceKey: 'identity',
@@ -113,4 +113,5 @@ export const AxelModelConfig = {
 };
 
 
-export default AxelModelConfig;
+module.exports = AxelModelConfig;
+module.exports.AxelModelConfig = AxelModelConfig;

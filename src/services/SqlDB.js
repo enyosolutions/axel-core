@@ -1,8 +1,8 @@
-import axel from '../axel.cjs';
-import fs from 'fs';
-import _ from 'lodash';
-import colors from 'colors';
-import Sequelize from 'sequelize';
+const axel = require('../axel.js');
+const fs = require('fs');
+const _ = require('lodash');
+const colors = require('colors');
+const Sequelize = require('sequelize');
 
 async function loadSequelize() {
   if (axel.config.sqldb) {
@@ -45,4 +45,4 @@ async function loadSequelize() {
   return;
 }
 const sqlDB = loadSequelize();
-export default sqlDB;
+module.exports = sqlDB;

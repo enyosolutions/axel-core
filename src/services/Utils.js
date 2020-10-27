@@ -1,9 +1,9 @@
-// import mongo from 'mongodb';
-import crypto from 'crypto';
-import stringify from 'json-stringify-safe';
-import Sequelize from 'sequelize';
-import _ from 'lodash';
-import { ExtendedError } from './ExtendedError.js';
+// const mongo =  require('mongodb');
+const crypto = require('crypto');
+const stringify = require('json-stringify-safe');
+const Sequelize = require('sequelize');
+const _ = require('lodash');
+const { ExtendedError } = require('./ExtendedError.js');
 
 // declare const Sequelize;
 
@@ -431,4 +431,4 @@ const Utils = {
   },
 };
 
-export default Utils;
+module.exports = Utils;

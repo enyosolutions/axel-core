@@ -1,6 +1,6 @@
-import { NextFunction, Application } from 'express';
-import { Sequelize } from 'sequelize';
-import { ExtendedError } from '../index';
+const { NextFunction, Application } = require('express');
+const { Sequelize } = require('sequelize');
+const { ExtendedError } = require('../index');
 
 declare namespace Express {
   interface Request {

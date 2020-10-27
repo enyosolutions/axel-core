@@ -1,7 +1,7 @@
-import axel from '../axel.cjs';
-import _ from 'lodash';
-import socketIO from 'socket.io';
-import axelCli from 'axel-cli';
+const axel = require('../axel.js');
+const _ = require('lodash');
+const socketIO = require('socket.io');
+const axelCli = require('axel-cli');
 const { generateController, generateModel, generateApi, generateRoute } = axelCli;
 
 
@@ -247,4 +247,4 @@ class AxelManager {
   }
 }
 
-export default new AxelManager();
+module.exports = new AxelManager();

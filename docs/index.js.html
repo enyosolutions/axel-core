@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <meta charset="utf-8">
     <title>index.js - Documentation</title>
-    
-    
+
+
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
     <!--[if lt IE 9]>
@@ -26,20 +26,20 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav >
-    
+
     <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-axel-core.html">axel-core</a></li></ul>
 </nav>
 
 <div id="main">
-    
+
     <h1 class="page-title">index.js</h1>
-    
-
-    
 
 
 
-    
+
+
+
+
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>
@@ -49,10 +49,10 @@
  * @module axel-core
  */
 
- export { axel } from './axel.js';
-export { Server } from './Server.js';
-export { router } from './router.js';
-export { models } from './models.js';
+ module.exports.axel =   require('./axel.js').axel;
+module.exports.Server =   require('./Server.js').Server;
+module.exports.router =   require('./router.js').router;
+module.exports.models =   require('./models.js').models;
 
 export {default as SchemaValidator} from './services/SchemaValidator.js';
 export {default as AxelAdmin} from './services/AxelAdmin.js';
@@ -63,22 +63,22 @@ export {default as AuthService, tokenDecryptMiddleware} from './services/AuthSer
 
 
 
-export { ExtendedError } from './services/ExtendedError.js';
+module.exports.ExtendedError =   require('./services/ExtendedError.js').ExtendedError;
 export * from './services/AxelAdmin.js';
 
 // @ts-ignore
 global.axel = axel;
 // @ts-ignore
 
-export default axel;</code></pre>
+module.exports =  axel;</code></pre>
         </article>
     </section>
 
 
 
 
-    
-    
+
+
 </div>
 
 <br class="clear">

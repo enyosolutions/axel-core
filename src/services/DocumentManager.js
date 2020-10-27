@@ -6,10 +6,10 @@
  *            type:string, mimetype: string, size: float, entity:string, entityId: FK}
  */
 
-import fs from 'fs';
-import path from 'path';
-import multer from 'multer';
-import Utils from '../services/Utils.js';
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const Utils = require('../services/Utils.js');
 
 let s3;
 
@@ -31,7 +31,7 @@ const getStorage = (pathSuffix, filePrefix) => {
   });
 };
 
-export const DocumentManager = {
+const DocumentManager = {
   storage: 'local',
   s3,
   httpUpload(
@@ -237,4 +237,5 @@ export const DocumentManager = {
   },
 };
 
-export default DocumentManager;
+module.exports = DocumentManager;
+module.exports.DocumentManager = DocumentManager;

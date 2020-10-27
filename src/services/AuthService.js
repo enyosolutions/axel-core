@@ -1,34 +1,35 @@
-import _ from 'lodash';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-const { VerifyCallback, VerifyErrors, sign, verify: jverify } = jwt;
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
+
+const {
+  VerifyCallback, VerifyErrors, sign, verify: jverify
+} = jwt;
 
 
 const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id';
 const saltRounds = 10;
 
-export const issue = (payload, expiry = '7d') =>
-  sign(
-    payload,
-    axel.config.tokenSecret, // Token Secret that we sign it with
-    {
-      expiresIn: expiry, // Token Expire time
-    },
-  );
+const issue = (payload, expiry = '7d') => sign(
+  payload,
+  axel.config.tokenSecret, // Token Secret that we sign it with
+  {
+    expiresIn: expiry, // Token Expire time
+  },
+);
 
 // @fixme only id should be inserted in the token. The rest should fetched from the database / cache  with each request
-export const generateFor = (user) =>
-  issue({
-    [primaryKey]: user[primaryKey],
-    username: user.username,
-    email: user.email,
-    firstname: user.firstname,
-    lastname: user.lastname,
-    roles: user.roles,
-  });
+const generateFor = user => issue({
+  [primaryKey]: user[primaryKey],
+  username: user.username,
+  email: user.email,
+  firstname: user.firstname,
+  lastname: user.lastname,
+  roles: user.roles,
+});
 
 // Verifies token on a request
-export function verify(token, callback) {
+function verify(token, callback) {
   return jverify(
     token, // The token to be verified
     axel.config.tokenSecret, // Same token we used to sign
@@ -38,7 +39,7 @@ export function verify(token, callback) {
   );
 }
 
-export function beforeCreate(user) {
+function beforeCreate(user) {
   return new Promise((resolve, reject) => {
     bcrypt.hash(user.password, saltRounds, (error, hash) => {
       if (error) {
@@ -53,7 +54,7 @@ export function beforeCreate(user) {
   });
 }
 
-export function beforeUpdate(user) {
+function beforeUpdate(user) {
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(saltRounds, (err, salt) => {
       if (err) return reject(err);
@@ -75,7 +76,7 @@ export function beforeUpdate(user) {
   });
 }
 
-export function comparePassword(password, user) {
+function comparePassword(password, user) {
   return new Promise((resolve, reject) => {
     if (!user || !user.encryptedPassword) {
       reject(new Error('error_invalid_credentials'));
@@ -92,12 +93,12 @@ export function comparePassword(password, user) {
 }
 
 // @todo add support for injection of roles checking methods
-export function tokenDecryptMiddleware(req, res, next) {
+function tokenDecryptMiddleware(req, res, next) {
   let hasHeader = false;
   if (
-    req.headers &&
-    req.headers.authorization &&
-    req.headers.authorization.indexOf('Bearer') > -1
+    req.headers
+    && req.headers.authorization
+    && req.headers.authorization.indexOf('Bearer') > -1
   ) {
     const parts = req.headers.authorization.split(' ');
     if (parts.length === 2) {
@@ -129,12 +130,12 @@ export function tokenDecryptMiddleware(req, res, next) {
   }
 }
 
-export function getExtendedRoles(role) {
+function getExtendedRoles(role) {
   let myRoles = [];
   if (
-    axel.config.framework.roles[role] &&
-    axel.config.framework.roles[role].inherits &&
-    Array.isArray(axel.config.framework.roles[role].inherits)
+    axel.config.framework.roles[role]
+    && axel.config.framework.roles[role].inherits
+    && Array.isArray(axel.config.framework.roles[role].inherits)
   ) {
     myRoles = myRoles.concat(axel.config.framework.roles[role].inherits);
     axel.config.framework.roles[role].inherits.forEach((r) => {
@@ -144,11 +145,11 @@ export function getExtendedRoles(role) {
   return _.uniq(myRoles);
 }
 
-export function hasRole(user, role) {
+function hasRole(user, role) {
   return user && user.roles && user.roles.indexOf(role) > -1;
 }
 
-export function hasAnyRole(user, _requiredRoles) {
+function hasAnyRole(user, _requiredRoles) {
   if (!user || !user.roles) {
     return false;
   }
@@ -187,13 +188,14 @@ export function hasAnyRole(user, _requiredRoles) {
   return canAccess;
 }
 
-export default {
-  issue,
-  generateFor,
-  verify,
-  comparePassword,
+module.exports = {
   beforeCreate,
   beforeUpdate,
-  hasRole,
+  comparePassword,
+  generateFor,
   hasAnyRole,
+  hasRole,
+  issue,
+  tokenDecryptMiddleware,
+  verify,
 };
