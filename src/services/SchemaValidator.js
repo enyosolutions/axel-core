@@ -1,6 +1,6 @@
 const Ajv = require('ajv');
 const _ = require('lodash');
-
+const debug = require('debug')('axel:schemavalidator');
 
 
 
@@ -145,14 +145,14 @@ class SchemaValidator {
 
   loadSchema(definition) {
     const identity = definition.identity;
-    axel.logger.verbose('VALIDATOR :: loading %s ', identity);
+    debug('VALIDATOR :: loading %s ', identity);
     if (!definition.schema) {
       //  throw new Error('VALIDATOR :: no schema for ' + identity);
       console.warn('VALIDATOR :: no schema for ' + identity);
       return;
     }
     if (!this.validators[identity] && axel.models[identity].schema) {
-      axel.logger.info('loading schema for %s', identity);
+      debug('loading schema for %s', identity);
       try {
         // @ts-ignore
         this.validators[identity] = this.ajv.compile(axel.models[identity].schema);
@@ -172,7 +172,7 @@ class SchemaValidator {
         axel.logger.warn('retrying', e.missingRef);
       }
     }
-    axel.logger.verbose('VALIDATOR :: loading %s complete', identity);
+    debug('VALIDATOR :: loading %s complete', identity);
   }
 
   validate(data, model, options = { strict: false }) {
@@ -183,7 +183,7 @@ class SchemaValidator {
       if (typeof validator === 'function') {
         result.isValid = this.validators[model](data);
       } else {
-        axel.logger.info(
+        axel.logger.warn(
           'VALIDATOR :: ' + model + ' validator is not a function',
           typeof validator,
         );
@@ -191,7 +191,7 @@ class SchemaValidator {
         return result;
       }
     } catch (e) {
-      axel.logger.info('model issues', e, model);
+      axel.logger.warn('model issues', e, model);
     }
     if (!result.isValid) {
       // result = normalize(this.validators[model.toLowerCase()].errors);

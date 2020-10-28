@@ -24,14 +24,14 @@ class AxelAdmin {
     if (!axel.sqldb) {
       return Promise.reject(new Error('missing_sqldb'));
     }
-    const m1 = loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
-    const m2 = loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
+    loadSchemaModel(`${__dirname}/../models/schema/AxelModelConfig.js`);
+    loadSchemaModel(`${__dirname}/../models/schema/AxelModelFieldConfig.js`);
+
+    const axelModelConfig = loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
+    const axelModelFieldConfig = loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
 
     // console.log(m1)
     // console.log(m2)
-
-    loadSchemaModel(`${__dirname}/../models/schema/AxelModelConfig.js`);
-    loadSchemaModel(`${__dirname}/../models/schema/AxelModelFieldConfig.js`);
 
 
     if (!axel.models.axelModelConfig) {
@@ -39,10 +39,10 @@ class AxelAdmin {
     }
 
     Promise.all([
-      m1.em.sync(),
-      m2.em.sync(),
+      axelModelConfig.em.sync(),
+      axelModelFieldConfig.em.sync(),
     ])
-      .then(() => axel.models.axelModelConfig.em
+      .then(() => axelModelConfig.em
         .findAll())
       .then((savedConfig) => {
         const insertions = Object.keys(axel.models).map((modelKey) => {

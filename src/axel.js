@@ -50,7 +50,7 @@ const axel = {
   policies: {},
   logger: l,
   log: l,
-  rootPath: path.resolve(process.cwd(), '..'),
+  rootPath: path.resolve(process.cwd()),
   init: async () => {
     debug('init requested');
     if (axel.initCompleted && Object.keys(axel.config).length > 0) {

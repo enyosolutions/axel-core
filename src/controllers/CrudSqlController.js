@@ -4,12 +4,13 @@
  * @description :: Server-side logic for managing all endpoints
  * @help        :: See http://axel.s.org/#!/documentation/concepts/Controllers
  */
+const d = require('debug');
 const Utils = require('../services/Utils.js');
 const { ExtendedError } = require('../services/ExtendedError.js');
 const DocumentManager = require('../services/DocumentManager.js');
 const ExcelService = require('../services/ExcelService.js');
 const SchemaValidator = require('../services/SchemaValidator.js');
-const d = require('debug');
+
 const debug = d('axel:CrudSqlController');
 
 class CrudSqlController {
@@ -26,7 +27,7 @@ class CrudSqlController {
     const { repository, tableName } = axel.models[endpoint];
     repository
       .count({})
-      .then(data => {
+      .then((data) => {
         // TOTAL
         output.total = data;
 
@@ -41,7 +42,7 @@ class CrudSqlController {
           },
         );
       })
-      .then(data => {
+      .then((data) => {
         if (data && data.length > 0 && data[0].month) {
           output.month = data[0].month;
         } else {
@@ -59,7 +60,7 @@ class CrudSqlController {
           },
         );
       })
-      .then(data => {
+      .then((data) => {
         if (data && data.length > 0 && data[0].week) {
           output.week = data[0].week;
         } else {
@@ -77,7 +78,7 @@ class CrudSqlController {
           },
         );
       })
-      .then(data => {
+      .then((data) => {
         if (data && data.length > 0 && data[0].today) {
           output.today = data[0].today;
         } else {
@@ -88,7 +89,7 @@ class CrudSqlController {
           body: output,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -96,13 +97,14 @@ class CrudSqlController {
 
   list(req, resp) {
     const endpoint = req.params.endpoint;
-    const primaryKey =
-      axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-        ? axel.models[endpoint].em.primaryKeyField
-        : axel.config.framework.primaryKey;
+    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
+      ? axel.models[endpoint].em.primaryKeyField
+      : axel.config.framework.primaryKey;
 
     let items = [];
-    const { listOfValues, startPage, limit, offset, order } = Utils.injectPaginationQuery(req, {
+    const {
+      listOfValues, startPage, limit, offset, order
+    } = Utils.injectPaginationQuery(req, {
       primaryKey,
     });
     let query = Utils.injectQueryParams(req);
@@ -118,7 +120,6 @@ class CrudSqlController {
       });
     }
     query = Utils.cleanSqlQuery(query);
-    console.log('[CRUD] list', req.url, query, limit, offset, order);
     repository
       .findAndCountAll({
         // where: req.query.filters,
@@ -127,7 +128,7 @@ class CrudSqlController {
         limit,
         offset,
       })
-      .then(result => {
+      .then((result) => {
         items = result.rows;
         if (listOfValues) {
           items = items.map(item => ({
@@ -138,16 +139,14 @@ class CrudSqlController {
         return result.count || 0;
       })
 
-      .then(totalCount =>
-        resp.status(200).json({
-          body: items,
-          page: startPage,
-          perPage: limit,
-          count: limit,
-          totalCount: totalCount,
-        }),
-      )
-      .catch(err => {
+      .then(totalCount => resp.status(200).json({
+        body: items,
+        page: startPage,
+        perPage: limit,
+        count: limit,
+        totalCount,
+      }))
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -160,10 +159,9 @@ class CrudSqlController {
     }
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
     const endpoint = req.params.endpoint;
-    const primaryKey =
-      axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-        ? axel.models[endpoint].em.primaryKeyField
-        : axel.config.framework.primaryKey;
+    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
+      ? axel.models[endpoint].em.primaryKeyField
+      : axel.config.framework.primaryKey;
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
@@ -174,7 +172,7 @@ class CrudSqlController {
         where: { [primaryKey]: id },
         raw: false,
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         throw new ExtendedError({
           code: 404,
@@ -186,7 +184,7 @@ class CrudSqlController {
           message: err.message || 'not_found',
         });
       })
-      .then(item => {
+      .then((item) => {
         if (item) {
           item = item.get();
           if (listOfValues) {
@@ -209,7 +207,7 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -217,7 +215,6 @@ class CrudSqlController {
 
   post(req, resp) {
     const data = req.body;
-    console.log('[crudSql][post] original', data);
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
@@ -238,19 +235,16 @@ class CrudSqlController {
       throw new Error('error_wrong_json_format_for_model_definition');
     }
 
-    console.log('[crudSql][post]', data);
     repository
       .create(data)
-      .then(result =>
-        resp.status(200).json({
-          body: result,
-        }),
-      )
-      .catch(err => {
+      .then(result => resp.status(200).json({
+        body: result,
+      }))
+      .catch((err) => {
         axel.logger.warn(err);
         if (err && err.name === 'SequelizeValidationError') {
           resp.status(400).json({
-            //@ts-ignore
+            // @ts-ignore
             errors: err.errors && err.errors.map(e => e.message),
             message: 'sql_validation_error',
           });
@@ -273,10 +267,9 @@ class CrudSqlController {
     const data = req.body;
 
     const endpoint = req.params.endpoint;
-    const primaryKey =
-      axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-        ? axel.models[endpoint].em.primaryKeyField
-        : axel.config.framework.primaryKey;
+    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
+      ? axel.models[endpoint].em.primaryKeyField
+      : axel.config.framework.primaryKey;
     const repository = Utils.getEntityManager(req, resp);
 
     if (!repository) {
@@ -302,7 +295,7 @@ class CrudSqlController {
 
     repository
       .findByPk(id)
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         throw new ExtendedError({
           code: 404,
@@ -314,7 +307,7 @@ class CrudSqlController {
           message: err.message || 'not_found',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           return repository.update(data, {
             where: {
@@ -329,7 +322,7 @@ class CrudSqlController {
         });
       })
       .then(() => repository.findByPk(id))
-      .then(result => {
+      .then((result) => {
         if (result) {
           return resp.status(200).json({
             body: result,
@@ -340,11 +333,11 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         if (err && err.name === 'SequelizeValidationError') {
           resp.status(400).json({
-            //@ts-ignore
+            // @ts-ignore
             errors: err.errors && err.errors.map(e => e.message),
             message: 'validation_error',
           });
@@ -371,17 +364,16 @@ class CrudSqlController {
       return;
     }
     const endpoint = req.params.endpoint;
-    const primaryKey =
-      axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-        ? axel.models[endpoint].em.primaryKeyField
-        : axel.config.framework.primaryKey;
+    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
+      ? axel.models[endpoint].em.primaryKeyField
+      : axel.config.framework.primaryKey;
     repository
       .destroy({
         where: {
           [primaryKey]: id,
         },
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         throw new ExtendedError({
           code: 400,
@@ -389,7 +381,7 @@ class CrudSqlController {
           message: err.message || 'delete_error',
         });
       })
-      .then(a => {
+      .then((a) => {
         if (!a) {
           return resp.status(404).json();
         }
@@ -397,7 +389,7 @@ class CrudSqlController {
           status: 'OK',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -411,21 +403,19 @@ class CrudSqlController {
     const url = `${endpoint}_export`;
     const options = {};
     const query = {};
-    let repository = Utils.getEntityManager(req, resp);
+    const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
     Promise.resolve()
-      .then(() => {
-        return repository.findAll({
-          where: query,
-        });
-      })
-      .then(result => {
+      .then(() => repository.findAll({
+        where: query,
+      }))
+      .then((result) => {
         data = result;
         if (endpoint === 'user') {
-          data = data.map(item => {
+          data = data.map((item) => {
             delete item.encryptedPassword;
             delete item.resetToken;
             return item;
@@ -433,7 +423,7 @@ class CrudSqlController {
         }
         return ExcelService.export(data, url, options);
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           if (result.errno) {
             return resp.status(500).json({
@@ -452,7 +442,7 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -473,16 +463,14 @@ class CrudSqlController {
     const query = {};
 
     Promise.resolve()
-      .then(() =>
-        repository.findAll({
-          limit: 1,
-        }),
-      )
-      .then(result => {
+      .then(() => repository.findAll({
+        limit: 1,
+      }))
+      .then((result) => {
         data = result;
         return ExcelService.export(data, url, options);
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           if (result.errno) {
             return resp.status(500).json({
@@ -501,7 +489,7 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
@@ -520,7 +508,7 @@ class CrudSqlController {
       path: 'uploads/excel',
     })
       // @ts-ignore
-      .then(document => {
+      .then((document) => {
         if (document && document.length > 0) {
           doc = document[0];
           return ExcelService.parse(doc.fd, {
@@ -534,9 +522,9 @@ class CrudSqlController {
           errors: ['no_file_uploaded'],
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
-          result.forEach(item => {
+          result.forEach((item) => {
             // check if data is proper before pushing it
             properData.push(item);
           });
@@ -551,7 +539,7 @@ class CrudSqlController {
           errors: ['parse_error'],
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
         throw new ExtendedError({
           errors: [
@@ -563,7 +551,7 @@ class CrudSqlController {
         });
       })
       .then(() => DocumentManager.delete(doc[0].fd))
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
         throw new ExtendedError({
           code: 500,
@@ -575,14 +563,12 @@ class CrudSqlController {
           message: err.message || 'delete_error',
         });
       })
-      .then(() =>
-        resp.json({
-          body: 'ok',
-          properData,
-          improperData,
-        }),
-      )
-      .catch(err => {
+      .then(() => resp.json({
+        body: 'ok',
+        properData,
+        improperData,
+      }))
+      .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
         Utils.errorCallback(err, resp);
       });

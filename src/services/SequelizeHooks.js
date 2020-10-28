@@ -1,4 +1,4 @@
-module.exports.jsonStringifyHook = (fields, defaultValue) => (item) => {
+const jsonStringifyHook = (fields, defaultValue) => (item) => {
   if (!item) {
     return;
   }
@@ -15,6 +15,7 @@ module.exports.jsonStringifyHook = (fields, defaultValue) => (item) => {
   }
   return item;
 };
+
 module.exports.bulkJsonStringifyHook = (fields, defaultValue) => (
   items,
 ) => {
@@ -33,7 +34,7 @@ module.exports.bulkJsonStringifyHook = (fields, defaultValue) => (
   return items;
 };
 
-module.exports.jsonParseHook = (fields, defaultValue) => (item) => {
+const jsonParseHook = (fields, defaultValue) => (item) => {
   if (!item) {
     return;
   }
@@ -69,3 +70,6 @@ module.exports.bulkJsonParseHook = (fields, defaultValue) => (
   }
   return items;
 };
+
+module.exports.jsonParseHook = jsonParseHook;
+module.exports.jsonStringifyHook = jsonStringifyHook;

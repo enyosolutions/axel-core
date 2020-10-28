@@ -8,9 +8,6 @@ const axel = require('./axel.js');
 
 const AuthService = require('./services/AuthService.js');
 
-console.log(AuthService);
-
-
 if (!axel.initCompleted) {
   axel.init();
 }

@@ -23,9 +23,9 @@ class Server {
     this.beforeFn = null;
     this.afterFn = null;
     this.app = app;
+    this.initCompleted = false;
     this.middlewares = {};
 
-    console.log(axel.init);
     axel.init()
       .then(() => {
         debug('', 'init in server.js');
@@ -97,6 +97,32 @@ class Server {
     return this;
   }
 
+  async start() {
+    axel.init();
+
+    if (this.beforeFn) {
+      await this.beforeFn(app);
+    }
+
+    return this.modelsFn(app)
+      // .then(() => installValidator(app, this.routes))
+      .then(() => this.router(app))
+      .then(async () => {
+        if (!process.env.NODE_ENV) {
+          process.env.NODE_ENV = 'development';
+        }
+        console.log('"process.env.NODE_ENV', process.env.NODE_ENV);
+        if (this.afterFn) {
+          this.afterFn(app);
+        }
+        app.emit('app-ready', { axel });
+      })
+      .catch((e) => {
+        l.error(e);
+        exit(1);
+      });
+  }
+
   async listen(port) {
     const welcome = p => () => {
       l.info(
@@ -114,35 +140,9 @@ class Server {
       console.timeEnd('STARTUP TIME');
       l.info('__________________________________');
       app.emit('server-ready', { axel });
-      if (this.afterFn) {
-        this.afterFn(app);
-      }
     };
-
-    await axel.init();
-    console.log('this.router', this.router);
-
-    this.modelsFn(app)
-      // .then(() => installValidator(app, this.routes))
-      .then(() => this.router(app))
-      .then(async () => {
-        if (!process.env.NODE_ENV) {
-          process.env.NODE_ENV = 'development';
-        }
-        debug('modelFn fn completed');
-        console.log('"process.env.NODE_ENV', process.env.NODE_ENV);
-
-        if (this.beforeFn) {
-          await this.beforeFn(app);
-        }
-        app.locals.server = http.createServer(app);
-        app.locals.server.listen(port, welcome(port));
-      })
-      .catch((e) => {
-        l.error(e);
-        exit(1);
-      });
-
+    app.locals.server = http.createServer(app);
+    app.locals.server.listen(port, welcome(port));
     return app;
   }
 }
