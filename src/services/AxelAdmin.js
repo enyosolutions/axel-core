@@ -177,8 +177,7 @@ class AxelAdmin {
       .then(() => {
         const models = Object.keys(axel.models)
           .filter(
-            key => axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1
-              && axel.models[key].schema,
+            key => axel.models[key].schema,
           )
           .map((modelId) => {
             const model = axel.models[modelId];
