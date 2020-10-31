@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
-const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
+const SchemaValidator = require('../services/SchemaValidator.js');
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -18,26 +18,29 @@ Uncomment if you need the following features:
 // const DocumentManager =  require('../../services/DocumentManager');
 // const ExcelService =  require('../../services/ExcelService');
 
-const entity = 'axelModelConfig';
+const entity = 'axelModelFieldConfig';
 const primaryKey = axel.models[entity] && axel.models[entity].primaryKeyField
   ? axel.models[entity].primaryKeyField
   : axel.config.framework.primaryKey;
 
-class AxelModelConfigController {
+class AxelModelFieldConfigController {
   list(req, resp) {
     let items = [];
-
     const {
       listOfValues, startPage, limit, offset, order
-    } = Utils.injectPaginationQuery(req);
+    } = Utils.injectPaginationQuery(req, {
+      primaryKey,
+    });
     let query = Utils.injectQueryParams(req);
+
     const repository = Utils.getEntityManager(entity, resp);
     if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req, query, {
-        modelName: req.params.entity,
+        modelName: req.params.endpoint,
       });
     }
     query = Utils.cleanSqlQuery(query);
@@ -51,10 +54,6 @@ class AxelModelConfigController {
       })
       .then((result) => {
         items = result.rows;
-        items = items.map(item => AxelAdmin.mergeModels(
-          AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
-          item,
-        ));
         if (listOfValues) {
           items = items.map(item => ({
             [primaryKey]: item[primaryKey],
@@ -67,10 +66,12 @@ class AxelModelConfigController {
       .then(totalCount => resp.status(200).json({
         body: items,
         page: startPage,
+        perPage: limit,
         count: limit,
         totalCount,
       }))
       .catch((err) => {
+        axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
   }
@@ -81,23 +82,20 @@ class AxelModelConfigController {
       return false;
     }
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
-
     const repository = Utils.getEntityManager(entity, resp);
     if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
     repository
       .findOne({
-        where: { [pKey]: id },
+        where: { [primaryKey]: id },
         raw: false,
       })
       .catch((err) => {
-        if (process.env.NODE_ENV === 'development') {
-          axel.logger.warn(err);
-        }
+        axel.logger.warn(err);
         throw new ExtendedError({
-          code: 400,
+          code: 404,
           errors: [
             {
               message: err.message || 'not_found',
@@ -106,15 +104,9 @@ class AxelModelConfigController {
           message: err.message || 'not_found',
         });
       })
-      .then(async (item) => {
+      .then((item) => {
         if (item) {
           item = item.get();
-          if (axel.models[item.identity]) {
-            item = AxelAdmin.mergeModels(
-              AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
-              item,
-            );
-          }
           if (listOfValues) {
             item = {
               [primaryKey]: item[primaryKey],
@@ -123,14 +115,6 @@ class AxelModelConfigController {
           }
           return resp.status(200).json({
             body: item,
-          });
-        } if (pKey === 'identity' && axel.models[pKey]) {
-          await axel.models[pKey].em.create(axel.models[pKey]);
-          return resp.status(200).json({
-            body: {
-              ...axel.models[pKey],
-              apiUrl: axel.models[pKey].apiUrl,
-            },
           });
         }
         throw new ExtendedError({
@@ -144,6 +128,35 @@ class AxelModelConfigController {
         });
       })
       .catch((err) => {
+        axel.logger.warn(err);
+        Utils.errorCallback(err, resp);
+      });
+  }
+
+  post(req, resp) {
+    const data = req.body;
+    const repository = Utils.getEntityManager(entity, resp);
+    if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
+      return;
+    }
+
+
+    repository
+      .create(data)
+      .then(result => resp.status(200).json({
+        body: result,
+      }))
+      .catch((err) => {
+        axel.logger.warn(err);
+        if (err && err.name === 'SequelizeValidationError') {
+          resp.status(400).json({
+            // @ts-ignore
+            errors: err.errors && err.errors.map(e => e.message),
+            message: 'sql_validation_error',
+          });
+          return false;
+        }
         Utils.errorCallback(err, resp);
       });
   }
@@ -161,16 +174,34 @@ class AxelModelConfigController {
     const data = req.body;
 
     const repository = Utils.getEntityManager(entity, resp);
+
     if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
+    if (axel.config.framework && axel.config.framework.validateDataWithJsonSchema) {
+      try {
+        const result = SchemaValidator.validate(data, req.params.endpoint);
+        console.log('result', result);
+
+        if (!result.isValid) {
+          console.warn('[SCHEMA VALIDATION ERROR]', req.params.endpoint, result, data);
+          resp.status(400).json({
+            message: 'data_validation_error',
+            errors: result.formatedErrors,
+          });
+          debug('formatting error', result);
+          return;
+        }
+      } catch (err) {
+        throw new Error('error_wrong_json_format_for_model_definition');
+      }
+    }
+
     repository
-      .findOne({
-        where: { [pKey]: id },
-        raw: false,
-      })
+      .findByPk(id)
       .catch((err) => {
+        axel.logger.warn(err);
         throw new ExtendedError({
           code: 404,
           errors: [
@@ -185,7 +216,7 @@ class AxelModelConfigController {
         if (result) {
           return repository.update(data, {
             where: {
-              [pKey]: id,
+              [primaryKey]: id,
             },
           });
         }
@@ -195,10 +226,7 @@ class AxelModelConfigController {
           errors: ['not_found'],
         });
       })
-      .then(() => repository.findOne({
-        where: { [pKey]: id },
-        raw: false,
-      }))
+      .then(() => repository.findByPk(id))
       .then((result) => {
         if (result) {
           return resp.status(200).json({
@@ -211,14 +239,12 @@ class AxelModelConfigController {
         });
       })
       .catch((err) => {
-        if (process.env.NODE_ENV === 'development') {
-          axel.logger.warn(err);
-        }
+        axel.logger.warn(err);
         if (err && err.name === 'SequelizeValidationError') {
           resp.status(400).json({
             // @ts-ignore
             errors: err.errors && err.errors.map(e => e.message),
-            message: 'sql_validation_error',
+            message: 'validation_error',
           });
           return false;
         }
@@ -238,17 +264,19 @@ class AxelModelConfigController {
     const id = req.params.id;
 
     const repository = Utils.getEntityManager(entity, resp);
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
     if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
+
     repository
       .destroy({
         where: {
-          [pKey]: id,
+          [primaryKey]: id,
         },
       })
       .catch((err) => {
+        axel.logger.warn(err);
         throw new ExtendedError({
           code: 400,
           errors: [err || 'delete_error'],
@@ -264,12 +292,10 @@ class AxelModelConfigController {
         });
       })
       .catch((err) => {
-        if (process.env.NODE_ENV === 'development') {
-          axel.logger.warn(err);
-        }
+        axel.logger.warn(err);
         Utils.errorCallback(err, resp);
       });
   }
 }
 
-module.exports = new AxelModelConfigController();
+module.exports = new AxelModelFieldConfigController();

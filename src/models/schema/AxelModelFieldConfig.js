@@ -1,9 +1,11 @@
 module.exports = {
   identity: 'axelModelFieldConfig',
   collectionName: 'axel-model-field-config',
-  url: '/axel-model-field-config', // url for front api
+  apiUrl: '/api/axel-admin/axel-model-field-config', // url for front api
   additionalProperties: false,
+  automaticApi: true,
   autoValidate: true,
+  displayField: 'name',
   schema: {
     $id: 'http://acme.com/schemas/axel-model-field-config.json',
     type: 'object',
@@ -22,9 +24,7 @@ module.exports = {
       },
       parentIdentity: {
         type: 'string',
-        model: 'axelModelConfig',
-        relation: '/api/automatic/axel-model-config',
-        foreignKey: 'identity',
+        relation: 'axelModelConfig',
         field: {
           required: true,
           readonly: true,
@@ -40,23 +40,39 @@ module.exports = {
       },
       type: {
         type: ['string', 'array'],
-        enum: ['string', 'number', 'array', 'object'],
         default: 'string',
-        field: {},
+        column: {
+          enum: ['string', 'number', 'array', 'object', 'integer']
+        },
+        field: {
+          options: ['string', 'number', 'array', 'object', 'string', 'object']
+        },
         items: [{ type: 'string' }],
       },
       description: {
-        type: 'string',
+        type: ['null', 'string'],
         default: 'string',
         field: {},
       },
       relation: {
-        type: 'string',
+        type: ['null', 'string'],
         description: 'The object that this property is related to',
         example: 'user',
       },
-      foreignKey: {
-        type: 'string',
+      relationKey: {
+        type: ['null', 'string'],
+        description:
+          'The field of the object that this property is related to (eg relation[foreignKey] == this property',
+        example: 'user',
+      },
+      relationLabel: {
+        type: ['null', 'string'],
+        description:
+          'The field of the object that this property is related to (eg relation[foreignKey] == this property',
+        example: 'user',
+      },
+      relationUrl: {
+        type: ['null', 'string'],
         description:
           'The field of the object that this property is related to (eg relation[foreignKey] == this property',
         example: 'user',
@@ -156,10 +172,10 @@ module.exports = {
             title: 'The title of the field',
           },
           type: {
-            type: 'string',
             description:
               'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
-            enum: ['image', 'string', 'number', 'date', 'datetime'],
+            type: 'string',
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation']
           },
           hidden: {
             type: 'string',
@@ -184,42 +200,13 @@ module.exports = {
         },
       },
     },
-    required: ['name', 'model'],
+    required: ['parentIdentity', 'name'],
   },
   admin: {
+    routerPath: 'axel-model-field-config',
     layout: {
       columns: [
-        {
-          legend: 'General',
-          cols: 4,
-          styleClasses: '',
-          groups: [
-            {
-              legend: 'board',
-              cols: 12,
-              fields: ['id', 'name', 'parentIdentity', 'title', 'description'],
-            },
-          ],
-        },
-        {
-          legend: 'Field',
-          cols: 4,
-          styleClasses: '',
-          fields: [
-            'field.title',
-            'field.type',
-            'field.inputType',
-            'field.required',
-            'field.readonly',
-            'field.disabled',
-          ],
-        },
-        {
-          legend: 'Column',
-          cols: 4,
-          styleClasses: '',
-          fields: ['column.type'],
-        },
+
       ],
     },
     actions: {
@@ -230,6 +217,7 @@ module.exports = {
     },
     options: {
       detailPageMode: 'page',
+      useCustomLayout: false
     },
   },
 };

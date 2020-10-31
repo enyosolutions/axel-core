@@ -30,6 +30,9 @@ class AxelAdmin {
     const axelModelConfig = loadSqlModel(`${__dirname}/../models/sequelize/AxelModelConfig.js`, axel.sqldb);
     const axelModelFieldConfig = loadSqlModel(`${__dirname}}/../models/sequelize/AxelModelFieldConfig.js`, axel.sqldb);
 
+    SchemaValidator.loadSchema(axelModelConfig);
+    SchemaValidator.loadSchema(axelModelFieldConfig);
+
     // console.log(m1)
     // console.log(m2)
 
@@ -39,8 +42,8 @@ class AxelAdmin {
     }
 
     Promise.all([
-      axelModelConfig.em.sync(),
-      axelModelFieldConfig.em.sync(),
+      axelModelConfig.em.sync({ alter: true }),
+      axelModelFieldConfig.em.sync({ alter: true }),
     ])
       .then(() => axelModelConfig.em
         .findAll())
@@ -119,11 +122,13 @@ class AxelAdmin {
   jsonSchemaToFrontModel(model) {
     return {
       identity: model.identity,
+      primaryKeyField: model.primaryKeyField || null,
+      displayField: model.displayField || null,
       name: _.get(model, 'admin.name', model.name) || model.identity,
       namePlural: _.get(model, 'admin.namePlural', ''),
       pageTitle: _.get(model, 'admin.pageTitle', ''),
-      apiUrl: _.get(model, 'apiUrl') || this.prefixUrl(model.url),
-      url: _.get(model, 'apiUrl') || this.prefixUrl(model.url),
+      apiUrl: _.get(model, 'apiUrl') || this.prefixUrl(model.identity),
+      url: _.get(model, 'apiUrl') || this.prefixUrl(model.identity),
       routerPath: _.get(model, 'admin.routerPath', ''),
       schema: model.schema, // todo fetch from the other config api
       options: _.get(model, 'admin.options', {}),
@@ -132,6 +137,7 @@ class AxelAdmin {
       listOptions: _.get(model, 'admin.listOptions', {}),
       kanbanOptions: _.get(model, 'admin.kanbanOptions', {}),
       tableOptions: _.get(model, 'admin.tableOptions', {}),
+      layout: _.get(model, 'admin.layout', {}),
     };
   }
 

@@ -21,7 +21,7 @@ const {
   };
 */
 
-const jsonFields = ['options', 'layout', 'formOptions', 'kanbanOptions', 'listOptions'];
+const jsonFields = ['options', 'actions', 'layout', 'formOptions', 'kanbanOptions', 'listOptions', 'layout'];
 const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {
@@ -62,6 +62,9 @@ const AxelModelConfig = {
         type: Sequelize.TEXT,
       },
       listOptions: {
+        type: Sequelize.TEXT,
+      },
+      layout: {
         type: Sequelize.TEXT,
       },
     },

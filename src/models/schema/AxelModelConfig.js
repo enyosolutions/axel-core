@@ -1,9 +1,11 @@
 module.exports = {
   identity: 'axelModelConfig',
   collectionName: 'axel-model-config',
-  url: '/axel-model-config', // url for front api
+  apiUrl: '/api/axel-admin/axel-model-config', // url for front api
+  automaticApi: false,
   additionalProperties: false,
   autoValidate: true,
+  displayField: 'name',
   schema: {
     $id: 'http://acme.com/schemas/axel-model-config.json',
     type: 'object',
@@ -83,7 +85,11 @@ module.exports = {
       },
       actions: {
         type: 'object',
-        column: { type: 'string' },
+        title: 'Possible actions',
+        column: {
+          type: 'string',
+          title: 'Possible actions',
+        },
         default: {},
         properties: {
           create: { type: 'boolean' },
@@ -130,13 +136,13 @@ module.exports = {
     name: null,
     namePlural: null,
     pageTitle: null,
-    routerPath: null,
+    routerPath: 'axel-model-config',
     actions: {
       create: false,
       edit: true,
       view: true,
       delete: true,
     },
-    options: { detailPageMode: 'page' },
+    options: { detailPageMode: 'sidebar' },
   },
 };

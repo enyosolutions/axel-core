@@ -50,6 +50,9 @@ const DocumentManager = {
           fieldSize: 250 * 1024 * 1024,
         },
       }).single('file')(req, res, (err) => {
+        if (err) {
+          return reject(err);
+        }
         const fileName = req.file.originalname;
         const fileNameParts = fileName.split('.');
 
@@ -223,7 +226,7 @@ const DocumentManager = {
       if (doc.indexOf(axel.config.appUrl) !== -1) {
         doc = doc.replace(axel.config.appUrl, '');
       }
-      fs.unlink(`${process.cwd()}/assets/${doc}`, err => {
+      fs.unlink(`${process.cwd()}/assets/${doc}`, (err) => {
         if (err) {
           if (err.code && err.code === 'ENOENT') {
             resolve(true);

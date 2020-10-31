@@ -11,6 +11,12 @@ const path = require('path');
 // type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
 const debug = d('axel:router');
 
+/**
+ * Models that will not be connected to the automatic api
+ */
+const forbiddenAutoConnectModels = ['axelModelConfig'];
+
+
 function connectRoute(app, source, _target) {
   let verb = 'all';
   let route;
@@ -24,8 +30,9 @@ function connectRoute(app, source, _target) {
   } else {
     target = _target;
     if (target.controller) {
-      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'
-      }`;
+      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller')
+        ? '' : 'Controller'
+        }`;
     }
   }
   if (sourceArray.length === 2) {
@@ -119,6 +126,7 @@ function connectRoute(app, source, _target) {
       axel.controllers[target.controller] = c;
       if (c[target.action]) {
         app[verb](route, routePolicies, c[target.action]);
+        debug('[ROUTING] connected', route, target.controller, target.action);
       } else {
         axel.logger.warn(
           '[ROUTING] missing Action for',
@@ -160,19 +168,17 @@ const loadEndpointMiddleware = (endpoint) => {
       res.status(403).json({ message: 'automatic_api_disabled' });
       return;
     }
-    if (!axel.config.framework.automaticApiBlacklistedModels) {
-      res.status(403).json({ message: 'cant_have_automatic_api_without_blacklist_configured' });
-      return;
-    }
-    if (axel.config.framework.automaticApiBlacklistedModels.indexOf(endpoint) > -1) {
-      res.status(403).json({ message: 'model_blacklisted_from_automatic_api' });
-      return;
-    }
 
     if (!axel.models[endpoint]) {
       axel.logger.trace(`[ROUTING]  MODEL ${endpoint} does not exists`);
       return;
     }
+
+    if (!axel.models[endpoint].automaticApi) {
+      res.status(403).json({ errors: ['model_blacklisted_from_automatic_api'], message: 'this api has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it' });
+      return;
+    }
+
     req.params.endpoint = endpoint;
     next();
   };
@@ -181,13 +187,23 @@ const loadEndpointMiddleware = (endpoint) => {
 function injectAxelAdminConfig() {
   debug('injectAxelAdminConfig');
   if (!axel.config.framework || !axel.config.framework.axelAdmin) {
+    debug('[AXEL ADMIN] axel admin is disabled. not mounting admin apis');
     return;
   }
-  axel.config.routes['GET /api/automatic/axel-models-config'] = '@axel/controllers/AxelModelConfigController.list';
-  axel.config.routes['GET /api/automatic/axel-models-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
-  axel.config.routes['PUT /api/automatic/axel-models-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
-  axel.config.routes['DELETE /api/automatic/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
-  axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.models';
+
+  axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
+  axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
+  axel.config.routes['PUT /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
+  axel.config.routes['DELETE /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
+
+
+  axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
+  axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
+  axel.config.routes['PUT /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.put';
+  axel.config.routes['DELETE /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.delete';
+
+  axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
+  axel.config.routes['GET /api/axel-admin/models/:modelId'] = '@axel/controllers/AxelAdminController.getModel';
 }
 
 function injectCrudRoutesConfig() {
@@ -226,11 +242,18 @@ function injectCrudRoutesConfig() {
   };
   Object.keys(axel.models).forEach((key) => {
     const model = axel.models[key];
-    let routeUrl = model.url || model.identity;
-    routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${routeUrl}`;
-    routeUrl = routeUrl.replace(/\/\//g, '/');
+    let routeUrl = model.apiUrl;
+
+    if (!routeUrl) {
+      routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${model.identity}`;
+      routeUrl = routeUrl.replace(/\/\//g, '/');
+    }
     axel.logger.trace('[ROUTING] WIRING', model.identity, routeUrl);
-    if (axel.config.framework.automaticApiBlacklistedModels.indexOf(key) === -1) {
+    debug('[ROUTING] WIRING', model.identity, routeUrl);
+    if (
+      axel.config.framework.automaticApi
+      && (axel.models[key].automaticApi || process.env.NODE_ENV !== 'production') // allow this in dev environment to help with debugging  where needed
+      && forbiddenAutoConnectModels.indexOf(key) === -1) {
       model.apiUrl = routeUrl;
       Object.keys(crudRoutes).forEach((route) => {
         const localRoute = route.replace('{routeUrl}', routeUrl);
@@ -240,10 +263,12 @@ function injectCrudRoutesConfig() {
             ...crudRoutes[route],
             policies: [loadEndpointMiddleware(model.identity)], // @todo cache the middleware for better perf
           };
+        } else {
+          debug('Route', localRoute, 'is already defined');
         }
       });
     } else {
-      axel.logger.trace(`[ROUTING] SKIPPING MODEL ${model.identity} because it's blacklisted`);
+      debug(`[ROUTING] SKIPPING MODEL ${model.identity} because it's blacklisted`);
     }
   });
 }
