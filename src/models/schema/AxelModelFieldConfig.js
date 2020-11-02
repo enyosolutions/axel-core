@@ -88,12 +88,14 @@ module.exports = {
           type: {
             type: 'string',
             title:
-              'The type of the field, comming from https://vue-generators.gitbook.io/vue-generators/fields',
+              'The type of the field',
+            description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields'
           },
           inputType: {
             type: 'string',
             title:
-              'The type of the field, when its a text input comming from https://vue-generators.gitbook.io/vue-generators/fields',
+              'The type of the input field',
+            description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields'
           },
           required: {
             type: 'boolean',
@@ -175,7 +177,7 @@ module.exports = {
             description:
               'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
             type: 'string',
-            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation']
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url']
           },
           hidden: {
             type: 'string',
