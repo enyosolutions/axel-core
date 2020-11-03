@@ -56,18 +56,18 @@ const Utils = {
       }
       if (err.name === 'SequelizeValidationError') {
         if (err.errors && Array.isArray(err.errors)) {
-          //@ts-ignore
-          err.errors = err.errors.map((e) => e.message);
+          // @ts-ignore
+          err.errors = err.errors.map(e => e.message);
         }
         err.message = 'validation_error';
       }
 
       if (err.name === 'SequelizeDatabasExtendedError') {
         if (err.errors && Array.isArray(err.errors)) {
-          //@ts-ignore
-          err.errors = err.errors.map((e) => e.sqlMessage);
+          // @ts-ignore
+          err.errors = err.errors.map(e => e.sqlMessage);
         } else {
-          //@ts-ignore
+          // @ts-ignore
           err.errors = [err.sqlMessage || err.message];
         }
         err.message = 'database_error';
@@ -75,24 +75,23 @@ const Utils = {
 
       if (err.message === 'Validation error') {
         if (err.errors && Array.isArray(err.errors)) {
-          //@ts-ignore
-          err.errors = err.errors.map((e) => `${e.path}_${e.validatorKey}`);
+          // @ts-ignore
+          err.errors = err.errors.map(e => `${e.path}_${e.validatorKey}`);
         }
-        err.message =
-          err.errors && err.errors[0]
-            ? _.isString(err.errors[0])
-              ? err.errors[0]
-              : err.errors[0].message
-            : 'sql_validation_error';
+        err.message = err.errors && err.errors[0]
+          ? _.isString(err.errors[0])
+            ? err.errors[0]
+            : err.errors[0].message
+          : 'sql_validation_error';
       }
       let errors;
       if (err.errors && Array.isArray(err.errors)) {
         if (axel.config.env === 'production') {
           errors =
-            //@ts-ignore
-            err.errors.map((e) => (_.isString(e) ? e : e.message));
+            // @ts-ignore
+            err.errors.map(e => (_.isString(e) ? e : e.message));
         } else {
-          //@ts-ignore
+          // @ts-ignore
           errors = err.errors.map(Utils.safeError);
         }
       } else {
@@ -100,7 +99,7 @@ const Utils = {
       }
       response.status(err.code && parseInt(err.code) < 504 ? parseInt(err.code) : 400).json({
         message: err.message || 'global_error',
-        errors: errors,
+        errors,
       });
     }
     /*
@@ -183,7 +182,7 @@ const Utils = {
       const filters = req.query.filters;
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (filters[i]) {
             query[i] = {
               [Op.like]: `${filters[i]}%`,
@@ -197,7 +196,7 @@ const Utils = {
       const filters = req.query._filters;
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (filters[i]) {
             query[i] = { [Op.like]: `${filters[i]}%` };
           }
@@ -249,7 +248,7 @@ const Utils = {
       if (req.query.sort && _.isObject(req.query.sort)) {
         const sort = req.query.sort;
         options.sort = {};
-        Object.keys(sort).forEach(i => {
+        Object.keys(sort).forEach((i) => {
           options.sort[i] = parseInt(sort[i]);
         });
       } else {
@@ -281,7 +280,7 @@ const Utils = {
     const offset = startPage * limit;
     const sortOptions = req.query.sort || options.sort;
     const order = _.toPairs(
-      sortOptions ? sortOptions : { [options.primaryKey || primaryKey]: 'DESC' },
+      sortOptions || { [options.primaryKey || primaryKey]: 'DESC' },
     );
     return {
       listOfValues: isListOfValues,
@@ -315,6 +314,7 @@ const Utils = {
     },
   ) {
     const Op = Sequelize.Op;
+    console.log(Op);
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
       throw new Error('search_params_injections_missing_model_name');
     }
@@ -331,7 +331,7 @@ const Utils = {
         fields = options.fields;
       }
       if (fields) {
-        fields.forEach(i => {
+        fields.forEach((i) => {
           query[Op.or].push({ [i]: { [Op.like]: `%${req.query.search}%` } });
         });
       }
@@ -348,7 +348,7 @@ const Utils = {
     if (!query) {
       return query;
     }
-    Object.keys(query).forEach(key => {
+    Object.keys(query).forEach((key) => {
       if (query[key] === undefined) {
         delete query[key];
       }
@@ -383,7 +383,7 @@ const Utils = {
   },
 
   objectTrim(item) {
-    Object.keys(item).forEach(key => {
+    Object.keys(item).forEach((key) => {
       if (_.isString(item[key])) {
         item[key] = item[key].trim();
       }
@@ -423,8 +423,8 @@ const Utils = {
 
     const output = item.get();
     /* eslint-disable no-underscore-dangle,no-unused-expressions */
-    item._options.includeNames &&
-      item._options.includeNames.forEach((inc) => {
+    item._options.includeNames
+      && item._options.includeNames.forEach((inc) => {
         output[inc] = Utils.getRawObject(item[inc]);
       });
     return output;
