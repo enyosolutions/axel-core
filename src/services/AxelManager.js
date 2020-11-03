@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
-const axel = require('../axel.js');
+const AxelAdmin = require('./AxelAdmin');
 
 const {
   generateController, generateModel, generateApi, generateRoute
@@ -238,6 +238,7 @@ class AxelManager {
             cb = req;
           }
           switch (req.method) {
+            default:
             case 'GET':
               break;
             case 'POST':
@@ -258,6 +259,25 @@ class AxelManager {
               }
           }
         },
+      );
+
+      /** Reset all the details saved in the data base for models. */
+      socket.on(
+        '/axel-manager/reset-models-config',
+        (req = { method: 'POST', query: {}, body: {} }, cb) => {
+          console.log('[AxelManager] insertModelsIntoDb');
+
+          if (typeof req === 'function') {
+            cb = req;
+          }
+          switch (req.method) {
+            case 'GET':
+            default:
+              break;
+            case 'POST':
+              AxelAdmin.insertModelsIntoDb().then(() => cb()).catch(cb);
+          }
+        }
       );
     });
   }

@@ -44,6 +44,9 @@ const AxelModelFieldConfig = {
       description: {
         type: Sequelize.STRING,
       },
+      foreignKey: {
+        type: Sequelize.STRING,
+      },
       relation: {
         type: Sequelize.STRING,
       },

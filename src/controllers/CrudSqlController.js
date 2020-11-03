@@ -294,7 +294,7 @@ class CrudSqlController {
     }
 
     repository
-      .findByPk(id)
+      .findOne({ where: { [primaryKey]: id }, raw: false })
       .catch((err) => {
         axel.logger.warn(err);
         throw new ExtendedError({
@@ -321,7 +321,7 @@ class CrudSqlController {
           errors: ['not_found'],
         });
       })
-      .then(() => repository.findByPk(id))
+      .then(() => repository.findOne({ where: { [primaryKey]: id }, raw: false }))
       .then((result) => {
         if (result) {
           return resp.status(200).json({

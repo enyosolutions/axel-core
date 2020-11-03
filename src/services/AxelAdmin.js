@@ -104,8 +104,22 @@ class AxelAdmin {
       ));
   }
 
-  createConfigTables() {
-    // create the tables, sequelize models and json schemas for the administration of models
+  insertModelsIntoDb() {
+    console.log('[AxelAdmin] insertModelsIntoDb');
+    return Promise.all([
+      axel.models.axelModelConfig.em.sync({ drop: true, force: true, alter: true }),
+      axel.models.axelModelFieldConfig.em.sync({ drop: true, force: true, alter: true })
+    ])
+      .then(() => {
+        const insertions = Object.keys(axel.models).map((modelKey) => {
+          const model = axel.models[modelKey];
+          return axel.models.axelModelConfig.em.create({ ...model, name: model.identity });
+        });
+        return Promise.all(insertions);
+      })
+      .then(() => Promise.all(
+        Object.entries(axel.models).map(([, entry]) => this.updateFieldsConfig(entry))
+      ));
   }
 
   connectToRouter() {
@@ -124,7 +138,7 @@ class AxelAdmin {
       identity: model.identity,
       primaryKeyField: model.primaryKeyField || null,
       displayField: model.displayField || null,
-      name: _.get(model, 'admin.name', model.name) || model.identity,
+      name: _.get(model, 'admin.name') || model.name || model.identity,
       namePlural: _.get(model, 'admin.namePlural', ''),
       pageTitle: _.get(model, 'admin.pageTitle', ''),
       apiUrl: _.get(model, 'apiUrl') || this.prefixUrl(model.identity),
