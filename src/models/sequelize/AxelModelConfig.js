@@ -41,7 +41,6 @@ const AxelModelConfig = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
       },
       pageTitle: {
         type: Sequelize.STRING,

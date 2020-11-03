@@ -113,7 +113,7 @@ class AxelAdmin {
       .then(() => {
         const insertions = Object.keys(axel.models).map((modelKey) => {
           const model = axel.models[modelKey];
-          return axel.models.axelModelConfig.em.create({ ...model, name: model.identity });
+          return axel.models.axelModelConfig.em.create({ ...model, identity: model.identity });
         });
         return Promise.all(insertions);
       })
@@ -160,6 +160,7 @@ class AxelAdmin {
       if (_.isArray(a) && b !== null && b !== undefined) {
         return a;
       }
+
       if (b === null && a) {
         return a;
       }
@@ -205,6 +206,7 @@ class AxelAdmin {
               this.jsonSchemaToFrontModel(model),
               mappedSavedConfig[axel.models[modelId].identity] || {},
             );
+            if (modelId === 'program') { console.warn('[AXEL ADMIN]', modelId, 'model.name', model.name, _.get(model, 'admin.name'), 'model.admin.name', model.admin && model.admin.name, 'merged', merged.name); }
             if (modelId === 'axelModelConfig' && _.isString(merged.options)) {
               try {
                 const result = SchemaValidator.validate(merged, 'axelModelConfig');
