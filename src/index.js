@@ -27,3 +27,4 @@ module.exports.DocumentManager = require('./services/DocumentManager.js');
 module.exports.AuthService = AuthService;
 module.exports.tokenDecryptMiddleware = AuthService.tokenDecryptMiddleware;
 module.exports.ExtendedError = require('./services/ExtendedError.js');
+module.exports.Utils = require('./services/Utils.js');

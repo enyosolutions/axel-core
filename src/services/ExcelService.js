@@ -3,7 +3,6 @@ const _ = require('lodash');
 const path = require('path');
 
 
-
 const ExcelService = {
   /**
    * [formatJson format a json by switching and filtering columns are required by the option]
@@ -17,7 +16,7 @@ const ExcelService = {
     return json.map((item) => {
       if (options.columns && Object.keys(options.columns).length) {
         const newObject = {};
-        Object.keys(item).forEach(key => {
+        Object.keys(item).forEach((key) => {
           let newKey = options.columns && options.columns[key];
           if (newKey || options.eager) {
             newKey = _.isString(newKey) ? newKey : key;

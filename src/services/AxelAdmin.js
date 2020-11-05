@@ -135,6 +135,7 @@ class AxelAdmin {
    */
   jsonSchemaToFrontModel(model) {
     return {
+      ...model.admin,
       identity: model.identity,
       primaryKeyField: model.primaryKeyField || null,
       displayField: model.displayField || null,
@@ -209,7 +210,7 @@ class AxelAdmin {
             if (modelId === 'program') { console.warn('[AXEL ADMIN]', modelId, 'model.name', model.name, _.get(model, 'admin.name'), 'model.admin.name', model.admin && model.admin.name, 'merged', merged.name); }
             if (modelId === 'axelModelConfig' && _.isString(merged.options)) {
               try {
-                const result = SchemaValidator.validate(merged, 'axelModelConfig');
+                const result = SchemaValidator.validate(merged, 'axelModelConfig', { strict: true });
                 if (!result.isValid) {
                   console.warn('[SCHEMA VALIDATION ERROR]', modelId, result, merged);
                 }
