@@ -151,7 +151,7 @@ const loadSqlModels = () => {
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
     debug('ORM : loading sql models');
-    console.log('ORM : loading sql models');
+    axel.logger.debug('ORM : loading sql models');
     if (!(axel.config && axel.config.sqldb && axel.config.sqldb.host)) {
       debug('ORM : ⚠️ no sql configured');
       return resolve();
@@ -271,13 +271,13 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
         let diff1 = _.difference(sqlProperties, jsonProperties);
         let diff2 = _.difference(jsonProperties, sqlProperties);
         if (diff1.length) {
-          console.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
+          axel.logger.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
           // diff1 = diff1.unshift('ORM ::', 'Fields present in sql but not in json');
-          console.warn(diff1);
+          axel.logger.warn(diff1);
         }
         if (diff2.length) {
           axel.logger.warn('ORM :: model : ', key, ' => Fields present in json but not in sql');
-          console.warn(diff2);
+          axel.logger.warn(diff2);
         }
       }
     });
