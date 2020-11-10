@@ -36,7 +36,7 @@ function loadConfig() {
     // eslint-disable-next-line
     const data = require(`${path.resolve(dir, e)}`);
     debug('merge', e);
-    config = _.merge(config, data.default || data);
+    config = _.merge(config, data || data);
   });
   return config;
 }

@@ -120,9 +120,6 @@ function connectRoute(app, source, _target) {
     : require(`${path.resolve(controllerRoute)}`);
   Promise.resolve(controller)
     .then((c) => {
-      if (c && c.default) {
-        c = c.default;
-      }
       axel.controllers[target.controller] = c;
       if (c[target.action]) {
         app[verb](route, routePolicies, c[target.action]);

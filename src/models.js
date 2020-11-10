@@ -12,7 +12,6 @@ const loadSchemaModel = (filePath) => {
   debug('Loading schema model', filePath);
   /* eslint-disable */
   let model = require(`${path.resolve(filePath)}`);
-  model = model.default || model;
   /* eslint-enable */
 
   if (!model.identity) {
@@ -39,7 +38,6 @@ const loadSqlModel = (filePath, sequelize) => {
     if (!model) {
       throw new Error('missing_model_' + filePath);
     }
-    model = model.default || model;
     /* eslint-enable */
     const tableName = model.entity
       && model.entity.options
@@ -162,7 +160,7 @@ const loadSqlModels = () => {
       // eslint-disable-next-line
       sequelize = require('./services/SqlDB.js');
 
-      axel.sqldb = sequelize.default || sequelize;
+      axel.sqldb = sequelize;
       if (axel.sqldb.then) {
         axel.sqldb = await axel.sqldb;
         sequelize = axel.sqldb;
@@ -273,11 +271,11 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
         if (diff1.length) {
           axel.logger.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
           // diff1 = diff1.unshift('ORM ::', 'Fields present in sql but not in json');
-          axel.logger.warn(diff1);
+          axel.logger.warn(diff1.join(' | '));
         }
         if (diff2.length) {
           axel.logger.warn('ORM :: model : ', key, ' => Fields present in json but not in sql');
-          axel.logger.warn(diff2);
+          axel.logger.warn(diff2.join(' | '));
         }
       }
     });
