@@ -4,10 +4,12 @@ module.exports = {
     "node": true
   },
   extends: [
-    "plugin:node/recommended-module",
+    "eslint:recommended",
+    "plugin:node/recommended",
     "airbnb-base",
     //    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
   ],
+  plugins: ["promise"],
   globals: {
     "axel": true,
   },
@@ -90,19 +92,17 @@ module.exports = {
     //   "version": ">=10.0.0",
     //   "ignores": []
     // }]
-    /*
     "promise/always-return": "warn",
     "promise/no-return-wrap": "warn",
     "promise/param-names": "warn",
     "promise/catch-or-return": "warn",
     "promise/no-native": "off",
     "promise/no-nesting": "warn",
+    "promise/no-return-in-finally": "warn",
     "promise/no-promise-in-callback": "warn",
     "promise/no-callback-in-promise": "warn",
     "promise/avoid-new": 0,
     "promise/no-new-statics": "warn",
-    "promise/no-return-in-finally": "warn",
     "promise/valid-params": "warn"
-    */
   },
 };

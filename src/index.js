@@ -28,3 +28,4 @@ module.exports.AuthService = AuthService;
 module.exports.tokenDecryptMiddleware = AuthService.tokenDecryptMiddleware;
 module.exports.ExtendedError = require('./services/ExtendedError.js');
 module.exports.Utils = require('./services/Utils.js');
+module.exports.ErrorUtils = require('./services/ErrorUtils.js');

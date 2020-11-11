@@ -133,6 +133,7 @@ function connectRoute(app, source, _target) {
           target.route,
         );
       }
+      return true;
     })
     .catch((err) => {
       axel.logger.warn('[ROUTING] Error while loading', controllerRoute, err.message, err);
@@ -146,7 +147,6 @@ function loadPolicies() {
 
   files
     .filter(file => _.endsWith(file, '.ts') || _.endsWith(file, '.js'))
-
     .forEach((file) => {
       // eslint-disable-next-line
       const func = require(`${folder}/${file}`);
@@ -167,12 +167,15 @@ const loadEndpointMiddleware = (endpoint) => {
     }
 
     if (!axel.models[endpoint]) {
-      axel.logger.trace(`[ROUTING]  MODEL ${endpoint} does not exists`);
+      axel.logger.trace(`[ROUTING] MODEL ${endpoint} does not exists`);
       return;
     }
 
     if (!axel.models[endpoint].automaticApi) {
-      res.status(403).json({ errors: ['model_blacklisted_from_automatic_api'], message: 'this api has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it' });
+      res.status(403).json({
+        errors: ['model_blacklisted_from_automatic_api'],
+        message: 'this api has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it'
+      });
       return;
     }
 
@@ -249,7 +252,8 @@ function injectCrudRoutesConfig() {
     debug('[ROUTING] WIRING', model.identity, routeUrl);
     if (
       axel.config.framework.automaticApi
-      && (axel.models[key].automaticApi || process.env.NODE_ENV !== 'production') // allow this in dev environment to help with debugging  where needed
+      && (axel.models[key].automaticApi || process.env.NODE_ENV !== 'production')
+      // allow this in dev environment to help with debugging  where needed
       && forbiddenAutoConnectModels.indexOf(key) === -1) {
       model.apiUrl = routeUrl;
       Object.keys(crudRoutes).forEach((route) => {
