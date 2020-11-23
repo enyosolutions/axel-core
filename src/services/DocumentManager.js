@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const mkdirp = require('mkdirp');
 const _ = require('lodash');
 const Utils = require('../services/Utils.js');
 
@@ -158,6 +159,7 @@ const DocumentManager = {
     filepath = filepath.replace(/\/\//g, '/');
     const base64 = image && image.base64;
     let fullPath = `${process.cwd()}/${options.publicPath}/${filepath}`;
+    mkdirp.sync(`${process.cwd()}/${options.publicPath}/${options.targetFolder || '/data/'}`);
     fullPath = fullPath.replace(/\/\//g, '/');
     fs.writeFileSync(fullPath,
       Buffer.from(base64, 'base64'));
@@ -182,7 +184,7 @@ const DocumentManager = {
       try {
         let fullPath = `${process.cwd()}/${options.publicPath}/${oldImage}`;
         fullPath = fullPath.replace(/\/\//g, '/');
-        fs.unlinkSync(`${fullPath} `);
+        fs.unlinkSync(`${fullPath}`);
         resolve(true);
       } catch (err) {
         console.warn(err.message, imageUrl);
