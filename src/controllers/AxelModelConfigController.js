@@ -6,6 +6,7 @@
 
 const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
 /*
@@ -71,7 +72,7 @@ class AxelModelConfigController {
         totalCount,
       }))
       .catch((err) => {
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -144,7 +145,7 @@ class AxelModelConfigController {
         });
       })
       .catch((err) => {
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -222,7 +223,7 @@ class AxelModelConfigController {
           });
           return false;
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -267,7 +268,7 @@ class AxelModelConfigController {
         if (process.env.NODE_ENV === 'development') {
           axel.logger.warn(err);
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 }

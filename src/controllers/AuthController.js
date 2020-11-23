@@ -14,6 +14,7 @@ const _ = require('lodash');
 const Utils = require('../services/Utils.js');
 const { ExtendedError } = require('../services/ExtendedError.js');
 const AuthService = require('../services/AuthService.js');
+const ErrorUtils = require('../services/ErrorUtils.js');
 
 const primaryKey = axel.config.framework.primaryKey;
 // const flatten =  require('flat');
@@ -44,7 +45,7 @@ module.exports = {
 
     axel.models.user.em
       .findByPk(req.user[primaryKey])
-      .then(user => {
+      .then((user) => {
         if (user) {
           if (!user.roles || typeof user.roles === 'string') {
             user.roles = ['USER'];
@@ -65,9 +66,9 @@ module.exports = {
           errors: ['no_user_found'],
         });
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, res);
+        ErrorUtils.errorCallback(err, res);
       });
   },
 
@@ -109,7 +110,7 @@ module.exports = {
       .findOne({
         where: { email },
       })
-      .then(u => {
+      .then((u) => {
         user = u;
         if (!user) {
           throw new ExtendedError({
@@ -139,7 +140,7 @@ module.exports = {
           },
         );
       })
-      .then(success => {
+      .then((success) => {
         if (!success) {
           return res.status(403).json({
             errors: ['error_forbidden'],
@@ -153,9 +154,9 @@ module.exports = {
         }
         return res.status(200).json({});
       })
-      .catch(err => {
+      .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, res);
+        ErrorUtils.errorCallback(err, res);
       });
   },
 
@@ -210,7 +211,7 @@ module.exports = {
           email,
         },
       })
-      .then(u => {
+      .then((u) => {
         user = u;
         if (!u) {
           throw new Error('error_unknown_email');
@@ -218,7 +219,7 @@ module.exports = {
 
         return AuthService.comparePassword(password, user);
       })
-      .then(valid => {
+      .then((valid) => {
         if (!valid) {
           throw new Error('error_invalid_credentials');
         }
@@ -258,18 +259,16 @@ module.exports = {
         });
       })
       // eslint-disable-next-line no-undef
-      .then(valid => {
+      .then((valid) => {
         if (!valid) {
           throw new Error('error_deactivated_user');
         }
       })
-      .then(() =>
-        res.status(200).json({
-          user,
-          token,
-        }),
-      )
-      .catch(errUpdate => {
+      .then(() => res.status(200).json({
+        user,
+        token,
+      }))
+      .catch((errUpdate) => {
         if (errUpdate.message) {
           return res.status(401).json({
             errors: [errUpdate.message],
@@ -279,7 +278,7 @@ module.exports = {
 
         axel.logger.warn(errUpdate);
 
-        Utils.errorCallback(errUpdate, res);
+        ErrorUtils.errorCallback(errUpdate, res);
       });
   },
 };

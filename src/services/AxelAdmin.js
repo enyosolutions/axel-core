@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { dirname } = require('path');
 const { fileURLToPath } = require('url');
-const Utils = require('./Utils.js');
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const axel = require('../axel.js');
 
 const SchemaValidator = require('./SchemaValidator.js');
@@ -226,7 +226,7 @@ class AxelAdmin {
           body: models,
         });
       })
-      .catch(err => Utils.errorCallback(err, res));
+      .catch(err => ErrorUtils.errorCallback(err, res));
   }
 }
 

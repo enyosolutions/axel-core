@@ -13,7 +13,9 @@
     "docs": "node_modules/.bin/jsdoc -c jsdoc.json",
     "lint": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}'",
     "lint:fix": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}' --fix --quiet",
-    "lint:watch": "nodemon --exec 'npm run lint:fix'"
+    "lint:watch": "nodemon --exec 'npm run lint:fix'",
+    "jest": "cross-env AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true jest -c jest.config.js",
+    "test": "cross-env AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true jest -c jest.config.js"
   },
   "engines": {
     "node": ">=10.0.0"
@@ -46,6 +48,8 @@
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "axel-cli": "^0.0.13",
+    "babel-jest": "^26.6.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "cross-env": "^7.0.2",
     "docdash": "^1.2.0",
     "eslint-config-airbnb": "^17.0.0",
@@ -54,8 +58,11 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.4",
+    "faker": "^5.1.0",
+    "jest": "^26.6.3",
     "jsdoc": "^3.6.6",
     "mysql2": "^2.2.5",
+    "regenerator-runtime": "^0.13.7",
     "sequelize": "^5.0.0"
   }
 }

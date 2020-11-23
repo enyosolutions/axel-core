@@ -39,10 +39,10 @@ const AxelModelFieldConfig = {
       },
 
       type: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING,
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
       },
       foreignKey: {
         type: Sequelize.STRING,

@@ -4,24 +4,24 @@ const stringify = require('json-stringify-safe');
 const Sequelize = require('sequelize');
 const _ = require('lodash');
 const { ExtendedError } = require('./ExtendedError');
-const Utils = require('./Utils');
 
 // declare const Sequelize;
 
 
 const ErrorUtils = {
-  sendError(code = 500, message, response) {
-    const err = Utils.stringToError(code, message, response);
-    if (response) {
-      Utils.errorCallback(err, response);
-    }
-    return err;
-  },
-
   stringToError(code = 500, message) {
     const err = new ExtendedError({ code, message });
     return err;
   },
+
+  sendError(code = 500, message, response) {
+    const err = ErrorUtils.stringToError(code, message, response);
+    if (response) {
+      ErrorUtils.errorCallback(err, response);
+    }
+    return err;
+  },
+
 
   safeError(err) {
     try {
@@ -81,7 +81,7 @@ const ErrorUtils = {
             err.errors.map(e => (_.isString(e) ? e : e.message));
         } else {
           // @ts-ignore
-          errors = err.errors.map(Utils.safeError);
+          errors = err.errors.map(ErrorUtils.safeError);
         }
       } else {
         errors = [err.message];

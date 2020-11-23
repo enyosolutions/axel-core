@@ -8,8 +8,9 @@
 const moment = require('moment');
 const _ = require('lodash');
 const Utils = require('../services/Utils');
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../index');
-const AuthService = require('../../axel/services/AuthService');
+const AuthService = require('../services/AuthService');
 const MailService = require('../services/MailService');
 
 const primaryKey = axel.models.user && axel.models.user.em && axel.models.user.em.primaryKeyField
@@ -183,7 +184,7 @@ module.exports = {
       })
       .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
-        Utils.errorCallback(err, res);
+        ErrorUtils.errorCallback(err, res);
       });
   },
 
@@ -463,7 +464,7 @@ module.exports = {
         });
       })
       .catch((err) => {
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -575,7 +576,7 @@ module.exports = {
         });
       })
       .catch((err) => {
-        Utils.errorCallback(err, res);
+        ErrorUtils.errorCallback(err, res);
       });
   },
 
@@ -632,7 +633,7 @@ module.exports = {
         });
       })
       .catch((err) => {
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 };

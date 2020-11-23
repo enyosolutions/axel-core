@@ -2,7 +2,6 @@ const _ = require('lodash');
 const nodemailer = require('nodemailer');
 
 
-
 const MailService = {
   defaultData: {
     title: '',
@@ -32,6 +31,8 @@ const MailService = {
     const data = _.merge({}, this.defaultData);
     data.title = 'Email address confirmation';
     data.user = user;
+    console.log('sendEmailConfirmation', data);
+
     return axel.renderView('emails/account-reset', data, (err, html) => {
       if (err) return axel.logger.warn(err);
       MailService.sendMail(user.email, data.title, html);
@@ -90,9 +91,9 @@ const MailService = {
       };
       mailOptions = _.merge(mailOptions, options);
       try {
-        transporter.sendMail(mailOptions, (err) => {
+        transporter.sendMail(mailOptions, (err, info) => {
           if (err) {
-            console.log('[err] => ', err);
+            console.trace('[err] Email sending error => ', err, info);
             // axel.logger.warn('error while sending Email');
             axel.logger.warn('error while sending Email', err);
             axel.logger.warn('***');
@@ -103,7 +104,7 @@ const MailService = {
           } else {
             axel.logger.verbose('** ');
             axel.logger.verbose('** Email sent');
-            axel.logger.verbose('** ');
+            axel.logger.verbose('** ', info);
             mailOptions.status = 'sent';
             resolve(true);
           }

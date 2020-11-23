@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 /**
  * Api/CrudController
  *
@@ -7,6 +7,7 @@
  */
 
 const Utils = require('../services/Utils');
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const ExtendedError = require('../services/ExtendedError');
 
 const primaryKey = axel.config.framework.primaryKey;
@@ -36,7 +37,7 @@ module.exports = {
 
     collection
       .count()
-      .then(data => {
+      .then((data) => {
         // TOTAL
         output.total = data;
 
@@ -48,7 +49,7 @@ module.exports = {
           },
         });
       })
-      .then(data => {
+      .then((data) => {
         output.month = data;
 
         // THIS WEEK
@@ -59,7 +60,7 @@ module.exports = {
           },
         });
       })
-      .then(data => {
+      .then((data) => {
         output.week = data;
 
         // TODAY
@@ -70,16 +71,16 @@ module.exports = {
           },
         });
       })
-      .then(data => {
+      .then((data) => {
         output.today = data;
 
         resp.status(200).json({
           body: output,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -122,7 +123,7 @@ module.exports = {
 
     collection
       .find(query, options)
-      .then(data => {
+      .then((data) => {
         if (data && data.length) {
           output = data;
           if (listOfValues) {
@@ -135,7 +136,7 @@ module.exports = {
         }
         return 0;
       })
-      .then(totalCount => {
+      .then((totalCount) => {
         resp.status(200).json({
           body: output,
           page: startPage,
@@ -143,8 +144,8 @@ module.exports = {
           totalCount,
         });
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -160,7 +161,7 @@ module.exports = {
       .findOne({
         [primaryKey]: App.mongodb.id(id),
       })
-      .then(doc => {
+      .then((doc) => {
         if (doc) {
           if (listOfValues) {
             return resp.status(200).json({
@@ -181,8 +182,8 @@ module.exports = {
           });
         }
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -214,8 +215,8 @@ module.exports = {
           entity: endpoint,
         });
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -242,14 +243,14 @@ module.exports = {
       .findOne({
         [primaryKey]: id,
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err);
         resp.status(404).json({
           errors: [err.message],
           message: 'not_found',
         });
       })
-      .then(o => {
+      .then((o) => {
         original = o;
         if (original) {
           updatee = _.merge(req.body, {
@@ -265,7 +266,7 @@ module.exports = {
           );
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err);
         resp.status(err.code < 504 ? err.code : 500).json({
           errors: err.errors || [err.message],
@@ -273,7 +274,7 @@ module.exports = {
         });
         return false;
       })
-      .then(d => {
+      .then((d) => {
         if (!d) {
           return;
         }
@@ -298,8 +299,8 @@ module.exports = {
           entity: endpoint,
         });
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -316,7 +317,7 @@ module.exports = {
       .findOne({
         [primaryKey]: req.param('id'),
       })
-      .then(o => {
+      .then((o) => {
         if (o) {
           const original = o;
           const data = _.merge({}, original, req.body, {
@@ -330,7 +331,7 @@ module.exports = {
               },
               data,
             )
-            .then(d => {
+            .then((d) => {
               resp.status(200).json({
                 body: d,
               });
@@ -349,7 +350,7 @@ module.exports = {
                 entity: endpoint,
               });
             })
-            .catch(err => {
+            .catch((err) => {
               App.logger.warn(err);
             });
         } else {
@@ -359,8 +360,8 @@ module.exports = {
           });
         }
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -385,7 +386,7 @@ module.exports = {
       .remove({
         [primaryKey]: id,
       })
-      .then(data => {
+      .then((data) => {
         resp.status(200).json({
           status: 'OK',
         });
@@ -410,8 +411,8 @@ module.exports = {
           },
         );
       })
-      .catch(err => {
-        Utils.errorCallback(err, resp);
+      .catch((err) => {
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -428,7 +429,7 @@ module.exports = {
     DocumentManager.httpUpload(req, {
       path: 'updloads/excel',
     })
-      .then(document => {
+      .then((document) => {
         if (document && document.length > 0) {
           doc = document;
           return ExcelService.parse(doc[0].fd, {
@@ -443,18 +444,18 @@ module.exports = {
           errors: ['no_file_uploaded'],
         });
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(400).json({
           errors: [err.message || 'update_error'],
           message: err.message || 'update_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           // return repository.bulkCreate(result);
           if (result) {
-            result.forEach(item => {
+            result.forEach((item) => {
               if (!item.code || !item.designation || !item.family || !item.numberOfPoints) {
                 improperData.push(item);
               } else {
@@ -472,26 +473,26 @@ module.exports = {
           }
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(400).json({
           errors: [err.message || 'create_error'],
           message: err.message || 'create_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           return DocumentManager.delete(doc[0].fd);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(500).json({
           errors: [err.message || 'delete_error'],
           message: err.message || 'delete_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           resp.json({
             body: 'ok',
@@ -500,9 +501,9 @@ module.exports = {
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 
@@ -519,7 +520,7 @@ module.exports = {
     DocumentManager.httpUpload(req, {
       path: 'updloads/excel',
     })
-      .then(document => {
+      .then((document) => {
         if (document && document.length > 0) {
           doc = document;
           return ExcelService.parse(doc[0].fd, {
@@ -534,18 +535,18 @@ module.exports = {
           errors: ['no_file_uploaded'],
         });
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(400).json({
           errors: [err.message || 'update_error'],
           message: err.message || 'update_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           // return repository.bulkCreate(result);
           if (result) {
-            result.forEach(item => {
+            result.forEach((item) => {
               if (!item.code || !item.designation || !item.family || !item.numberOfPoints) {
                 improperData.push(item);
               } else {
@@ -563,26 +564,26 @@ module.exports = {
           }
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(400).json({
           errors: [err.message || 'create_error'],
           message: err.message || 'create_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           return DocumentManager.delete(doc[0].fd);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
         resp.status(500).json({
           errors: [err.message || 'delete_error'],
           message: err.message || 'delete_error',
         });
       })
-      .then(result => {
+      .then((result) => {
         if (result) {
           resp.json({
             body: 'ok',
@@ -591,9 +592,9 @@ module.exports = {
           });
         }
       })
-      .catch(err => {
+      .catch((err) => {
         App.logger.warn(err && err.message ? err.message : err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   },
 };

@@ -6,6 +6,7 @@
  */
 const d = require('debug');
 const Utils = require('../services/Utils.js');
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js');
 const DocumentManager = require('../services/DocumentManager.js');
 const ExcelService = require('../services/ExcelService.js');
@@ -91,7 +92,7 @@ class CrudSqlController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -148,7 +149,7 @@ class CrudSqlController {
       }))
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -209,7 +210,7 @@ class CrudSqlController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -250,7 +251,7 @@ class CrudSqlController {
           });
           return false;
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -343,7 +344,7 @@ class CrudSqlController {
           });
           return false;
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -391,7 +392,7 @@ class CrudSqlController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -444,7 +445,7 @@ class CrudSqlController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -491,7 +492,7 @@ class CrudSqlController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -570,7 +571,7 @@ class CrudSqlController {
       }))
       .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 }

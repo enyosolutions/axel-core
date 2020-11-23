@@ -5,10 +5,10 @@ class ExtendedError extends Error {
    * @type string
    * @memberof ExtendedError
    */
-  name;
-  code;
-  message;
-  errors;
+  name = '';
+  code = 0;
+  message = '';
+  errors = [];
   constructor(message) {
     super('');
     if (!message || _.isString(message)) {

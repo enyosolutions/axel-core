@@ -4,6 +4,7 @@ const stringify = require('json-stringify-safe');
 const Sequelize = require('sequelize');
 const _ = require('lodash');
 const { ExtendedError } = require('./ExtendedError.js');
+const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
 
 // declare const Sequelize;
 
@@ -34,89 +35,11 @@ const Utils = {
       .trim();
   },
 
-  safeError(err) {
-    try {
-      err = JSON.parse(stringify(err));
-      return err;
-    } catch (e) {
-      err = {
-        name: err.name,
-        message: err.message,
-        code: err ? err.code : undefined,
-      };
-      return err;
-    }
-  },
+  safeError: ErrorUtils.safeError,
+  sendError: ErrorUtils.sendError,
+  stringToError: ErrorUtils.stringToError,
+  errorCallback: ErrorUtils.errorCallback,
 
-  errorCallback(err, response) {
-    if (!response.headersSent) {
-      if (!err) {
-        axel.logger.error(err);
-        throw new Error('error_handler_called_without_error_arg');
-      }
-      if (err.name === 'SequelizeValidationError') {
-        if (err.errors && Array.isArray(err.errors)) {
-          // @ts-ignore
-          err.errors = err.errors.map(e => e.message);
-        }
-        err.message = 'validation_error';
-      }
-
-      if (err.name === 'SequelizeDatabasExtendedError') {
-        if (err.errors && Array.isArray(err.errors)) {
-          // @ts-ignore
-          err.errors = err.errors.map(e => e.sqlMessage);
-        } else {
-          // @ts-ignore
-          err.errors = [err.sqlMessage || err.message];
-        }
-        err.message = 'database_error';
-      }
-
-      if (err.message === 'Validation error') {
-        if (err.errors && Array.isArray(err.errors)) {
-          // @ts-ignore
-          err.errors = err.errors.map(e => `${e.path}_${e.validatorKey}`);
-        }
-        err.message = err.errors && err.errors[0]
-          ? _.isString(err.errors[0])
-            ? err.errors[0]
-            : err.errors[0].message
-          : 'sql_validation_error';
-      }
-      let errors;
-      if (err.errors && Array.isArray(err.errors)) {
-        if (axel.config.env === 'production') {
-          errors =
-            // @ts-ignore
-            err.errors.map(e => (_.isString(e) ? e : e.message));
-        } else {
-          // @ts-ignore
-          errors = err.errors.map(Utils.safeError);
-        }
-      } else {
-        errors = [err.message];
-      }
-      response.status(err.code && parseInt(err.code) < 504 ? parseInt(err.code) : 400).json({
-        message: err.message || 'global_error',
-        errors,
-      });
-    }
-    /*
-    if (Raven.getContext()) {
-      Raven.mergeContext({
-        user: axel.session && axel.session.token,
-        app: axel.config && axel.config.env,
-        env: axel.config && axel.config.env,
-        tags: {
-          app: axel.config && axel.config.env,
-          env: axel.config && axel.config.env,
-        },
-      });
-    }
-    Raven.captureException(err);
-    */
-  },
 
   /**
    * check that the id has the correct mongoID format
@@ -314,7 +237,6 @@ const Utils = {
     },
   ) {
     const Op = Sequelize.Op;
-    console.log(Op);
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
       throw new Error('search_params_injections_missing_model_name');
     }

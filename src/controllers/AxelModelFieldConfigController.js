@@ -6,6 +6,7 @@
 
 const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
+const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 /*
@@ -72,7 +73,7 @@ class AxelModelFieldConfigController {
       }))
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -129,7 +130,7 @@ class AxelModelFieldConfigController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -157,7 +158,7 @@ class AxelModelFieldConfigController {
           });
           return false;
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -248,7 +249,7 @@ class AxelModelFieldConfigController {
           });
           return false;
         }
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 
@@ -293,7 +294,7 @@ class AxelModelFieldConfigController {
       })
       .catch((err) => {
         axel.logger.warn(err);
-        Utils.errorCallback(err, resp);
+        ErrorUtils.errorCallback(err, resp);
       });
   }
 }

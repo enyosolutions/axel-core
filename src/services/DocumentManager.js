@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const _ = require('lodash');
 const Utils = require('../services/Utils.js');
 
 let s3;
@@ -34,6 +35,7 @@ const getStorage = (pathSuffix, filePrefix) => {
 const DocumentManager = {
   storage: 'local',
   s3,
+
   httpUpload(
     req,
     res,
@@ -145,6 +147,50 @@ const DocumentManager = {
     return promise;
   },
 
+  base64Upload(image,
+    options = {}) {
+    options = _.merge({
+      targetFolder: '/data/workshop/', filename: '', includeHost: true, publicPath: '/public/'
+    }, options);
+    const filename = options.filename || `${Date.now()}-${_.random(100000)}-${Utils.md5(image.name)}.${image.name.split('.').pop()}`;
+    const host = axel.config.cdnUrl || axel.config.apiUrl;
+    let filepath = `${options.targetFolder || '/data/'}${filename}`;
+    filepath = filepath.replace(/\/\//g, '/');
+    const base64 = image && image.base64;
+    let fullPath = `${process.cwd()}/${options.publicPath}/${filepath}`;
+    fullPath = fullPath.replace(/\/\//g, '/');
+    fs.writeFileSync(fullPath,
+      Buffer.from(base64, 'base64'));
+
+    return { url: `${options.includeHost ? host : ''}${filepath}`, path: fullPath };
+  },
+
+  deleteFile(imageUrl, resp,
+    options = {}) {
+    options = _.merge({
+      targetFolder: '/data/workshop/', publicPath: '/public/'
+    }, options);
+    return new Promise((resolve, reject) => {
+      if (!imageUrl) {
+        return reject(new Error('missing_file_to_delete'));
+      }
+      const host = axel.config.cdnUrl || axel.config.apiUrl;
+      let oldImage = imageUrl.replace(host, '');
+      if (oldImage[0] && oldImage[0] === '/') {
+        oldImage = oldImage.substr(1);
+      }
+      try {
+        let fullPath = `${process.cwd()}/${options.publicPath}/${oldImage}`;
+        fullPath = fullPath.replace(/\/\//g, '/');
+        fs.unlinkSync(`${fullPath} `);
+        resolve(true);
+      } catch (err) {
+        console.warn(err.message, imageUrl);
+        reject(err);
+      }
+    });
+  },
+
   post(
     document,
     options = {
@@ -162,7 +208,7 @@ const DocumentManager = {
   //     return Promise.all(promises);
   //   }
   //   return new Promise((resolve, reject) => {
-  //     const newKey = `${Date.now()}-${doc.id}`;
+  //     const newKey = `${ Date.now() } -${ doc.id } `;
 
   //     const docCopy = _.clone(doc);
   //     delete docCopy.createdOn;
@@ -177,7 +223,7 @@ const DocumentManager = {
   //     if (doc.awsId) {
   //       const params = {
   //         Bucket: axel.config.aws.bucket,
-  //         CopySource: `${axel.config.aws.bucket}/${doc.path}`,
+  //         CopySource: `${ axel.config.aws.bucket } /${doc.path}`,
   //         Key: `${options.path}/${newKey}`,
   //         ACL: 'public-read'
   //       };
