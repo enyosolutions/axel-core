@@ -19,14 +19,15 @@ const issue = (payload, expiry = '7d') => sign(
 );
 
 // @fixme only id should be inserted in the token. The rest should fetched from the database / cache  with each request
-const generateFor = user => issue({
-  [primaryKey]: user[primaryKey],
-  username: user.username,
-  email: user.email,
-  firstname: user.firstname,
-  lastname: user.lastname,
-  roles: user.roles,
-});
+const generateToken = (user, fields = null) => issue(
+  fields && Array.isArray(fields) ? _.pick(user, fields)
+    : {
+      [primaryKey]: user[primaryKey],
+      username: user.username,
+      email: user.email,
+      roles: user.roles,
+    }
+);
 
 // Verifies token on a request
 function verify(token, callback) {
@@ -192,7 +193,8 @@ module.exports = {
   beforeCreate,
   beforeUpdate,
   comparePassword,
-  generateFor,
+  generateToken,
+  generateFor: generateToken, // deprecated
   hasAnyRole,
   hasRole,
   issue,
