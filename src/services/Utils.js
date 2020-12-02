@@ -74,6 +74,25 @@ const Utils = {
     return data;
   },
 
+
+  /**
+ * Format a string for an sql search, by appending % where needed
+ */
+  sqlFormatForSearchMode(str, mode) {
+    const Op = Sequelize.Op;
+    switch (mode) {
+      case 'exact':
+        return { [Op.eq]: str };
+      case 'full':
+      case 'wildcard':
+        return { [Op.like]: `%${str}%` };
+      default:
+      case 'start':
+        return { [Op.like]: `${str}%` };
+    }
+  },
+
+
   /**
    *
    */
@@ -97,7 +116,11 @@ const Utils = {
       tags: undefined,
       createdOn: undefined,
     },
+    options = {}
   ) {
+    if (req.query.options) {
+      options.searchMode = options.searchMode || (req.query.options && req.query.options.searchMode);
+    }
     const Op = Sequelize.Op;
     // filters from the ui. Ex table fields
     // @deprecated use _filters
@@ -107,9 +130,7 @@ const Utils = {
         .filter(f => filters[f])
         .forEach((i) => {
           if (filters[i]) {
-            query[i] = {
-              [Op.like]: `${filters[i]}%`,
-            };
+            query[i] = Utils.sqlFormatForSearchMode(filters[i], options.searchMode);
           }
         });
     }
