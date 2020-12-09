@@ -182,7 +182,8 @@ module.exports = {
           },
           hidden: {
             type: 'string',
-            title: 'If the form field is displayed',
+            description: 'If the form field is displayed',
+            title: 'Hide this column',
           },
         },
       },
@@ -207,6 +208,8 @@ module.exports = {
   },
   admin: {
     routerPath: 'axel-model-field-config',
+    name: 'Field config',
+    namePlural: 'Fields configs',
     layout: {
       columns: [
 

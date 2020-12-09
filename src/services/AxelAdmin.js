@@ -156,6 +156,23 @@ class AxelAdmin {
     };
   }
 
+  prepareNestedModel(nestedModelDefinition, models) {
+    if (nestedModelDefinition.extends && models[nestedModelDefinition.extends]) {
+      const sourceModel = models[nestedModelDefinition.extends];
+      if (!sourceModel) {
+        console.warn('[AxelAdmin] nested models extension failed for', nestedModelDefinition.config, 'missing definition', nestedModelDefinition.extends);
+        return;
+      }
+      return this.mergeModels(_.cloneDeep(sourceModel), _.cloneDeep(nestedModelDefinition.config));
+    }
+    return nestedModelDefinition;
+  }
+
+
+  prepareNestedModels(nestedModelArray = [], models) {
+    return nestedModelArray.map(model => this.prepareNestedModel(model, models));
+  }
+
   mergeModels(...args) {
     return _.mergeWith(args[0], args[1], (a, b) => {
       if (_.isArray(a) && b !== null && b !== undefined) {
@@ -207,7 +224,6 @@ class AxelAdmin {
               this.jsonSchemaToFrontModel(model),
               mappedSavedConfig[axel.models[modelId].identity] || {},
             );
-            if (modelId === 'program') { console.warn('[AXEL ADMIN]', modelId, 'model.name', model.name, _.get(model, 'admin.name'), 'model.admin.name', model.admin && model.admin.name, 'merged', merged.name); }
             if (modelId === 'axelModelConfig' && _.isString(merged.options)) {
               try {
                 const result = SchemaValidator.validate(merged, 'axelModelConfig', { strict: true });
@@ -218,10 +234,12 @@ class AxelAdmin {
                 throw new Error('error_wrong_json_format_for_model_definition');
               }
             }
-
+            mappedSavedConfig[axel.models[modelId].identity] = merged;
             return merged;
           });
-
+        models.forEach((m) => {
+          m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig);
+        });
         res.json({
           body: models,
         });

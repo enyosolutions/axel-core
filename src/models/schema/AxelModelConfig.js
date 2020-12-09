@@ -28,17 +28,24 @@ module.exports = {
         type: 'string',
         title: 'Custom title for this page',
       },
+      icon: {
+        type: 'string',
+      },
       name: {
         type: 'string',
         field: {
           required: true,
         },
       },
-      icon: {
-        type: 'string',
-      },
       namePlural: {
         type: 'string',
+      },
+      nestedLayoutMode: {
+        type: 'string',
+        enum: ['horizontal-tabs', 'vertical-tabs', 'list'],
+        default: 'horizontal-tabs',
+        title: 'Layout of the detail page',
+        description: 'How the awesomeform is layed out in regards to nested components'
       },
       options: {
         type: 'object',
@@ -76,11 +83,27 @@ module.exports = {
           edit: { type: 'boolean' },
           view: { type: 'boolean' },
           delete: { type: 'boolean' },
-          customInlineActions: { type: 'array' },
-          customTopActions: { type: 'array' },
-          customTabletopActions: { type: 'array' },
+
+          noActions: { type: 'boolean', default: false },
+          search: { type: 'boolean', default: true },
+          filter: { type: 'boolean', default: true },
+          export: { type: 'boolean', default: false },
+          import: { type: 'boolean', default: false },
+          dateFilter: { type: 'boolean', default: true },
+          refresh: { type: 'boolean', default: true },
+
+          automaticRefresh: { type: 'boolean', default: false },
+          advancedFiltering: { type: 'boolean', default: true },
+          columnsFilters: { type: 'boolean', default: true },
+          bulkDelete: { type: 'boolean', default: true },
+          bulkEdit: { type: 'boolean', default: true },
+          itemsPerRow: { type: 'boolean', default: true },
+          editLayout: { type: 'boolean', default: true },
         },
       },
+      customInlineActions: { type: 'array' },
+      customTopActions: { type: 'array' },
+      customTabletopActions: { type: 'array' },
       formOptions: {
         title: 'Item display and edit Options',
         description: 'Options on how the field dehaves when displayed in a form (view and edit)',
@@ -113,16 +136,17 @@ module.exports = {
     required: ['identity', 'name'],
   },
   admin: {
-    name: null,
-    namePlural: null,
-    pageTitle: null,
+    name: 'Model config',
+    namePlural: 'Models configs',
+    pageTitle: '',
     routerPath: 'axel-model-config',
+    displayMode: 'page',
     actions: {
       create: false,
       edit: true,
       view: true,
       delete: true,
     },
-    options: { detailPageMode: 'sidebar' },
+    options: { detailPageMode: 'page' },
   },
 };
