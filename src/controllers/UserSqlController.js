@@ -350,7 +350,7 @@ module.exports = {
     query = Utils.cleanSqlQuery(query);
 
     axel.models.user.em
-      .findAndCountAll({ where: query }, options)
+      .findAndCountAll({ where: query, raw: false, nested: true }, options)
       .then((result) => {
         let data;
         if (result && Array.isArray(result.rows)) {

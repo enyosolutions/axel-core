@@ -128,6 +128,8 @@ class CrudSqlController {
         order,
         limit,
         offset,
+        raw: false,
+        nested: true,
       })
       .then((result) => {
         items = result.rows;
