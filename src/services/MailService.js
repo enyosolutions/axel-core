@@ -31,8 +31,6 @@ const MailService = {
     const data = _.merge({}, this.defaultData);
     data.title = 'Email address confirmation';
     data.user = user;
-    console.log('sendEmailConfirmation', data);
-
     return axel.renderView('emails/account-reset', data, (err, html) => {
       if (err) return axel.logger.warn(err);
       MailService.sendMail(user.email, data.title, html);

@@ -265,7 +265,7 @@ class AxelManager {
       socket.on(
         '/axel-manager/reset-models-config',
         (req = { method: 'POST', query: {}, body: {} }, cb) => {
-          console.log('[AxelManager] insertModelsIntoDb');
+          console.info('[AxelManager] insertModelsIntoDb');
 
           if (typeof req === 'function') {
             cb = req;

@@ -20,6 +20,9 @@
   "engines": {
     "node": ">=10.0.0"
   },
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",

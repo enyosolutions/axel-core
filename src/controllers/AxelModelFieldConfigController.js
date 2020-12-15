@@ -52,13 +52,19 @@ class AxelModelFieldConfigController {
         order,
         limit,
         offset,
+        raw: false
       })
       .then((result) => {
         items = result.rows;
         if (listOfValues) {
           items = items.map(item => ({
             [primaryKey]: item[primaryKey],
-            label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`,
+            label: item.identity,
+            name: item.name,
+          }));
+        } else {
+          items = items.map(item => ({
+            id: item.id, parentIdentity: item.parentIdentity, name: item.name, ...item.config
           }));
         }
         return result.count || 0;
@@ -108,12 +114,12 @@ class AxelModelFieldConfigController {
       .then((item) => {
         if (item) {
           item = item.get();
-          if (listOfValues) {
-            item = {
-              [primaryKey]: item[primaryKey],
-              label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`,
-            };
-          }
+          item = {
+            id: item.id,
+            parentIdentity: item.parentIdentity,
+            name: item.name,
+            ...item.config
+          };
           return resp.status(200).json({
             body: item,
           });
@@ -146,7 +152,12 @@ class AxelModelFieldConfigController {
     repository
       .create(data)
       .then(result => resp.status(200).json({
-        body: result,
+        body: {
+          id: result.id,
+          parentIdentity: result.parentIdentity,
+          name: result.name,
+          ...result.config
+        },
       }))
       .catch((err) => {
         axel.logger.warn(err);
@@ -183,8 +194,6 @@ class AxelModelFieldConfigController {
     if (axel.config.framework && axel.config.framework.validateDataWithJsonSchema) {
       try {
         const result = SchemaValidator.validate(data, req.params.endpoint);
-        console.log('result', result);
-
         if (!result.isValid) {
           console.warn('[SCHEMA VALIDATION ERROR]', req.params.endpoint, result, data);
           resp.status(400).json({
@@ -215,7 +224,7 @@ class AxelModelFieldConfigController {
       })
       .then((result) => {
         if (result) {
-          return repository.update(data, {
+          return repository.update({ config: data }, {
             where: {
               [primaryKey]: id,
             },
@@ -231,7 +240,12 @@ class AxelModelFieldConfigController {
       .then((result) => {
         if (result) {
           return resp.status(200).json({
-            body: result,
+            body: {
+              id: result.id,
+              parentIdentity: result.parentIdentity,
+              name: result.name,
+              ...result.config
+            },
           });
         }
         return resp.status(404).json({

@@ -14,6 +14,8 @@ const {
   bulkJsonParseHook,
 } = require('../../services/SequelizeHooks.js');
 
+const jsonFields = ['config'];
+
 const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
   entity: {
@@ -33,38 +35,10 @@ const AxelModelFieldConfig = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      config: {
+        type: Sequelize.TEXT,
+      },
 
-      title: {
-        type: Sequelize.STRING,
-      },
-
-      type: {
-        type: Sequelize.STRING,
-      },
-      description: {
-        type: Sequelize.TEXT,
-      },
-      foreignKey: {
-        type: Sequelize.STRING,
-      },
-      relation: {
-        type: Sequelize.STRING,
-      },
-      relationKey: {
-        type: Sequelize.STRING,
-      },
-      relationLabel: {
-        type: Sequelize.STRING,
-      },
-      relationUrl: {
-        type: Sequelize.STRING,
-      },
-      column: {
-        type: Sequelize.TEXT,
-      },
-      field: {
-        type: Sequelize.TEXT,
-      },
     },
     options: {
       // disable the modification of tablenames; By default, sequelize will automatically
@@ -81,11 +55,11 @@ const AxelModelFieldConfig = {
       updatedAt: 'lastModifiedOn',
       // Hooks. see => http://docs.sequelizejs.com/manual/tutorial/hooks.html
       hooks: {
-        afterSave: jsonParseHook(['type', 'column', 'field'], {}),
-        beforeValidate: jsonStringifyHook(['type', 'column', 'field'], {}),
-        afterFind: bulkJsonParseHook(['type', 'column', 'field'], {}),
-        beforeBulkCreate: bulkJsonStringifyHook(['type', 'column', 'field'], {}),
-        beforeBulkUpdate: bulkJsonStringifyHook(['type', 'column', 'field'], {}),
+        afterSave: jsonParseHook(jsonFields, {}),
+        beforeValidate: jsonStringifyHook(jsonFields, {}),
+        afterFind: bulkJsonParseHook(jsonFields, {}),
+        beforeBulkCreate: bulkJsonStringifyHook(jsonFields, {}),
+        beforeBulkUpdate: bulkJsonStringifyHook(jsonFields, {}),
       },
       indexes: [
         {

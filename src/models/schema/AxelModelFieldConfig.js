@@ -16,12 +16,6 @@ module.exports = {
         title: 'Config id', // serves for front form fields
         description: 'The id of this item', // serves for front form hint
       },
-      name: {
-        type: 'string',
-        field: {
-          required: true,
-        },
-      },
       parentIdentity: {
         type: 'string',
         relation: 'axelModelConfig',
@@ -29,7 +23,13 @@ module.exports = {
           required: true,
           readonly: true,
           disabled: true,
-          type: 'enyoSelect',
+          type: 'input',
+        },
+      },
+      name: {
+        type: 'string',
+        field: {
+          required: true,
         },
       },
       title: {
@@ -90,7 +90,18 @@ module.exports = {
             title:
               'The type of the field',
             description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields',
-            enum: ['string', 'input', 'number', 'list-of-value', 'list-of-data', 'EnyoSelect', 'dateTime', 'textArea', 'VSelect', 'date', 'datetime', 'time']
+            enum: ['string',
+              'input',
+              'number',
+              'list-of-value',
+              'list-of-data',
+              'EnyoSelect',
+              'dateTime',
+              'textArea',
+              'VSelect',
+              'date',
+              'datetime',
+              'time']
           },
           inputType: {
             type: 'string',

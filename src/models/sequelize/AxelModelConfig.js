@@ -21,7 +21,7 @@ const {
   };
 */
 
-const jsonFields = ['options', 'actions', 'layout', 'formOptions', 'kanbanOptions', 'listOptions', 'layout'];
+const jsonFields = ['config'];
 const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {
@@ -35,35 +35,9 @@ const AxelModelConfig = {
       identity: {
         type: Sequelize.STRING,
         allowNull: false,
+        primaryKey: true,
       },
-      namePlural: {
-        type: Sequelize.STRING,
-      },
-      name: {
-        type: Sequelize.STRING,
-      },
-      pageTitle: {
-        type: Sequelize.STRING,
-      },
-      icon: {
-        type: Sequelize.STRING,
-      },
-      options: {
-        type: Sequelize.TEXT,
-      },
-      actions: {
-        type: Sequelize.TEXT,
-      },
-      formOptions: {
-        type: Sequelize.TEXT,
-      },
-      kanbanOptions: {
-        type: Sequelize.TEXT,
-      },
-      listOptions: {
-        type: Sequelize.TEXT,
-      },
-      layout: {
+      config: {
         type: Sequelize.TEXT,
       },
     },

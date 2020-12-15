@@ -6,6 +6,8 @@ module.exports = {
   additionalProperties: false,
   autoValidate: true,
   displayField: 'name',
+  primaryKeyField: 'identity',
+  primaryKey: 'identity',
   schema: {
     $id: 'http://acme.com/schemas/axel-model-config.json',
     type: 'object',
@@ -24,6 +26,7 @@ module.exports = {
           readonly: true,
         },
       },
+
       pageTitle: {
         type: 'string',
         title: 'Custom title for this page',
@@ -105,35 +108,21 @@ module.exports = {
       customTopActions: { type: 'array' },
       customTabletopActions: { type: 'array' },
       formOptions: {
-        title: 'Item display and edit Options',
-        description: 'Options on how the field dehaves when displayed in a form (view and edit)',
+        title: 'Form Options',
+        description: 'Options for the create / edit / detail form',
         type: 'object',
+        default: {},
         properties: {
           layout: {
+            title: 'layout of the form',
             type: 'object',
-            default: {},
-            field: {},
+            default: null,
+            field: { type: 'JsonTextarea' },
           },
         },
       },
-      createdOn: {
-        type: ['string', 'object'],
-        format: 'date-time',
-        field: { readonly: true },
-        column: {
-          type: 'datetime',
-        },
-      },
-      lastModifiedOn: {
-        type: ['string', 'object'],
-        format: 'date-time',
-        field: { readonly: true },
-        column: {
-          type: 'datetime',
-        },
-      },
     },
-    required: ['identity', 'name'],
+    required: ['identity'],
   },
   admin: {
     name: 'Model config',

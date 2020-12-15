@@ -54,7 +54,7 @@ class AxelModelConfigController {
         items = result.rows;
         items = items.map(item => AxelAdmin.mergeModels(
           AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
-          item,
+          item.config,
         ));
         if (listOfValues) {
           items = items.map(item => ({
@@ -113,7 +113,7 @@ class AxelModelConfigController {
           if (axel.models[item.identity]) {
             item = AxelAdmin.mergeModels(
               AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
-              item,
+              item.config,
             );
           }
           if (listOfValues) {
@@ -184,7 +184,7 @@ class AxelModelConfigController {
       })
       .then((result) => {
         if (result) {
-          return repository.update(data, {
+          return repository.update({ config: data }, {
             where: {
               [pKey]: id,
             },
@@ -203,7 +203,7 @@ class AxelModelConfigController {
       .then((result) => {
         if (result) {
           return resp.status(200).json({
-            body: result,
+            body: result.config,
           });
         }
         return resp.status(404).json({
