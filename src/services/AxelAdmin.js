@@ -106,6 +106,9 @@ class AxelAdmin {
 
   insertModelsIntoDb() {
     axel.logger.debug('[AxelAdmin] insertModelsIntoDb');
+    if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
+      return Promise.resolve();
+    }
     return Promise.all([
       axel.models.axelModelConfig.em.sync({ drop: true, force: true, alter: true }),
       axel.models.axelModelFieldConfig.em.sync({ drop: true, force: true, alter: true })

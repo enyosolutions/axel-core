@@ -121,6 +121,26 @@ module.exports = {
           },
         },
       },
+      tableRowClickAction: {
+        type: 'string',
+        title: 'Row click action',
+        default: 'view',
+        enum: ['view', 'edit', 'none', 'delete'],
+        description: 'The action to execute when the user clicks on a row'
+      },
+      tableRowDoubleClickAction: {
+        type: 'string',
+        title: 'Row double click action',
+        default: 'none',
+        values: ['view', 'edit', 'none', 'delete'],
+        description: 'The action to execute when the user double clicks on a row'
+      },
+      tableDataLimit: {
+        type: 'number',
+        default: 1000,
+        description:
+          'Define the number of items to get from the api for the table. This prevents overloading the table with too much data'
+      }
     },
     required: ['identity'],
   },

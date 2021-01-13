@@ -79,6 +79,7 @@ const Utils = {
  * Format a string for an sql search, by appending % where needed
  */
   sqlFormatForSearchMode(str, mode) {
+    mode = mode || axel.config.framework.defaultApiSearchMode;
     const Op = Sequelize.Op;
     switch (mode) {
       case 'exact':

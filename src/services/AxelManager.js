@@ -48,16 +48,16 @@ class AxelManager {
                 return cb('missing_param_name');
               }
               try {
-                generateApi({
+                await generateApi({
                   name,
                   type,
                   force,
-                  fields: fields && fields.map(f => f.name),
+                  fields,
                   withSchema,
                 });
                 let count = withSchema ? 4 : 3;
                 // catching api signals in order for the file to generate properly
-                process.on('SIGUSR2', () => {
+                process.once('SIGUSR2', () => {
                   console.log('Captured interruption signal....', count--);
 
                   if (count <= 0) {
@@ -68,7 +68,8 @@ class AxelManager {
                 });
                 cb(null, { body: 'OK' });
               } catch (err) {
-                cb(err);
+                console.warn(err);
+                cb({ message: err.message });
               }
           }
         },
@@ -105,11 +106,15 @@ class AxelManager {
               if (!name) {
                 return cb('missing_param_name');
               }
-
-              generateModel({
-                name, types: [type], force, fields
-              });
-              cb(null, { body: 'OK' });
+              try {
+                generateModel({
+                  name, types: [type], force, fields
+                });
+                cb(null, { body: 'OK' });
+              } catch (err) {
+                console.warn(err);
+                cb(err.message || 'See terminal for more details');
+              }
           }
         },
       );

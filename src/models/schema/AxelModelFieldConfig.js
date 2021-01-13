@@ -139,7 +139,8 @@ module.exports = {
             title: 'the maximum number of characters',
           },
           fieldOptions: {
-            title: 'Options to be used on custom forms fields like multiselect, toggle etc',
+            title: 'Field options',
+            description: 'Options to be used on custom forms fields like multiselect, toggle etc',
             type: 'object',
             properties: {
               multiple: {
@@ -181,12 +182,26 @@ module.exports = {
                 description: 'example : cm | €',
                 example: 'username',
               },
+
+              validator: {
+                type: 'array',
+                description:
+                  'the validators used to validate fields https://vue-generators.gitbook.io/vue-generators/validation/built-in-validators',
+              },
+
+              displayOptions: {
+                title: 'Display options',
+                description: 'Options to be used specifically on view mode',
+                properties: {
+                  type: {
+                    type: 'string',
+                    title:
+                      'The type that links to the field option. In case of a dateTime selector, this would be date or datetime',
+                    enum: ['date', 'datetime'],
+                  }
+                }
+              },
             },
-          },
-          validator: {
-            type: 'array',
-            description:
-              'the validators used to validate fields https://vue-generators.gitbook.io/vue-generators/validation/built-in-validators',
           },
         },
       },
