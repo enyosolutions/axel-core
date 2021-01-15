@@ -7,6 +7,7 @@ const { readdirSync } = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const d = require('debug');
+const fs = require('fs');
 const l = require('./services/logger.js');
 
 const debug = d('axel:config');
@@ -67,14 +68,29 @@ const axel = {
     });
     return axel.initPromise;
   },
-  renderView: (relPath, ...args) => ejs.renderFile(
-    path.resolve(
-      process.cwd(),
-      'views',
-      relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`,
-    ),
-    ...args,
-  ),
+  // ejs.renderFile(
+  renderView: (relPath, data, callback) => new Promise((resolve, reject) => {
+    try {
+      axel.app.render(relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`, {
+        ...data,
+        // eslint-disable-next-line
+        __: data.__ || axel.app && axel.app.locals && axel.app.locals.i18n && axel.app.locals.i18n.__,
+        i18n: data.i18n || (axel.app.locals && axel.app.locals.i18n),
+        locale: data.locale || (axel.app.locals && axel.app.locals.i18n && axel.app.locals.i18n.getLocale())
+      }, (err, html) => {
+        if (err) {
+          reject(err);
+          callback(err);
+          return;
+        }
+        resolve(html);
+        callback(null, html);
+      });
+    } catch (err) {
+      callback(err);
+      reject(err);
+    }
+  })
 };
 
 global.axel = axel;
