@@ -211,15 +211,22 @@ class AxelAdmin {
 
   serveModels(req, res) {
     const mappedSavedConfig = {};
-    axel.models.axelModelConfig.em
-      .findAll({ logging: false })
+    let promise = Promise.resolve();
+    if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
+      promise = axel.models.axelModelConfig.em
+        .findAll({ logging: false });
+    }
+    promise
       .then((savedConfig) => {
-        savedConfig.forEach((config) => {
-          delete config.id;
-          delete config.createdOn;
-          delete config.lastModifiedOn;
-          mappedSavedConfig[config.identity] = config.config;
-        });
+        if (savedConfig && savedConfig.length) {
+          savedConfig.forEach((config) => {
+            delete config.id;
+            delete config.createdOn;
+            delete config.lastModifiedOn;
+            mappedSavedConfig[config.identity] = config.config;
+          });
+        }
+        return null;
       })
       .then(() => {
         const models = Object.keys(axel.models)

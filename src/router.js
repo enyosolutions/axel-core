@@ -174,7 +174,7 @@ const loadEndpointMiddleware = (endpoint) => {
     if (!axel.models[endpoint].automaticApi) {
       res.status(403).json({
         errors: ['model_blacklisted_from_automatic_api'],
-        message: 'this api has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it'
+        message: 'this api model has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it OR set the correct `apiUrl` in ' + `src/api/models/schema/${endpoint}`
       });
       return;
     }
@@ -186,24 +186,26 @@ const loadEndpointMiddleware = (endpoint) => {
 
 function injectAxelAdminConfig() {
   debug('injectAxelAdminConfig');
-  if (!axel.config.framework || !axel.config.framework.axelAdmin) {
+  if (!axel.config.framework || !axel.config.framework.axelAdmin || !axel.config.framework.axelAdmin.enabled) {
     debug('[AXEL ADMIN] axel admin is disabled. not mounting admin apis');
     return;
   }
 
-  axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
-  axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
-  axel.config.routes['PUT /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
-  axel.config.routes['DELETE /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
-
-
-  axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
-  axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
-  axel.config.routes['PUT /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.put';
-  axel.config.routes['DELETE /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.delete';
-
   axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
   axel.config.routes['GET /api/axel-admin/models/:modelId'] = '@axel/controllers/AxelAdminController.getModel';
+
+  if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
+    axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
+    axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
+    axel.config.routes['PUT /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
+    axel.config.routes['DELETE /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
+
+
+    axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
+    axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
+    axel.config.routes['PUT /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.put';
+    axel.config.routes['DELETE /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.delete';
+  }
 }
 
 function injectCrudRoutesConfig() {
