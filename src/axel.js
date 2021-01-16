@@ -95,6 +95,9 @@ const axel = {
 
 global.axel = axel;
 
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = axel.config.node_env || 'production';
+}
 axel.init();
 
 
