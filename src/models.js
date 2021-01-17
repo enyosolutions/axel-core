@@ -69,7 +69,21 @@ const loadSqlModel = (filePath, sequelize) => {
       },
       model.entity.options
     );
-
+    if (model.entity.attributes) {
+      Object.entries(model.entity.attributes).forEach(([, attr]) => {
+        if (typeof attr.type === 'string') {
+          const type = attr.type.replace('DataTypes.', '').replace('sequelize.', '').replace(/\(.+\)/, '');
+          const args = attr.type.match(/\(.+\)/);
+          const resolvedType = _.get(sequelize.DataTypes, type);
+          if (resolvedType) {
+            attr.type = resolvedType;
+            if (args && args[0]) {
+              attr.type = attr.type(...args[0].replace(/\(|\)/g, '').split(',').map(s => s.replace(/["']/g, '').trim()));
+            }
+          }
+        }
+      });
+    }
     const SqlModel = sequelize.define(
       _.upperFirst(_.camelCase(model.identity)),
       model.entity.attributes,

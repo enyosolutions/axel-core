@@ -255,7 +255,7 @@ class AxelAdmin {
         models.forEach((m) => {
           m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig);
         });
-        res.json({
+        return res.json({
           body: models,
         });
       })

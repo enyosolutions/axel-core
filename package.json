@@ -40,6 +40,7 @@
     "multer": "^1.4.2",
     "pino": "^6.7.0",
     "pino-pretty": "^4.3.0",
+    "serialize-javascript": "^5.0.1",
     "socket.io": "^2.3.0",
     "xlsx": "^0.16.8"
   },

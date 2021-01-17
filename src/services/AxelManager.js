@@ -1,27 +1,40 @@
-
+const fs = require('fs');
+const serialize = require('serialize-javascript');
 const _ = require('lodash');
 const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
 const AxelAdmin = require('./AxelAdmin');
 
 const {
-  generateController, generateModel, generateApi, generateRoute
+  generateController, generateModel, generateApi, generateRoute,
+  cliFieldToSequelizeField,
+  sequelizeFieldToSchemaField
 } = axelCli;
 
+const requireWithoutCache = (path) => {
+  const modelPath = require.resolve(path);
+  const cachedModel = require.cache[modelPath];
+  delete require.cache[modelPath];
+  // eslint-disable-next-line
+  const model = require(path);
+  delete require.cache[modelPath];
+  require.cache[modelPath] = cachedModel;
+  return model;
+};
 
 /**
- * Contains all the code necessary for bootstrapping the code manager page.
- *
- * @class AxelAdmin
- */
+   * Contains all the code necessary for bootstrapping the code manager page.
+   *
+   * @class AxelAdmin
+   */
 class AxelManager {
   /**
-   *
-   *
-   * @param {Application} app
-   * @returns {Promise<any>}
-   * @memberof AxelAdmin
-   */
+     *
+     *
+     * @param {Application} app
+     * @returns {Promise<any>}
+     * @memberof AxelAdmin
+     */
   init(app) {
     console.log('\n\n\n\n\n\n', 'WS for axelManager opening');
     const io = socketIO(app.locals.server);
@@ -63,6 +76,9 @@ class AxelManager {
                   if (count <= 0) {
                     setTimeout(() => {
                       process.kill(process.pid, 'SIGUSR2');
+                      if (count < -10) {
+                        process.exit();
+                      }
                     }, 1000);
                   }
                 });
@@ -89,12 +105,16 @@ class AxelManager {
               if (!axel.sqldb) {
                 return (cb('sqldb_not_ready'));
               }
-              // eslint-disable-next-line
+              // eslint-disable -next-line
               let tables = await axel.sqldb.query('show tables');
               tables = tables.map(t => Object.values(t)[0]);
+              const models = Object.entries(axel.models).map(([modelName, modelDef]) => ({
+                name: modelName,
+                fields: Object.keys(modelDef.entity.attributes).map(idx => ({ name: idx, ...modelDef.entity.attributes[idx], type: undefined }))
+              }));
               cb(null, {
                 body: {
-                  models: Object.keys(axel.models),
+                  models,
                   tables,
                 },
               });
@@ -109,6 +129,48 @@ class AxelManager {
               try {
                 generateModel({
                   name, types: [type], force, fields
+                });
+                cb(null, { body: 'OK' });
+              } catch (err) {
+                console.warn(err);
+                cb(err.message || 'See terminal for more details');
+              }
+          }
+        },
+      );
+      socket.on(
+        '/axel-manager/models/add-fields',
+        async (req = { method: 'PUT', query: {}, body: {} }, cb) => {
+          if (typeof req === 'function') {
+            cb = req;
+          }
+
+          switch (req.method) {
+            default:
+              cb('Incorrect method used');
+              break;
+            case 'POST':
+              const {
+                type, withSchema, fields
+              } = req.body;
+              if (!req.body || !req.body.model) {
+                return cb('Missing model name');
+              }
+              try {
+                const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.startCase(req.body.model)}.js`;
+                const model = requireWithoutCache(modelPath);
+                const schemaPath = `${process.cwd()}/src/api/models/schema/${_.startCase(req.body.model)}.js`;
+                const schema = requireWithoutCache(schemaPath);
+                fields.forEach((field) => {
+                  const sequelizeField = cliFieldToSequelizeField(field);
+                  model.entity.attributes[field.name] = {
+                    ...sequelizeField,
+                  };
+                  fs.writeFileSync(modelPath, `module.exports = ${serialize(model, { space: 2 })}`, { encoding: 'utf8' });
+                  if (withSchema) {
+                    schema.schema.properties[field.name] = sequelizeFieldToSchemaField(field.name, sequelizeField);
+                    fs.writeFileSync(schemaPath.replace('.js', '_updated.js'), `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`, { encoding: 'utf8' });
+                  }
                 });
                 cb(null, { body: 'OK' });
               } catch (err) {
