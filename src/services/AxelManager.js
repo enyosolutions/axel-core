@@ -3,6 +3,7 @@ const serialize = require('serialize-javascript');
 const _ = require('lodash');
 const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
+const { resolve } = require('path');
 const AxelAdmin = require('./AxelAdmin');
 
 const {
@@ -36,11 +37,17 @@ class AxelManager {
      * @memberof AxelAdmin
      */
   init(app) {
-    console.log('\n\n\n\n\n\n', 'WS for axelManager opening');
+    try {
+      fs.copyFileSync(resolve(__dirname, '../views/axel-manager.ejs'), `${process.cwd()}/views/axel-manager.ejs`);
+    } catch (err) {
+      console.warn('[AXELMANAGER][WARNING]', err.message);
+    }
+    console.log('\n\n\n\n\n\n');
+    console.log('[AXELMANAGER] WS is opening');
     const io = socketIO(app.locals.server);
     app.locals.io = io;
     io.on('connect', (socket) => {
-      console.log('WS client connected', socket.id);
+      console.log('[AXELMANAGER] WS client connected', socket.id);
       const counter = 0;
 
       socket.on(
@@ -71,7 +78,7 @@ class AxelManager {
                 let count = withSchema ? 4 : 3;
                 // catching api signals in order for the file to generate properly
                 process.once('SIGUSR2', () => {
-                  console.log('Captured interruption signal....', count--);
+                  console.log('[AXELMANAGER] Captured interruption signal....', count--);
 
                   if (count <= 0) {
                     setTimeout(() => {
@@ -84,7 +91,7 @@ class AxelManager {
                 });
                 cb(null, { body: 'OK' });
               } catch (err) {
-                console.warn(err);
+                console.warn('[AXELMANAGER]', err);
                 cb({ message: err.message });
               }
           }
@@ -121,18 +128,23 @@ class AxelManager {
               break;
             case 'POST':
               const {
-                name, type, force, fields
+                name, type, force, fields, withSchema
               } = req.body;
               if (!name) {
                 return cb('missing_param_name');
               }
               try {
+                let types = [type];
+                if (withSchema) {
+                  types.push('schema');
+                  types = _.uniq(types);
+                }
                 generateModel({
-                  name, types: [type], force, fields
+                  name, types, force, fields,
                 });
                 cb(null, { body: 'OK' });
               } catch (err) {
-                console.warn(err);
+                console.warn('[AXELMANAGER]', err);
                 cb(err.message || 'See terminal for more details');
               }
           }
@@ -157,9 +169,9 @@ class AxelManager {
                 return cb('Missing model name');
               }
               try {
-                const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.startCase(req.body.model)}.js`;
+                const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(req.body.model)}.js`;
                 const model = requireWithoutCache(modelPath);
-                const schemaPath = `${process.cwd()}/src/api/models/schema/${_.startCase(req.body.model)}.js`;
+                const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(req.body.model)}.js`;
                 const schema = requireWithoutCache(schemaPath);
                 fields.forEach((field) => {
                   const sequelizeField = cliFieldToSequelizeField(field);
@@ -169,12 +181,12 @@ class AxelManager {
                   fs.writeFileSync(modelPath, `module.exports = ${serialize(model, { space: 2 })}`, { encoding: 'utf8' });
                   if (withSchema) {
                     schema.schema.properties[field.name] = sequelizeFieldToSchemaField(field.name, sequelizeField);
-                    fs.writeFileSync(schemaPath.replace('.js', '_updated.js'), `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`, { encoding: 'utf8' });
+                    fs.writeFileSync(schemaPath.replace('.js'), `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`, { encoding: 'utf8' });
                   }
                 });
                 cb(null, { body: 'OK' });
               } catch (err) {
-                console.warn(err);
+                console.warn('[AXELMANAGER]', err);
                 cb(err.message || 'See terminal for more details');
               }
           }
@@ -200,7 +212,7 @@ class AxelManager {
               }
               const em = id === '$ALL' ? axel.sqldb : axel.models[id].em;
               if (!em) {
-                console.log(`error_while_accessing_${id}`, axel.models[id]);
+                console.log('[AXELMANAGER]', `error_while_accessing_${id}`, axel.models[id]);
                 return cb(`error_while_accessing_${id}`);
               }
               em.sync({ force, alter })
@@ -208,7 +220,7 @@ class AxelManager {
                   cb(null, { body: 'OK' });
                 })
                 .catch((err) => {
-                  console.warn(err);
+                  console.warn('[AXELMANAGER]', err);
                   cb(err.message || 'See terminal for more details');
                 });
               break;
@@ -332,8 +344,6 @@ class AxelManager {
       socket.on(
         '/axel-manager/reset-models-config',
         (req = { method: 'POST', query: {}, body: {} }, cb) => {
-          console.info('[AxelManager] insertModelsIntoDb');
-
           if (typeof req === 'function') {
             cb = req;
           }

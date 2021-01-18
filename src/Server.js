@@ -111,7 +111,6 @@ class Server {
         if (!process.env.NODE_ENV) {
           process.env.NODE_ENV = 'development';
         }
-        console.log('"process.env.NODE_ENV', process.env.NODE_ENV);
         if (this.afterFn) {
           this.afterFn(app);
         }
