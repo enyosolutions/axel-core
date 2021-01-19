@@ -57,18 +57,28 @@ function connectRoute(app, source, _target) {
     }
   }
 
+  let policyControllerName = '';
+  if (target.controller) {
+    const policyControllerNameParts = target.controller.split('/');
+    policyControllerName = policyControllerNameParts[policyControllerNameParts.length - 1];
+  }
+
   // Load policies from the policy files
-  if (axel.config.policies && axel.config.policies[target.controller]) {
-    if (axel.config.policies[target.controller][target.action]) {
-      if (!Array.isArray(axel.config.policies[target.controller][target.action])) {
-        throw new Error('Policy definition in config must be an array');
+  if (axel.config.policies) {
+    const controllerPolicies = axel.config.policies[target.controller] || axel.config.policies[policyControllerName];
+
+    if (controllerPolicies) {
+      if (controllerPolicies[target.action]) {
+        if (!Array.isArray(controllerPolicies[target.action])) {
+          throw new Error('Policy definition in config must be an array');
+        }
+        policies = policies.concat(controllerPolicies[target.action]);
+      } else if (controllerPolicies['*']) {
+        if (!Array.isArray(controllerPolicies['*'])) {
+          throw new Error('Policy definition in config must be an array');
+        }
+        policies = policies.concat(controllerPolicies['*']);
       }
-      policies = policies.concat(axel.config.policies[target.controller][target.action]);
-    } else if (axel.config.policies[target.controller]['*']) {
-      if (!Array.isArray(axel.config.policies[target.controller]['*'])) {
-        throw new Error('Policy definition in config must be an array');
-      }
-      policies = policies.concat(axel.config.policies[target.controller]['*']);
     }
   }
 
