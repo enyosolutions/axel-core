@@ -7,7 +7,7 @@ const express = require('express');
 const d = require('debug');
 const { fileURLToPath } = require('url');
 const path = require('path');
-
+const serialize = require('serialize-javascript');
 // type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
 const debug = d('axel:router');
 
@@ -68,11 +68,22 @@ function connectRoute(app, source, _target) {
     const controllerPolicies = axel.config.policies[target.controller] || axel.config.policies[policyControllerName];
 
     if (controllerPolicies) {
-      if (controllerPolicies[target.action]) {
-        if (!Array.isArray(controllerPolicies[target.action])) {
-          throw new Error('Policy definition in config must be an array');
+      const policy = controllerPolicies[target.action];
+      if (policy) {
+        const policyType = typeof (policy);
+        if (!['array', 'boolean', 'string'].includes(policyType) && !Array.isArray(policy)) {
+          console.log('policy', target.controller, policy);
+          throw new Error(`Policy definition in config must not be ${policyType} provided`);
         }
-        policies = policies.concat(controllerPolicies[target.action]);
+        if (Array.isArray(policy)) {
+          policies = policies.concat(policy);
+        } else if (policyType === 'string') {
+          policies.push(policy);
+        } else if (policyType === 'boolean') {
+          //
+        } else {
+          console.log('warging weird policy detected', policy, policyType);
+        }
       } else if (controllerPolicies['*']) {
         if (!Array.isArray(controllerPolicies['*'])) {
           throw new Error('Policy definition in config must be an array');
@@ -84,9 +95,18 @@ function connectRoute(app, source, _target) {
 
   // Finally load route policies.
   policies = policies.concat(target.policies || []);
-  policies = _.uniq(policies);
+  policies = _.uniq(policies).filter(p => (typeof p === 'function' || typeof p === 'string'));
   // turn  string named policies into functions
-  const routePolicies = policies.map(p => (typeof p === 'function' ? p : axel.policies[p]));
+  const routePolicies = [];
+  policies.forEach((p) => {
+    if (typeof p === 'function') {
+      routePolicies.push(p);
+    } else if (axel.policies[p]) {
+      routePolicies.push(axel.policies[p]);
+    } else {
+      axel.logger.warn('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
+    }
+  });
 
   // if route is mapped to a function link it directly
   if (typeof target === 'function') {
@@ -108,9 +128,6 @@ function connectRoute(app, source, _target) {
     return Promise.resolve();
   }
 
-  if (!target.controller) {
-    console.warn('target.controller', target);
-  }
 
   // Replace aliased routes
   const controllerRoute = target.controller[0] === '@'
@@ -132,8 +149,12 @@ function connectRoute(app, source, _target) {
     .then((c) => {
       axel.controllers[target.controller] = c;
       if (c[target.action]) {
-        app[verb](route, routePolicies, c[target.action]);
-        debug('[ROUTING] connected', route, target.controller, target.action);
+        try {
+          app[verb](route, routePolicies, c[target.action]);
+          debug('[ROUTING] connected', route, target.controller, target.action);
+        } catch (e) {
+          console.error('[ROUTING]', target.controller, target.action, e.message);
+        }
       } else {
         axel.logger.warn(
           '[ROUTING] missing Action for',
