@@ -6,7 +6,7 @@ const d = require('debug');
 const path = require('path');
 
 const debug = d('axel:models');
-
+const { DataTypes } = require('sequelize');
 
 const loadSchemaModel = (filePath) => {
   debug('Loading schema model', filePath);
@@ -74,7 +74,7 @@ const loadSqlModel = (filePath, sequelize) => {
         if (typeof attr.type === 'string') {
           const type = attr.type.replace('DataTypes.', '').replace('sequelize.', '').replace(/\(.+\)/, '');
           const args = attr.type.match(/\(.+\)/);
-          const resolvedType = _.get(sequelize.DataTypes, type);
+          const resolvedType = _.get(DataTypes, type);
           if (resolvedType) {
             attr.type = resolvedType;
             if (args && args[0]) {
