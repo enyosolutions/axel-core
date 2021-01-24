@@ -1227,7 +1227,6 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
              this.$socket.post('/axel-manager/models/add-fields', {body: {
               ...this.newApi, model: this.newApi.name, name: undefined}})
              .then(() => {
-               this.resetApiForm();
                return Swal2.fire({title: 'Model successfully created', icon: 'success', toast: true});
              })
              .catch(err => {

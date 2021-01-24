@@ -181,7 +181,7 @@ class AxelManager {
                   fs.writeFileSync(modelPath, `module.exports = ${serialize(model, { space: 2 })}`, { encoding: 'utf8' });
                   if (withSchema) {
                     schema.schema.properties[field.name] = sequelizeFieldToSchemaField(field.name, sequelizeField);
-                    fs.writeFileSync(schemaPath.replace('.js'), `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`, { encoding: 'utf8' });
+                    fs.writeFileSync(schemaPath, `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`, { encoding: 'utf8' });
                   }
                 });
                 cb(null, { body: 'OK' });
