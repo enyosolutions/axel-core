@@ -1,4 +1,7 @@
-<!-- AXEL ADMIN
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- AXEL ADMIN
 
 !!!!!
 Do not modify this file as your changes will be lost on the nest restart.
@@ -6,9 +9,6 @@ If you really need to edit this file, this we suggest you rename it to something
 !!!!!
 
 -->
-<!DOCTYPE html>
-<html>
-  <head>
     <title>Axel Management</title>
     <!-- needed for adaptive design -->
     <meta charset="utf-8" />
@@ -70,16 +70,11 @@ If you really need to edit this file, this we suggest you rename it to something
             <div class="sidebar-brand-icon rotate-n-15">
               <img
                 src="/axel-manager/img/axel.png"
-                style="
-                    width: 49px;
-                    background: white;
-                    border-radius: 50%;
-                    "
+                style="width: 49px; background: white; border-radius: 50%"
                 alt=""
               />
             </div>
-            <div class="sidebar-brand-text mx-3">Axel framework </div>
-
+            <div class="sidebar-brand-text mx-3">Axel framework</div>
           </a>
 
           <!-- Divider -->
@@ -97,9 +92,7 @@ If you really need to edit this file, this we suggest you rename it to something
           <hr class="sidebar-divider" />
 
           <!-- Heading -->
-          <div class="sidebar-heading">
-            Debug
-          </div>
+          <div class="sidebar-heading">Debug</div>
 
           <!-- Nav Item - Pages Collapse Menu -->
           <li class="nav-item">
@@ -122,7 +115,12 @@ If you really need to edit this file, this we suggest you rename it to something
             >
               <div class="bg-white py-2 collapse-inner show rounded">
                 <h6 class="collapse-header">Actions</h6>
-                <a class="collapse-item" href="#" @click="resetModelsAdminConfig()">Reset admin models</a>
+                <a
+                  class="collapse-item"
+                  href="#"
+                  @click="resetModelsAdminConfig()"
+                  >Reset admin models</a
+                >
                 <a class="collapse-item" href="cards.html">Cards</a>
               </div>
             </div>
@@ -132,9 +130,7 @@ If you really need to edit this file, this we suggest you rename it to something
           <hr class="sidebar-divider" />
 
           <!-- Heading -->
-          <div class="sidebar-heading">
-            Api
-          </div>
+          <div class="sidebar-heading">Api</div>
 
           <!-- Nav Item - Tables -->
           <li class="nav-item">
@@ -190,14 +186,21 @@ If you really need to edit this file, this we suggest you rename it to something
           <!-- Main Content -->
           <div id="content">
             <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+            <nav
+              class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+            >
               <!-- Sidebar Toggle (Topbar) -->
-              <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+              <button
+                id="sidebarToggleTop"
+                class="btn btn-link d-md-none rounded-circle mr-3"
+              >
                 <i class="fa fa-bars"></i>
               </button>
 
               <!-- Topbar Search -->
-              <h4 class="text-primary"><%= axel.config.app %> | <%= axel.config.env %></h4>
+              <h4 class="text-primary">
+                <%= axel.config.app %> | <%= axel.config.env %>
+              </h4>
               <form
                 class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
               >
@@ -266,7 +269,9 @@ If you really need to edit this file, this we suggest you rename it to something
                     role="button"
                   >
                     <i class="fas fa-bell fa-fw"></i>
-                    <span class="" v-if="!isConnected">Server is not connected</span>
+                    <span class="" v-if="!isConnected"
+                      >Server is not connected</span
+                    >
                     <span class="" v-if="isConnected">Server is connected</span>
                     <!-- Counter - Alerts -->
                   </a>
@@ -292,9 +297,7 @@ If you really need to edit this file, this we suggest you rename it to something
                     class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                     aria-labelledby="messagesDropdown"
                   >
-                    <h6 class="dropdown-header">
-                      Message Center
-                    </h6>
+                    <h6 class="dropdown-header">Message Center</h6>
                     <a class="dropdown-item d-flex align-items-center" href="#">
                       <div class="dropdown-list-image mr-3">
                         <img
@@ -306,10 +309,12 @@ If you really need to edit this file, this we suggest you rename it to something
                       </div>
                       <div class="font-weight-bold">
                         <div class="text-truncate">
-                          Hi there! I am wondering if you can help me with a problem I've been
-                          having.
+                          Hi there! I am wondering if you can help me with a
+                          problem I've been having.
                         </div>
-                        <div class="small text-gray-500">Emily Fowler · 58m</div>
+                        <div class="small text-gray-500">
+                          Emily Fowler · 58m
+                        </div>
                       </div>
                     </a>
                     <a class="dropdown-item d-flex align-items-center" href="#">
@@ -323,8 +328,8 @@ If you really need to edit this file, this we suggest you rename it to something
                       </div>
                       <div>
                         <div class="text-truncate">
-                          I have the photos that you ordered last month, how would you like them
-                          sent to you?
+                          I have the photos that you ordered last month, how
+                          would you like them sent to you?
                         </div>
                         <div class="small text-gray-500">Jae Chun · 1d</div>
                       </div>
@@ -340,10 +345,12 @@ If you really need to edit this file, this we suggest you rename it to something
                       </div>
                       <div>
                         <div class="text-truncate">
-                          Last month's report looks great, I am very happy with the progress so far,
-                          keep up the good work!
+                          Last month's report looks great, I am very happy with
+                          the progress so far, keep up the good work!
                         </div>
-                        <div class="small text-gray-500">Morgan Alvarez · 2d</div>
+                        <div class="small text-gray-500">
+                          Morgan Alvarez · 2d
+                        </div>
                       </div>
                     </a>
                     <a class="dropdown-item d-flex align-items-center" href="#">
@@ -357,15 +364,18 @@ If you really need to edit this file, this we suggest you rename it to something
                       </div>
                       <div>
                         <div class="text-truncate">
-                          Am I a good boy? The reason I ask is because someone told me that people
-                          say this to all dogs, even if they aren't good...
+                          Am I a good boy? The reason I ask is because someone
+                          told me that people say this to all dogs, even if they
+                          aren't good...
                         </div>
                         <div class="small text-gray-500">
                           Chicken the Dog · 2w
                         </div>
                       </div>
                     </a>
-                    <a class="dropdown-item text-center small text-gray-500" href="#"
+                    <a
+                      class="dropdown-item text-center small text-gray-500"
+                      href="#"
                       >Read More Messages</a
                     >
                   </div>
@@ -432,7 +442,9 @@ If you really need to edit this file, this we suggest you rename it to something
             <!-- Begin Page Content -->
             <div class="container-fluid">
               <!-- Page Heading -->
-              <div class="d-sm-flex align-items-center justify-content-between mb-4">
+              <div
+                class="d-sm-flex align-items-center justify-content-between mb-4"
+              >
                 <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
                 <a
                   href="#"
@@ -452,34 +464,45 @@ If you really need to edit this file, this we suggest you rename it to something
                       class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
                     >
                       <h6 class="m-0 font-weight-bold text-primary">
-                        Models <span class="badge badge-primary">{{ models.length }}</span>
+                        Models
+                        <span class="badge badge-primary">{{
+                          models.length
+                        }}</span>
                       </h6>
 
-                      <div class="btn-group float-right ">
+                      <div class="btn-group float-right">
                         <button class="btn btn-link mr-2" @click="listModels()">
                           <i class="fa fa-sync"></i>
                         </button>
-                        <button class="btn btn-link p-0"
-                        @click="resetApiForm(); modelEditModalMode = 'model'"
-                                          data-toggle="modal"
-                  data-target="#newApiModal"
+                        <button
+                          class="btn btn-link p-0"
+                          @click="resetApiForm(); modelEditModalMode = 'model'"
+                          data-toggle="modal"
+                          data-target="#newApiModal"
                         >
                           <i class="fa fa-plus"></i>
                         </button>
                       </div>
                     </div>
-                    <div class="card-body p-2 ">
-                      <table class="table table-bordered" id="dataTable" cellspacing="0">
+                    <div class="card-body p-2">
+                      <table
+                        class="table table-bordered"
+                        id="dataTable"
+                        cellspacing="0"
+                      >
                         <thead>
                           <tr>
                             <td>
                               <span class="text-secondary">ALL</span>
                               <div class="float-right">
-                                <button class="btn btn-primary badge" @click="syncModel('$ALL')">
+                                <button
+                                  class="btn btn-primary badge"
+                                  @click="syncModel('$ALL')"
+                                >
                                   sync
                                 </button>
                                 <button
-                                  class="btn btn-secondary badge "
+                                  class="btn btn-secondary badge"
                                   @click="syncModel('$ALL', {force: true, alter: true})"
                                 >
                                   Drop and sync
@@ -493,18 +516,23 @@ If you really need to edit this file, this we suggest you rename it to something
                             <td>
                               {{ model.name }}
                               <div class="float-right">
-                                <button class="btn btn-info badge" @click="resetApiForm(); modelEditModalMode = 'add-field'; newApi.name = model.name;newApi.type = 'sql'"
-                                data-toggle="modal"
-                                data-target="#newApiModal"
+                                <button
+                                  class="btn btn-info badge"
+                                  @click="resetApiForm(); modelEditModalMode = 'add-field'; newApi.name = model.name;newApi.type = 'sql'"
+                                  data-toggle="modal"
+                                  data-target="#newApiModal"
                                 >
                                   <i class="fa fa-edit"></i> Edit
                                 </button>
-                                <button class="btn btn-primary badge" @click="syncModel(model.name)">
+                                <button
+                                  class="btn btn-primary badge"
+                                  @click="syncModel(model.name)"
+                                >
                                   sync
                                 </button>
                                 <button
-                                  class="btn btn-secondary badge "
-                                  @click="syncModel(model, {force: true, alter: true})"
+                                  class="btn btn-secondary badge"
+                                  @click="syncModel(model.name || model.identity, {force: true, alter: true})"
                                 >
                                   Drop and sync
                                 </button>
@@ -523,19 +551,32 @@ If you really need to edit this file, this we suggest you rename it to something
                       class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
                     >
                       <h6 class="m-0 font-weight-bold text-primary">
-                        Controllers <span class="badge badge-primary">{{ Object.keys(controllers).length }}</span>
+                        Controllers
+                        <span class="badge badge-primary">{{
+                          Object.keys(controllers).length
+                        }}</span>
                       </h6>
-                      <div class="btn-group float-right ">
-                        <button class="btn btn-link mr-2" @click="listControllers()">
+                      <div class="btn-group float-right">
+                        <button
+                          class="btn btn-link mr-2"
+                          @click="listControllers()"
+                        >
                           <i class="fa fa-sync"></i>
                         </button>
-                        <button class="btn btn-link p-0" @click="createController()">
+                        <button
+                          class="btn btn-link p-0"
+                          @click="createController()"
+                        >
                           <i class="fa fa-plus"></i>
                         </button>
                       </div>
                     </div>
-                    <div class="card-body p-2 ">
-                      <table class="table table-bordered" id="dataTable" cellspacing="0">
+                    <div class="card-body p-2">
+                      <table
+                        class="table table-bordered"
+                        id="dataTable"
+                        cellspacing="0"
+                      >
                         <thead>
                           <tr></tr>
                         </thead>
@@ -556,7 +597,10 @@ If you really need to edit this file, this we suggest you rename it to something
                       class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
                     >
                       <h6 class="m-0 font-weight-bold text-primary">
-                        Routes <span class="badge badge-primary">{{ Object.keys(controllers).length }}</span>
+                        Routes
+                        <span class="badge badge-primary">{{
+                          Object.keys(controllers).length
+                        }}</span>
                       </h6>
                       <div class="float-right">
                         <button class="btn btn-link p-0" @click="listRoutes()">
@@ -568,7 +612,11 @@ If you really need to edit this file, this we suggest you rename it to something
                       </div>
                     </div>
                     <div class="card-body p-2 table-responsive">
-                      <table class="table table-bordered" id="dataTable" cellspacing="0">
+                      <table
+                        class="table table-bordered"
+                        id="dataTable"
+                        cellspacing="0"
+                      >
                         <thead>
                           <tr>
                             <th>Route</th>
@@ -576,10 +624,10 @@ If you really need to edit this file, this we suggest you rename it to something
                           </tr>
                         </thead>
 
-                        <tbody style="max-height:50vh; overflow: auto">
-                           <tr v-for="(route, id) in routes">
-                            <td style="width: 40%;">{{ id }}</td>
-                            <td >{{ route }}</td>
+                        <tbody style="max-height: 50vh; overflow: auto">
+                          <tr v-for="(route, id) in routes">
+                            <td style="width: 40%">{{ id }}</td>
+                            <td>{{ route }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -596,9 +644,7 @@ If you really need to edit this file, this we suggest you rename it to something
                       <div
                         class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
                       >
-                        <h6 class="m-0 font-weight-bold text-primary">
-                          Raw
-                        </h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Raw</h6>
                       </div>
                       <div class="card-body">
                         <pre id="jstree"></pre>
@@ -643,8 +689,15 @@ If you really need to edit this file, this we suggest you rename it to something
         <div class="modal-dialog modal-lg" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Create new {{ modelEditModalMode }}</h5>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <h5 class="modal-title" id="exampleModalLabel">
+                Create new {{ modelEditModalMode }}
+              </h5>
+              <button
+                class="close"
+                type="button"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
                 <span aria-hidden="true">×</span>
               </button>
             </div>
@@ -660,7 +713,8 @@ If you really need to edit this file, this we suggest you rename it to something
                 />
               </div>
               <div
-class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'model'"
+                class="form-group"
+                v-if="modelEditModalMode == 'api' || modelEditModalMode == 'model'"
               >
                 <label> DB type</label>
                 <select
@@ -681,11 +735,15 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
                   class="form-check-input"
                   placeholder="Api type"
                 />
-                <label class="form-check-label"> Also generate Schema  ?</label>
+                <label class="form-check-label"> Also generate Schema ?</label>
               </div>
               <hr />
               <div class="form-group">
-                <table class="table table-bordered" id="dataTable" cellspacing="0">
+                <table
+                  class="table table-bordered"
+                  id="dataTable"
+                  cellspacing="0"
+                >
                   <thead>
                     <tr>
                       Fields
@@ -700,38 +758,26 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
 
                   <tbody>
                     <tr>
-                      <td>
-                       Name
-                      </td>
-                      <td>
-                        Type
-                      </td>
-                      <td>
-                        Primary key
-                      </td>
-                      <td>
-                        Required
-                      </td>
-                      <td>
-                        Autoincrement
-                      </td>
-                      <td>
-                        Actions
-                      </td>
+                      <td>Name</td>
+                      <td>Type</td>
+                      <td>Primary key</td>
+                      <td>Required</td>
+                      <td>Autoincrement</td>
+                      <td>Actions</td>
                     </tr>
                     <template
-                    v-if="modelEditModalMode === 'add-field' && selectedModel && selectedModel.fields">
-                    <tr v-for="field of selectedModel.fields">
-                    <td>{{ field.name }}</td>
-                    <td>{{ field.type }}</td>
-                    <td>{{ field.primaryKey }}</td>
-                    <td>{{ !field.allowNull }}</td>
-                    <td>{{ field.autoIncrement }}</td>
-                    <td></td>
-                    </tr>
+                      v-if="modelEditModalMode === 'add-field' && selectedModel && selectedModel.fields"
+                    >
+                      <tr v-for="field of selectedModel.fields">
+                        <td>{{ field.name }}</td>
+                        <td>{{ field.type }}</td>
+                        <td>{{ field.primaryKey }}</td>
+                        <td>{{ !field.allowNull }}</td>
+                        <td>{{ field.autoIncrement }}</td>
+                        <td></td>
+                      </tr>
                     </template>
-                    <tr
-                    v-for="(field, idx) in newApi.fields">
+                    <tr v-for="(field, idx) in newApi.fields">
                       <td>
                         <input
                           v-model="field.name"
@@ -747,7 +793,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
                           class="form-control"
                           placeholder="Field type"
                         >
-                        <option v-for="type in fieldTypes">{{ type }}</option>
+                          <option v-for="type in fieldTypes">{{ type }}</option>
                         </select>
                       </td>
                       <td>
@@ -781,7 +827,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
                           class="btn btn-icon btn-link"
                           placeholder="Required"
                         >
-<i class="fa fa-times text-danger"></i>
+                          <i class="fa fa-times text-danger"></i>
                         </button>
                       </td>
                     </tr>
@@ -790,11 +836,15 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-dismiss="modal">
+              <button
+                class="btn btn-secondary"
+                type="button"
+                data-dismiss="modal"
+              >
                 Cancel
               </button>
               <button
-              v-if="modelEditModalMode == 'api'"
+                v-if="modelEditModalMode == 'api'"
                 class="btn btn-primary"
                 @click="createApi"
                 :disabled="!newApi || !newApi.name || !newApi.type"
@@ -802,7 +852,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
                 Create Api
               </button>
               <button
-              v-if="modelEditModalMode == 'model'"
+                v-if="modelEditModalMode == 'model'"
                 class="btn btn-success"
                 @click="createModel"
                 :disabled="!newApi || !newApi.name || !newApi.type"
@@ -810,7 +860,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
                 Create Model
               </button>
               <button
-              v-if="modelEditModalMode == 'add-field'"
+                v-if="modelEditModalMode == 'add-field'"
                 class="btn btn-success"
                 @click="addFieldsToModel()"
                 :disabled="!newApi || !newApi.name || !newApi.type"
@@ -1084,7 +1134,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
 
              });
              console.log("values", values)
-             this.$http.post('/api/axel-manager/controllers', {name: values.value[0], type: values.value[1], force: values.value[2]})
+             this.$socket.post('/axel-manager/controllers', {body:{name: values.value[0], type: values.value[1], force: values.value[2]}})
              .then(() => {
                return Swal2.fire({title: 'Controller successfully created', icon: 'success'});
              })
@@ -1131,7 +1181,7 @@ class="form-group" v-if="modelEditModalMode == 'api' || modelEditModalMode == 'm
 
              });
              console.log("values", values)
-             this.$http.post('/api/axel-manager/controllers', {name: values.value[0], type: values.value[1], force: values.value[2]})
+             this.$socket.post('/axel-manager/controllers', {body:{name: values.value[0], type: values.value[1], force: values.value[2]}})
              .then(() => {
                return Swal2.fire({title: 'Controller successfully created', icon: 'success'});
              })

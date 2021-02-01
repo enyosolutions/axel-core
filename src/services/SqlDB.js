@@ -1,8 +1,7 @@
-const axel = require('../axel.js');
 const fs = require('fs');
 const _ = require('lodash');
-const colors = require('colors');
 const Sequelize = require('sequelize');
+const axel = require('../axel.js');
 
 async function loadSequelize() {
   if (axel.config.sqldb) {
@@ -42,7 +41,6 @@ async function loadSequelize() {
       process.exit(-1);
     }
   }
-  return;
 }
 const sqlDB = loadSequelize();
 module.exports = sqlDB;

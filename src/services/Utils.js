@@ -66,11 +66,20 @@ const Utils = {
    *
    * Inject userId if required
    */
-  injectUserId(data, user) {
-    const primaryKey = axel.config.framework.primaryKey;
-    if (!data.userId && user && user[primaryKey]) {
-      data.userId = user[primaryKey];
+  injectUserId(data, user, fields = null) {
+    if (!fields) {
+      fields = ['userId'];
     }
+    if (typeof (fields) === 'string') {
+      fields = [fields];
+    }
+    const primaryKey = axel.config.framework.primaryKey;
+    fields.forEach((f) => {
+      if (!data[f] && user && user[primaryKey]) {
+        data[f] = user[primaryKey];
+      }
+    });
+
     return data;
   },
 
@@ -82,12 +91,12 @@ const Utils = {
     mode = mode || axel.config.framework.defaultApiSearchMode;
     const Op = Sequelize.Op;
     switch (mode) {
+      default:
       case 'exact':
         return { [Op.eq]: str };
       case 'full':
       case 'wildcard':
         return { [Op.like]: `%${str}%` };
-      default:
       case 'start':
         return { [Op.like]: `${str}%` };
     }

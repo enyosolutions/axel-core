@@ -5,6 +5,7 @@ const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
 const { resolve } = require('path');
 const AxelAdmin = require('./AxelAdmin');
+const debug = require('debug')('axel:manager');
 
 const {
   generateController, generateModel, generateApi, generateRoute,
@@ -38,6 +39,7 @@ class AxelManager {
      */
   init(app) {
     try {
+      debug('Copying manager to the front project', `${process.cwd()}/views/axel-manager.ejs`);
       fs.copyFileSync(resolve(__dirname, '../views/axel-manager.ejs'), `${process.cwd()}/views/axel-manager.ejs`);
     } catch (err) {
       console.warn('[AXELMANAGER][WARNING]', err.message);
@@ -210,10 +212,9 @@ class AxelManager {
               if (!id) {
                 return cb('missing_param_body');
               }
-              const em = id === '$ALL' ? axel.sqldb : axel.models[id].em;
+              const em = id === '$ALL' ? axel.sqldb : axel.models[id] && axel.models[id].em;
               if (!em) {
-                console.log('[AXELMANAGER]', `error_while_accessing_${id}`, axel.models[id]);
-                return cb(`error_while_accessing_${id}`);
+                return cb(`error_while_accessing_model${JSON.stringify(id)}`);
               }
               em.sync({ force, alter })
                 .then((result) => {

@@ -168,7 +168,6 @@ const loadSqlModels = () => {
       debug('ORM : ⚠️ no sql configured');
       return resolve();
     }
-    debug('boom');
     let sequelize;
     try {
       // eslint-disable-next-line

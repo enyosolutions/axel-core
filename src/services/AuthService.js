@@ -160,7 +160,11 @@ function hasAnyRole(user, _requiredRoles) {
   } else {
     requiredRoles = _requiredRoles;
   }
-  let myRoles = user.roles;
+  let myRoles = (user && user.roles) || user;
+
+  if (typeof (myRoles) === 'string') {
+    myRoles = JSON.parse(myRoles);
+  }
   // Check if role exists
   for (let i = 0; i < requiredRoles.length; i++) {
     const role = requiredRoles[i];
@@ -173,7 +177,9 @@ function hasAnyRole(user, _requiredRoles) {
       return false;
     }
   }
-
+  if (!Array.isArray(myRoles)) {
+    return false;
+  }
   myRoles.forEach((role) => {
     myRoles = myRoles.concat(getExtendedRoles(role));
   });
