@@ -5,18 +5,19 @@ class ExtendedError extends Error {
    * @type string
    * @memberof ExtendedError
    */
-  name = '';
-  code = 0;
-  message = '';
-  errors = [];
   constructor(message) {
-    super('');
+
+    this.name = '';
+    this.code = 0;
+    this.message = '';
+    this.errors = [];
     if (!message || _.isString(message)) {
       super(message);
       this.name = 'ExtendedError';
       this.message = message || '';
     } else {
       this.message = 'ExtendedError';
+      super(this.message);
       Object.keys(message).forEach((i) => {
         // @ts-ignore
         this[i] = message[i];
