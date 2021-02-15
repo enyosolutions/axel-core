@@ -74,7 +74,7 @@ If you really need to edit this file, this we suggest you rename it to something
                 alt=""
               />
             </div>
-            <div class="sidebar-brand-text mx-3">Axel framework</div>
+            <div class="sidebar-brand-text mx-3"><%= axel.config.appName || "Framework manager" %></div>
           </a>
 
           <!-- Divider -->
@@ -199,7 +199,7 @@ If you really need to edit this file, this we suggest you rename it to something
 
               <!-- Topbar Search -->
               <h4 class="text-primary">
-                <%= axel.config.app %> | <%= axel.config.env %>
+                app: <span class="badge badge-primary"><%= axel.config.app %></span> | env: <span class="badge-primary"><%= axel.config.env %></span> | NODE_ENV: <span class="badge-info"><%= process.env.NODE_ENV %></span>
               </h4>
               <form
                 class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"

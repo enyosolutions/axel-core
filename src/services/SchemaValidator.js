@@ -3,7 +3,6 @@ const _ = require('lodash');
 const debug = require('debug')('axel:schemavalidator');
 
 
-
 function getGrammaticalSingular(type) {
   switch (type) {
     case 'string':
@@ -27,9 +26,9 @@ function getGrammaticalSingular(type) {
 
 function getFieldName(error) {
   return (
-    error.params.missingProperty ||
-    error.params.additionalProperty ||
-    (error.dataPath && error.dataPath.replace('.', ''))
+    error.params.missingProperty
+    || error.params.additionalProperty
+    || (error.dataPath && error.dataPath.replace('.', ''))
   );
 }
 
@@ -104,25 +103,28 @@ function normaliseErrorMessages(errors) {
 }
 
 class SchemaValidator {
-  ajv = new Ajv({
-    useDefaults: true,
-    coerceTypes: true,
-    allErrors: true,
-    removeAdditional: false,
-    extendRefs: true,
-  });
-  ajvStrict = new Ajv({
-    useDefaults: true,
-    coerceTypes: true,
-    allErrors: true,
-    removeAdditional: true,
-    extendRefs: true,
-  });
+  constructor() {
+    this.ajv = new Ajv({
+      useDefaults: true,
+      coerceTypes: true,
+      allErrors: true,
+      removeAdditional: false,
+      extendRefs: true,
+    });
+    this.ajvStrict = new Ajv({
+      useDefaults: true,
+      coerceTypes: true,
+      allErrors: true,
+      removeAdditional: true,
+      extendRefs: true,
+    });
 
-  validators = {};
-  strictValidators = {};
-  missingSchemas = {};
-  initialized = false;
+    this.validators = {};
+    this.strictValidators = {};
+    this.missingSchemas = {};
+    this.initialized = false;
+  }
+
   init() {
     axel.logger.info('VALIDATOR: INIT');
     this.loadSchemas();

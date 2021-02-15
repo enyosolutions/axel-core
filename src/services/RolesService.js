@@ -3,14 +3,13 @@ const _ = require('lodash');
 const { Request, Response } = require('express');
 
 
-
 const RolesService = {
   getExtendedRoles(role) {
-    let myRoles: string[] = [];
+    let myRoles = [];
     if (
-      axel.config.framework.roles[role] &&
-      axel.config.framework.roles[role].inherits &&
-      Array.isArray(axel.config.framework.roles[role].inherits)
+      axel.config.framework.roles[role]
+      && axel.config.framework.roles[role].inherits
+      && Array.isArray(axel.config.framework.roles[role].inherits)
     ) {
       myRoles = myRoles.concat(axel.config.framework.roles[role].inherits);
       axel.config.framework.roles[role].inherits.forEach((r) => {
@@ -24,7 +23,7 @@ const RolesService = {
     return req.user && req.user.roles && req.user.roles.indexOf(role) > -1;
   },
 
-  hasAccess(user, requiredRoles: string[]) {
+  hasAccess(user, requiredRoles) {
     if (!user) {
       return false;
     }
