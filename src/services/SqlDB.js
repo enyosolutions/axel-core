@@ -8,11 +8,13 @@ async function loadSequelize() {
     const datastore = axel.config.sqldb;
     axel.logger.debug('ORM ::', 'Connecting to database ', datastore.database);
     const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
+      ...datastore,
       host: datastore.host,
       dialect: datastore.options.dialect,
       logging: datastore.options.logging,
       options: datastore.options,
-      query: {
+      retry: datastore.retry,
+      query: datastore.query ? datastore.query : {
         raw: true,
       },
       pool: {
