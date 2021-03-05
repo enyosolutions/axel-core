@@ -39,7 +39,7 @@ function connectRoute(app, source, _target) {
     if (target.controller) {
       target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller')
         ? '' : 'Controller'
-        }`;
+      }`;
     }
   }
   if (sourceArray.length === 2) {
@@ -213,7 +213,9 @@ const loadEndpointMiddleware = (endpoint) => {
     if (!axel.models[endpoint].automaticApi) {
       res.status(403).json({
         errors: ['model_blacklisted_from_automatic_api'],
-        message: 'this api model has automatic api disabled. Add `automaticApi: true` in the schema definition to enable it OR set the correct `apiUrl` in ' + `src/api/models/schema/${endpoint}`
+        message: 'this api model has automatic api disabled. Add `automaticApi: true` '
+          + 'in the schema definition to enable it OR set the correct `apiUrl` in '
+          + `src/api/models/schema/${endpoint}`
       });
       return;
     }
