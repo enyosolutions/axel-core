@@ -15,7 +15,7 @@ const SchemaValidator = require('../services/SchemaValidator.js');
 const debug = d('axel:CrudSqlController');
 
 class CrudSqlController {
-  stats(req, resp) {
+  stats(req, resp, next) {
     const output = {};
     const endpoint = req.params.endpoint;
 
@@ -90,13 +90,10 @@ class CrudSqlController {
           body: output,
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  list(req, resp) {
+  list(req, resp, next) {
     const endpoint = req.params.endpoint;
     const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
       ? axel.models[endpoint].em.primaryKeyField
@@ -149,13 +146,10 @@ class CrudSqlController {
         count: limit,
         totalCount,
       }))
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  get(req, resp) {
+  get(req, resp, next) {
     const id = req.params.id;
     if (!id) {
       return false;
@@ -210,13 +204,10 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  post(req, resp) {
+  post(req, resp, next) {
     const data = req.body;
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
@@ -243,18 +234,7 @@ class CrudSqlController {
       .then(result => resp.status(200).json({
         body: result,
       }))
-      .catch((err) => {
-        axel.logger.warn(err);
-        if (err && err.name === 'SequelizeValidationError') {
-          resp.status(400).json({
-            // @ts-ignore
-            errors: err.errors && err.errors.map(e => e.message),
-            message: 'sql_validation_error',
-          });
-          return false;
-        }
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
   /**
@@ -265,7 +245,7 @@ class CrudSqlController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  put(req, resp) {
+  put(req, resp, next) {
     const id = req.params.id;
     const data = req.body;
 
@@ -336,18 +316,7 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        if (err && err.name === 'SequelizeValidationError') {
-          resp.status(400).json({
-            // @ts-ignore
-            errors: err.errors && err.errors.map(e => e.message),
-            message: 'validation_error',
-          });
-          return false;
-        }
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
   /**
@@ -358,7 +327,7 @@ class CrudSqlController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  delete(req, resp) {
+  delete(req, resp, next) {
     const id = req.params.id;
 
     const repository = Utils.getEntityManager(req, resp);
@@ -392,13 +361,10 @@ class CrudSqlController {
           status: 'OK',
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  export(req, resp) {
+  export(req, resp, next) {
     const endpoint = req.params.endpoint;
     const schema = axel.models[endpoint] && axel.models[endpoint].schema;
     let data = [];
@@ -445,13 +411,10 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  getImportTemplate(req, resp) {
+  getImportTemplate(req, resp, next) {
     const endpoint = req.params.endpoint;
 
     const repository = Utils.getEntityManager(req, resp);
@@ -492,13 +455,10 @@ class CrudSqlController {
           message: 'not_found',
         });
       })
-      .catch((err) => {
-        axel.logger.warn(err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 
-  import(req, resp) {
+  import(req, resp, next) {
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
@@ -571,10 +531,7 @@ class CrudSqlController {
         properData,
         improperData,
       }))
-      .catch((err) => {
-        axel.logger.warn(err && err.message ? err.message : err);
-        ErrorUtils.errorCallback(err, resp);
-      });
+      .catch(next);
   }
 }
 

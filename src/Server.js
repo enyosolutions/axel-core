@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const debug = require('debug')('axel:server');
 const l = require('./services/logger.js');
+const errorHandler = require('./middlewares/error-handler');
 
 
 console.time('STARTUP TIME');
@@ -32,6 +33,7 @@ class Server {
         axel.app = app;
         // app.set('appPath', root + 'client');
         app.set('appPath', root);
+
         if (this.middlewares) {
           Object.keys(this.middlewares).forEach((m) => {
             debug('Loading middleware', m, this.middlewares[m]);
@@ -41,6 +43,7 @@ class Server {
             app.use(this.middlewares[m]);
           });
         }
+
 
         app.disable('x-powered-by');
 
@@ -108,6 +111,7 @@ class Server {
       // .then(() => installValidator(app, this.routes))
       .then(() => this.router(app))
       .then(async () => {
+        app.use(errorHandler);
         if (!process.env.NODE_ENV) {
           process.env.NODE_ENV = 'development';
         }

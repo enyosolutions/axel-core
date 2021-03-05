@@ -28,7 +28,6 @@ async function loadSequelize() {
         charset: 'utf8',
         collate: 'utf8_general_ci',
       },
-      operatorsAliases: Sequelize.Op,
     });
 
     try {

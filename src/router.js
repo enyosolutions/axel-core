@@ -17,6 +17,13 @@ const debug = d('axel:router');
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
 
+function wrapRoute(fn) {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+}
+
+
 function connectRoute(app, source, _target) {
   let verb = 'all';
   let route;
@@ -110,21 +117,21 @@ function connectRoute(app, source, _target) {
 
   // if route is mapped to a function link it directly
   if (typeof target === 'function') {
-    app[verb](source, target);
+    app[verb](source, wrapRoute(target));
     return Promise.resolve();
   }
 
   if (target && target.use && typeof target.use === 'function') {
-    app.use(source, routePolicies, target.use);
+    app.use(source, routePolicies, wrapRoute(target.use));
     return Promise.resolve(app);
   }
 
   if (target.view) {
-    app[verb](route, routePolicies, (req, res) => {
+    app[verb](route, routePolicies, wrapRoute((req, res) => {
       res.render(target.view, {
         axel,
       });
-    });
+    }));
     return Promise.resolve();
   }
 
@@ -184,6 +191,7 @@ function loadPolicies() {
       axel.policies[file.split('.')[0]] = func;
     });
 }
+
 
 const loadEndpointMiddleware = (endpoint) => {
   debug('loadEndpointMiddleware', endpoint);
