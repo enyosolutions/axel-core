@@ -138,10 +138,11 @@ class Server {
       );
       l.info('\n');
       l.info('__________________________________');
-      l.info(`http://localhost:${p}`);
+      l.info(`HOST: http://localhost:${p}`);
+      l.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+      l.info('__________________________________');
       l.info('__________________________________');
       console.timeEnd('STARTUP TIME');
-      l.info('__________________________________');
       app.emit('server-ready', { axel });
     };
     app.locals.server = http.createServer(app);

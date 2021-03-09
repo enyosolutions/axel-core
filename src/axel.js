@@ -54,16 +54,19 @@ const axel = {
   log: l,
   rootPath: path.resolve(process.cwd()),
   init: async () => {
-    debug('init requested');
+    debug('Init started');
     if (axel.initCompleted && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
     }
     if (axel.initPromise) {
       return axel.initPromise;
     }
-    axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
-      axel.config = config;
-      debug('init completed');
+    axel.initPromise = Promise.resolve().then((config) => {
+      if (config) {
+        axel.config = config;
+      }
+
+      debug('Init completed');
       axel.initCompleted = true;
       return config;
     });

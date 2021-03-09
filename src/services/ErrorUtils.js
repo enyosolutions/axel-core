@@ -38,8 +38,6 @@ const ErrorUtils = {
   },
 
   errorCallback(err, response) {
-    console.log('err recived', err);
-
     if (!err) {
       axel.logger.error(err);
       throw new Error('error_handler_called_without_error_arg');
