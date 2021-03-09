@@ -1,12 +1,14 @@
 const pino = require('pino');
+const colada = require('pino-colada');
 
 const l = pino({
   prettyPrint: true,
+  prettifier: colada,
   name: process.env.APP_ID,
   level: process.env.LOG_LEVEL || 'info',
   // @ts-ignore
   hooks: {
-    logMethod: function (args, method) {
+    logMethod(args, method) {
       if (args.length > 1) {
         let interpolation = '';
         for (let i = 1; i < args.length; i++) {

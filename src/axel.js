@@ -41,6 +41,7 @@ function loadConfig() {
   });
   return config;
 }
+
 const axel = {
   port: 3333,
   config: loadConfig(),
