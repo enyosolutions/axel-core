@@ -1,5 +1,3 @@
-
-
 const fs = require('fs');
 const _ = require('lodash');
 const d = require('debug');
@@ -25,12 +23,37 @@ const loadSchemaModel = (filePath) => {
   return axel.models[model.identity];
 };
 
+const loadSqlAttributes = (model) => {
+  Object.entries(model.entity.attributes).forEach(([, attr]) => {
+    if (typeof attr.type === 'string') {
+      const type = attr.type
+        .replace('DataTypes.', '')
+        .replace('sequelize.', '')
+        .replace(/\(.+\)/, '');
+      const args = attr.type.match(/\(.+\)/);
+      const resolvedType = _.get(DataTypes, type);
+      if (resolvedType) {
+        attr.type = resolvedType;
+        if (args && args[0]) {
+          attr.type = attr.type(
+            ...args[0]
+              .replace(/\(|\)/g, '')
+              .split(',')
+              .map(s => s.replace(/["']/g, '').trim())
+          );
+        }
+      }
+    }
+  });
+};
+
 const loadSqlModel = (filePath, sequelize) => {
   if (sequelize) {
     axel.logger.verbose('ORM :: loading sequelize model  %s', filePath);
-    /* eslint-disable */
+
     let model;
     try {
+      /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
     } catch (err) {
       console.warn('[WARN] ', filePath, err);
@@ -39,20 +62,15 @@ const loadSqlModel = (filePath, sequelize) => {
       throw new Error('missing_model_' + filePath);
     }
     /* eslint-enable */
-    const tableName = model.entity
-      && model.entity.options
-      && model.entity.options
-      && model.entity.options.tableName;
+    const tableName = model.entity && model.entity.options && model.entity.options && model.entity.options.tableName;
     axel.logger.verbose('Loading identity', model);
     debug('Loading entity', model.identity);
     if (!model.identity) {
       throw new Error(`ORM ::  missing sql identity for ${filePath}`);
     }
-
     if (!model.entity) {
       throw new Error(`ORM ::  missing sql entity for ${filePath}`);
     }
-
     if (!tableName) {
       throw new Error(`ORM ::  missing sql tableName for ${filePath}`);
     }
@@ -70,19 +88,7 @@ const loadSqlModel = (filePath, sequelize) => {
       model.entity.options
     );
     if (model.entity.attributes) {
-      Object.entries(model.entity.attributes).forEach(([, attr]) => {
-        if (typeof attr.type === 'string') {
-          const type = attr.type.replace('DataTypes.', '').replace('sequelize.', '').replace(/\(.+\)/, '');
-          const args = attr.type.match(/\(.+\)/);
-          const resolvedType = _.get(DataTypes, type);
-          if (resolvedType) {
-            attr.type = resolvedType;
-            if (args && args[0]) {
-              attr.type = attr.type(...args[0].replace(/\(|\)/g, '').split(',').map(s => s.replace(/["']/g, '').trim()));
-            }
-          }
-        }
-      });
+      loadSqlAttributes(model);
     }
     const SqlModel = sequelize.define(
       _.upperFirst(_.camelCase(model.identity)),
@@ -99,7 +105,6 @@ const loadSqlModel = (filePath, sequelize) => {
     axel.models[model.identity].em = SqlModel;
     // @deprecated
     axel.models[model.identity].repository = SqlModel;
-
     axel.models[model.identity].tableName = tableName;
 
     return axel.models[model.identity];
@@ -110,11 +115,6 @@ const loadSqlModel = (filePath, sequelize) => {
 const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
-    /*
-  if (!(axel.config && axel.config.models && axel.config.models.schema)) {
-    return next();
-  }
-  */
     axel.logger.info('ORM :: loading schema models');
     const modelsLocation = `${process.cwd()}/src/api/models/schema`;
 
@@ -126,9 +126,7 @@ const loadSchemaModels = () => {
         axel.logger.warn(err);
         return reject(err);
       }
-      files = files.filter(
-        file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs')
-      );
+      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
       axel.logger.info('ORM :: found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
       const promises = files.map((file) => {
@@ -138,13 +136,11 @@ const loadSchemaModels = () => {
       });
 
       Promise.all(promises)
-        .then(
-          () => {
-            axel.logger.debug('ORM :: schema final callback');
-            debug('ORM :: schema final callback');
-            resolve();
-          }
-        )
+        .then(() => {
+          axel.logger.debug('ORM :: schema final callback');
+          debug('ORM :: schema final callback');
+          resolve();
+        })
         .catch((errAsync) => {
           axel.logger.warn(errAsync);
           debug(errAsync);
@@ -153,7 +149,6 @@ const loadSchemaModels = () => {
     });
   });
 };
-
 
 /**
  * @description load all the sql defined models
@@ -189,9 +184,7 @@ const loadSqlModels = () => {
       axel.models = {};
     }
     let files = fs.readdirSync(modelsLocation);
-    files = files.filter(
-      file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs')
-    );
+    files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
     axel.logger.info('ORM :: found %s sequelize models files', files.length);
     debug('MODELS :: found %s sequelize models files', files.length);
     const loadedModels = files.map((file) => {
@@ -208,6 +201,7 @@ const loadSqlModels = () => {
         if (model.entity && model.entity.attributes) {
           Object.keys(model.entity.attributes).forEach((field) => {
             const fieldDefinition = model.entity.attributes[field];
+            /*
             if (fieldDefinition.references) {
               // console.log('Auto linking ', model.identity, field, fieldDefinition);
               // sqlModels[model.identity].belongsTo(sqlModels[fieldDefinition.references.model], {
@@ -215,7 +209,7 @@ const loadSqlModels = () => {
               //   sourceKey: fieldDefinition.references.key,
               // });
               // only do the inverse link if there is no existing
-              /*
+
                 if (
                   !sqlModels[fieldDefinition.references.model].associations[
                     fieldDefinition.references.model.name
@@ -228,28 +222,20 @@ const loadSqlModels = () => {
                       targetKey: fieldDefinition.references.key,
                     }
                   );
-                  */
+
             }
+            */
           });
         }
         if (model.entity && model.entity.associations) {
           model.entity.associations(sqlModels);
         }
-        if (
-          model.entity
-          && model.entity.defaultScope
-          && model.entity.defaultScope instanceof Function
-        ) {
-          model.repository.addScope(
-            'defaultScope',
-            model.entity.defaultScope(sqlModels),
-            {
-              override: true,
-            }
-          );
+        if (model.entity && model.entity.defaultScope && model.entity.defaultScope instanceof Function) {
+          model.repository.addScope('defaultScope', model.entity.defaultScope(sqlModels), {
+            override: true,
+          });
         }
       });
-
 
       axel.logger.verbose('ORM :: sequelize final callback');
       resolve();
@@ -260,39 +246,38 @@ const loadSqlModels = () => {
   });
 };
 
-
 const findModelsDifferences = () => new Promise((resolve, reject) => {
   try {
     /* eslint-disable */
-    axel.logger.verbose('ORM :: compare definitions');
-    axel.logger.info('\n\n\n');
-    axel.logger.info('___________________________');
-    Object.keys(axel.models).forEach(key => {
-      const model = axel.models[key];
-      if (model.entity && model.schema) {
-        const sqlProperties = Object.keys(model.entity.attributes);
-        const jsonProperties = Object.keys(model.schema.properties);
+      axel.logger.verbose('ORM :: compare definitions');
+      axel.logger.info('\n\n\n');
+      axel.logger.info('___________________________');
+      Object.keys(axel.models).forEach(key => {
+        const model = axel.models[key];
+        if (model.entity && model.schema) {
+          const sqlProperties = Object.keys(model.entity.attributes);
+          const jsonProperties = Object.keys(model.schema.properties);
 
-        if (model.entity.options && model.entity.options.timestamps) {
-          const options = model.entity.options;
-          sqlProperties.push(options.createdAt || 'createdAt');
-          sqlProperties.push(options.updatedAt || 'updatedAt');
-        }
+          if (model.entity.options && model.entity.options.timestamps) {
+            const options = model.entity.options;
+            sqlProperties.push(options.createdAt || 'createdAt');
+            sqlProperties.push(options.updatedAt || 'updatedAt');
+          }
 
-        let diff1 = _.difference(sqlProperties, jsonProperties);
-        let diff2 = _.difference(jsonProperties, sqlProperties);
-        if (diff1.length) {
-          axel.logger.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
-          // diff1 = diff1.unshift('ORM ::', 'Fields present in sql but not in json');
-          axel.logger.warn(diff1.join(' | '));
+          let diff1 = _.difference(sqlProperties, jsonProperties);
+          let diff2 = _.difference(jsonProperties, sqlProperties);
+          if (diff1.length) {
+            axel.logger.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
+            // diff1 = diff1.unshift('ORM ::', 'Fields present in sql but not in json');
+            axel.logger.warn(diff1.join(' | '));
+          }
+          if (diff2.length) {
+            axel.logger.warn('ORM :: model : ', key, ' => Fields present in json but not in sql');
+            axel.logger.warn(diff2.join(' | '));
+          }
         }
-        if (diff2.length) {
-          axel.logger.warn('ORM :: model : ', key, ' => Fields present in json but not in sql');
-          axel.logger.warn(diff2.join(' | '));
-        }
-      }
-    });
-    /* eslint-enable */
+      });
+      /* eslint-enable */
     axel.logger.info('___________________________');
     axel.logger.info('\n\n\n');
     resolve();
@@ -307,7 +292,7 @@ function unifyEntityManagers() {
     const model = axel.models[key];
     if (model.repository) {
       model.em = model.repository;
-      model.em.unifiedFind = function (query, options = {}) {
+      model.em.unifiedFind = function(query, options = {}) {
         if (!query) {
           return this.find(query, options);
         }
@@ -320,7 +305,7 @@ function unifyEntityManagers() {
         return this.findAll(query, options);
       };
       // FIND ONE
-      model.em.unifiedFindOne = function (query, options) {
+      model.em.unifiedFindOne = function(query, options) {
         if (!query) {
           return this.find(query, options);
         }
@@ -334,7 +319,7 @@ function unifyEntityManagers() {
         return this.findOne(query, options);
       };
       // UPDATE
-      model.em.unifiedUpdate = function (query, options) {
+      model.em.unifiedUpdate = function(query, options) {
         try {
           if (!query || !options) {
             return this.update(query, options);
@@ -353,34 +338,27 @@ function unifyEntityManagers() {
       };
 
       // UPDATE
-      model.em.unifiedFindOneAndUpdate = function (
-        query,
-        options,
-      ) {
+      model.em.unifiedFindOneAndUpdate = function(query, options) {
         return model.em.unifiedUpdate(query, options);
       };
 
       // COUNT
-      model.em.unifiedCount = function (query, options) {
+      model.em.unifiedCount = function(query, options) {
         return model.em.count(
           {
             where: query,
           },
-          options,
+          options
         );
       };
 
       // INSERT
-      model.em.unifiedInsert = function (
-        query,
-        options,
-        moreOptions,
-      ) {
+      model.em.unifiedInsert = function(query, options, moreOptions) {
         return this.create(query, options, moreOptions);
       };
 
       // DELETE
-      model.em.unifiedRemove = function (query) {
+      model.em.unifiedRemove = function(query) {
         if (!query) {
           return this.destroy(query);
         }
@@ -391,17 +369,21 @@ function unifyEntityManagers() {
       };
     }
     if (model.collection) {
-      model.em = model.collection;
-      model.em.unifiedFind = model.em.find;
-      model.em.unifiedFindOne = model.em.findOne;
-      model.em.unifiedUpdate = model.em.update;
-      model.em.unifiedInsert = model.em.insert;
-      model.em.unifiedRemove = model.em.remove;
-      model.em.unifiedFindOneAndUpdate = model.em.findOneAndUpdate;
-      model.em.unifiedCount = model.em.count;
+      injectUnifiedFunctions(model);
     }
   });
   return;
+}
+
+function injectUnifiedFunctions(model) {
+  model.em = model.collection;
+  model.em.unifiedFind = model.em.find;
+  model.em.unifiedFindOne = model.em.findOne;
+  model.em.unifiedUpdate = model.em.update;
+  model.em.unifiedInsert = model.em.insert;
+  model.em.unifiedRemove = model.em.remove;
+  model.em.unifiedFindOneAndUpdate = model.em.findOneAndUpdate;
+  model.em.unifiedCount = model.em.count;
 }
 
 async function modelsLoader(app) {

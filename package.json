@@ -31,6 +31,7 @@
     "cors": "^2.8.5",
     "debug": "^4.2.0",
     "ejs": "^3.1.5",
+    "eslint": "^7.22.0",
     "eslint-plugin-promise": "^4.2.1",
     "express": "^4.17.1",
     "json-stringify-safe": "^5.0.1",

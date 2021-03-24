@@ -7,6 +7,7 @@ async function loadSequelize() {
   if (axel.config.sqldb) {
     const datastore = axel.config.sqldb;
     axel.logger.debug('ORM ::', 'Connecting to database ', datastore.database);
+    axel.logger.debug('ORM ::', 'Connecting to database ', datastore);
     const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
       ...datastore,
       host: datastore.host,

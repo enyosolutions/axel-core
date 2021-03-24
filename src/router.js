@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 /**
  * Connects all the config in routes.ts to the express router.
  */
@@ -16,7 +18,6 @@ const debug = d('axel:router');
  */
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
-
 function wrapRoute(fn) {
   return (req, res, next) => {
     const p = fn(req, res, next);
@@ -27,61 +28,21 @@ function wrapRoute(fn) {
   };
 }
 
-
-function connectRoute(app, source, _target) {
-  let verb = 'all';
-  let route;
-  let policies = [];
-  let target = {};
-  const sourceArray = source.split(' ');
-  if (typeof _target === 'string') {
-    const [controller, action] = _target.split('.');
-    target.controller = controller;
-    target.action = action;
-  } else {
-    target = _target;
-    if (target.controller) {
-      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller')
-        ? '' : 'Controller'
-        }`;
-    }
-  }
-  if (sourceArray.length === 2) {
-    verb = sourceArray[0].toLowerCase();
-    route = sourceArray[1];
-  } else {
-    route = sourceArray[0];
-  }
-  debug('connecting route', sourceArray);
-  debug('axel.policies', axel.policies);
-  // load security policy if enabled, unless its disabled specifically or that route.
-  if (axel.config.security.secureAllEndpoints && target.secure !== false) {
-    if (!axel.config.security.securityPolicy) {
-      axel.logger.warn('[ROUTER] missing config default security policy middleware');
-    } else {
-      if (!axel.policies[axel.config.security.securityPolicy]) {
-        throw new Error(
-          `Error policy [${axel.config.security.securityPolicy}] does not exists in the policy folder`,
-        );
-      }
-      policies.push(axel.config.security.securityPolicy);
-    }
-  }
-
-  let policyControllerName = '';
-  if (target.controller) {
-    const policyControllerNameParts = target.controller.split('/');
-    policyControllerName = policyControllerNameParts[policyControllerNameParts.length - 1];
-  }
-
-  // Load policies from the policy files
+// Load policies from the policy files
+function loadControllerPolicies(target, policies) {
   if (axel.config.policies) {
+    let policyControllerName = '';
+    if (target.controller) {
+      const policyControllerNameParts = target.controller.split('/');
+      policyControllerName = policyControllerNameParts[policyControllerNameParts.length - 1];
+    }
+
     const controllerPolicies = axel.config.policies[target.controller] || axel.config.policies[policyControllerName];
 
     if (controllerPolicies) {
       const policy = controllerPolicies[target.action];
       if (policy) {
-        const policyType = typeof (policy);
+        const policyType = typeof policy;
         if (!['array', 'boolean', 'string'].includes(policyType) && !Array.isArray(policy)) {
           console.log('policy', target.controller, policy);
           throw new Error(`Policy definition in config must not be ${policyType} provided`);
@@ -93,7 +54,7 @@ function connectRoute(app, source, _target) {
         } else if (policyType === 'boolean') {
           //
         } else {
-          console.log('warging weird policy detected', policy, policyType);
+          console.log('warning weird policy detected', policy, policyType);
         }
       } else if (controllerPolicies['*']) {
         if (!Array.isArray(controllerPolicies['*'])) {
@@ -104,9 +65,12 @@ function connectRoute(app, source, _target) {
     }
   }
 
-  // Finally load route policies.
+  return policies;
+}
+
+function loadRoutePolicies(target, policies) {
   policies = policies.concat(target.policies || []);
-  policies = _.uniq(policies).filter(p => (typeof p === 'function' || typeof p === 'string'));
+  policies = _.uniq(policies).filter(p => typeof p === 'function' || typeof p === 'string');
   // turn  string named policies into functions
   const routePolicies = [];
   policies.forEach((p) => {
@@ -118,8 +82,46 @@ function connectRoute(app, source, _target) {
       axel.logger.warn('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
     }
   });
+  return routePolicies;
+}
 
-  // if route is mapped to a function link it directly
+function loadSecurityPolicy(target, policies) {
+  if (axel.config.security.secureAllEndpoints && target.secure !== false) {
+    if (!axel.config.security.securityPolicy) {
+      axel.logger.warn('[ROUTER] missing config default security policy middleware');
+    } else {
+      if (!axel.policies[axel.config.security.securityPolicy]) {
+        throw new Error(`Error policy [${axel.config.security.securityPolicy}] does not exists in the policy folder`);
+      }
+      policies.push(axel.config.security.securityPolicy);
+    }
+  }
+}
+
+function connectRoute(app, source, _target) {
+  let verb = 'all';
+  let route;
+  const policies = [];
+  const target = _target || {};
+  const sourceArray = source.split(' ');
+  if (typeof _target === 'string') {
+    const [controller, action] = _target.split('.');
+    target.controller = controller;
+    target.action = action;
+  } else if (target.controller) {
+    target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'}`;
+  }
+  if (sourceArray.length === 2) {
+    verb = sourceArray[0].toLowerCase();
+    route = sourceArray[1];
+  } else {
+    route = sourceArray[0];
+  }
+  debug('connecting route', sourceArray);
+  loadSecurityPolicy();
+  loadControllerPolicies(target, policies);
+  const routePolicies = loadRoutePolicies(target, policies);
+
   if (typeof target === 'function') {
     app[verb](source, wrapRoute(target));
     return Promise.resolve();
@@ -131,14 +133,17 @@ function connectRoute(app, source, _target) {
   }
 
   if (target.view) {
-    app[verb](route, routePolicies, wrapRoute((req, res) => {
-      res.render(target.view, {
-        axel,
-      });
-    }));
+    app[verb](
+      route,
+      routePolicies,
+      wrapRoute((req, res) => {
+        res.render(target.view, {
+          axel,
+        });
+      })
+    );
     return Promise.resolve();
   }
-
 
   // Replace aliased routes
   const controllerRoute = target.controller[0] === '@'
@@ -149,12 +154,8 @@ function connectRoute(app, source, _target) {
     controllerRoute,
   });
 
-  // controllerRoute = controllerRoute.replace(/\\\\/g, '/');
-
-
   const controller = axel.controllers[target.controller]
     ? axel.controllers[target.controller]
-    // eslint-disable-next-line
     : require(`${path.resolve(controllerRoute)}`);
   Promise.resolve(controller)
     .then((c) => {
@@ -162,18 +163,12 @@ function connectRoute(app, source, _target) {
       if (c[target.action]) {
         try {
           app[verb](route, routePolicies, c[target.action]);
-          debug('[ROUTING] connected', route, target.controller, target.action);
+          //   debug('[ROUTING] connected', route, target.controller, target.action);
         } catch (e) {
           console.error('[ROUTING]', target.controller, target.action, e.message);
         }
       } else {
-        axel.logger.warn(
-          '[ROUTING] missing Action for',
-          controllerRoute,
-          target.policies,
-          target.action,
-          target.route,
-        );
+        axel.logger.warn('[ROUTING] missing Action for', controllerRoute, target.policies, target.action, target.route);
       }
       return true;
     })
@@ -196,7 +191,6 @@ function loadPolicies() {
     });
 }
 
-
 const loadEndpointMiddleware = (endpoint) => {
   debug('loadEndpointMiddleware', endpoint);
   if (!endpoint) {
@@ -217,9 +211,10 @@ const loadEndpointMiddleware = (endpoint) => {
     if (!axel.models[endpoint].automaticApi) {
       res.status(403).json({
         errors: ['model_blacklisted_from_automatic_api'],
-        message: 'this api model has automatic api disabled. Add `automaticApi: true` '
+        message:
+          'this api model has automatic api disabled. Add `automaticApi: true` '
           + 'in the schema definition to enable it OR set the correct `apiUrl` in '
-          + `src/api/models/schema/${endpoint}`
+          + `src/api/models/schema/${endpoint}`,
       });
       return;
     }
@@ -244,7 +239,6 @@ function injectAxelAdminConfig() {
     axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
     axel.config.routes['PUT /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
     axel.config.routes['DELETE /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
-
 
     axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
     axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
@@ -301,7 +295,8 @@ function injectCrudRoutesConfig() {
       axel.config.framework.automaticApi
       && (axel.models[key].automaticApi || process.env.NODE_ENV !== 'production')
       // allow this in dev environment to help with debugging  where needed
-      && forbiddenAutoConnectModels.indexOf(key) === -1) {
+      && forbiddenAutoConnectModels.indexOf(key) === -1
+    ) {
       model.apiUrl = routeUrl;
       Object.keys(crudRoutes).forEach((route) => {
         const localRoute = route.replace('{routeUrl}', routeUrl);
