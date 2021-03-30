@@ -8,7 +8,6 @@ const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
 
 // declare const Sequelize;
 
-
 const Utils = {
   md5(str) {
     return crypto
@@ -40,7 +39,6 @@ const Utils = {
   stringToError: ErrorUtils.stringToError,
   errorCallback: ErrorUtils.errorCallback,
 
-
   /**
    * check that the id has the correct mongoID format
    */
@@ -70,11 +68,11 @@ const Utils = {
     if (!fields) {
       fields = ['userId'];
     }
-    if (typeof (fields) === 'string') {
+    if (typeof fields === 'string') {
       fields = [fields];
     }
     const primaryKey = axel.config.framework.primaryKey;
-    fields.forEach((f) => {
+    fields.forEach(f => {
       if (!data[f] && user && user[primaryKey]) {
         data[f] = user[primaryKey];
       }
@@ -83,10 +81,9 @@ const Utils = {
     return data;
   },
 
-
   /**
- * Format a string for an sql search, by appending % where needed
- */
+   * Format a string for an sql search, by appending % where needed
+   */
   sqlFormatForSearchMode(str, mode) {
     mode = mode || axel.config.framework.defaultApiSearchMode;
     const Op = Sequelize.Op;
@@ -101,7 +98,6 @@ const Utils = {
         return { [Op.like]: `${str}%` };
     }
   },
-
 
   /**
    *
@@ -138,7 +134,7 @@ const Utils = {
       const filters = req.query.filters;
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach((i) => {
+        .forEach(i => {
           if (filters[i]) {
             query[i] = Utils.sqlFormatForSearchMode(filters[i], options.searchMode);
           }
@@ -150,7 +146,7 @@ const Utils = {
       const filters = req.query._filters;
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach((i) => {
+        .forEach(i => {
           if (filters[i]) {
             query[i] = { [Op.like]: `${filters[i]}%` };
           }
@@ -161,8 +157,8 @@ const Utils = {
       const tags = _.isArray(req.query.tags)
         ? req.query.tags
         : _.isString(req.query.tags)
-          ? req.query.tags.split(',')
-          : [];
+        ? req.query.tags.split(',')
+        : [];
       query.tags = {
         $all: tags,
       };
@@ -202,7 +198,7 @@ const Utils = {
       if (req.query.sort && _.isObject(req.query.sort)) {
         const sort = req.query.sort;
         options.sort = {};
-        Object.keys(sort).forEach((i) => {
+        Object.keys(sort).forEach(i => {
           options.sort[i] = parseInt(sort[i]);
         });
       } else {
@@ -219,7 +215,7 @@ const Utils = {
     options = {
       sort: null,
       primaryKey: '',
-    },
+    }
   ) {
     const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
@@ -228,14 +224,12 @@ const Utils = {
     let limit = isListOfValues
       ? axel.config.framework.defaultLovPagination
       : req.query.perPage
-        ? req.query.perPage
-        : axel.config.framework.defaultPagination;
+      ? req.query.perPage
+      : axel.config.framework.defaultPagination;
     limit = _.toNumber(limit);
     const offset = startPage * limit;
     const sortOptions = req.query.sort || options.sort;
-    const order = _.toPairs(
-      sortOptions || { [options.primaryKey || primaryKey]: 'DESC' },
-    );
+    const order = _.toPairs(sortOptions || { [options.primaryKey || primaryKey]: 'DESC' });
     return {
       listOfValues: isListOfValues,
       startPage,
@@ -265,7 +259,7 @@ const Utils = {
     options = {
       modelName: '',
       fields: undefined,
-    },
+    }
   ) {
     const Op = Sequelize.Op;
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
@@ -284,7 +278,7 @@ const Utils = {
         fields = options.fields;
       }
       if (fields) {
-        fields.forEach((i) => {
+        fields.forEach(i => {
           query[Op.or].push({ [i]: { [Op.like]: `%${req.query.search}%` } });
         });
       }
@@ -294,14 +288,14 @@ const Utils = {
   },
 
   /**
-   * Removes undefiend fields from the object query since the cause sequelize to crash
+   * Removes undefined fields from the object query since the cause sequelize to crash
    * @param query
    */
   cleanSqlQuery(query) {
     if (!query) {
       return query;
     }
-    Object.keys(query).forEach((key) => {
+    Object.keys(query).forEach(key => {
       if (query[key] === undefined) {
         delete query[key];
       }
@@ -336,7 +330,7 @@ const Utils = {
   },
 
   objectTrim(item) {
-    Object.keys(item).forEach((key) => {
+    Object.keys(item).forEach(key => {
       if (_.isString(item[key])) {
         item[key] = item[key].trim();
       }
@@ -376,8 +370,8 @@ const Utils = {
 
     const output = item.get();
     /* eslint-disable no-underscore-dangle,no-unused-expressions */
-    item._options.includeNames
-      && item._options.includeNames.forEach((inc) => {
+    item._options.includeNames &&
+      item._options.includeNames.forEach(inc => {
         output[inc] = Utils.getRawObject(item[inc]);
       });
     return output;

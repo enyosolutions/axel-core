@@ -10,8 +10,6 @@ const yaml = require('js-yaml');
 const express = require('express');
 const descriptor = {};
 
-
-
 class SwaggerService {
   /**
    *
@@ -99,7 +97,7 @@ class SwaggerService {
   modelParser(attributes) {
     const attrs = {};
 
-    _.each(attributes, function (val, key) {
+    _.each(attributes, function(val, key) {
       attrs[key] = {
         type: _.capitalize(val.type),
       };
@@ -307,7 +305,7 @@ class SwaggerService {
       );
       console.log(chalk.blue('parsed path to json file: '), chalk.yellow(jsonPath));
       if (jsonPath.lastIndexOf('//') !== -1) {
-        console.log(chalk.red('veriry provided options, there is an unused `//` in the json path'));
+        console.log(chalk.red('verify provided options, there is an unused `//` in the json path'));
       }
       console.log(
         chalk.blue('Swagger info: '),

@@ -13,9 +13,10 @@ const { ExtendedError } = require('../index');
 const AuthService = require('../services/AuthService');
 const MailService = require('../services/MailService');
 
-const primaryKey = axel.models.user && axel.models.user.em && axel.models.user.em.primaryKeyField
-  ? axel.models.user.em.primaryKeyField
-  : axel.config.framework.primaryKey;
+const primaryKey =
+  axel.models.user && axel.models.user.em && axel.models.user.em.primaryKeyField
+    ? axel.models.user.em.primaryKeyField
+    : axel.config.framework.primaryKey;
 
 module.exports = {
   initDefaultUser(req, res) {
@@ -91,7 +92,7 @@ module.exports = {
           email: newUser.email,
         },
       })
-      .then((user) => {
+      .then(user => {
         if (user) {
           throw new ExtendedError({
             code: 400,
@@ -104,12 +105,12 @@ module.exports = {
         if (!newUser.roles) {
           newUser.roles = JSON.stringify(['USER']);
         }
-        newUser.isActive = !axel.config.framework.emailConfirmationRequired
-          && !axel.config.framework.accountManualVerification;
+        newUser.isActive =
+          !axel.config.framework.emailConfirmationRequired && !axel.config.framework.accountManualVerification;
 
         return AuthService.beforeCreate(newUser);
       })
-      .then((data) => {
+      .then(data => {
         if (data) {
           return axel.models.user.em.create(newUser, {
             raw: true,
@@ -117,7 +118,7 @@ module.exports = {
         }
         throw new Error('password_encoding_error');
       })
-      .then((result) => {
+      .then(result => {
         if (result && result.dataValues) {
           newUser = result.dataValues;
 
@@ -152,18 +153,14 @@ module.exports = {
         throw new Error('user_not_created');
       })
       .then(() => {
-        if (
-          newUser
-          && newUser[primaryKey]
-          && axel.config.framework.user.emailConfirmationRequired
-        ) {
+        if (newUser && newUser[primaryKey] && axel.config.framework.user.emailConfirmationRequired) {
           return MailService.sendEmailConfirmation(
             Object.assign(
               {
                 activationToken: Utils.md5(`${Date.now() + Math.random() * 1000}`),
               },
-              newUser,
-            ),
+              newUser
+            )
           );
         }
         return true;
@@ -182,7 +179,7 @@ module.exports = {
           });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         axel.logger.warn(err && err.message ? err.message : err);
         ErrorUtils.errorCallback(err, res);
       });
@@ -207,7 +204,7 @@ module.exports = {
           resetToken,
         },
       })
-      .then((data) => {
+      .then(data => {
         if (!data) {
           throw new ExtendedError({
             code: 401,
@@ -217,8 +214,8 @@ module.exports = {
           });
         }
         if (
-          !data.passwordResetRequestedOn
-          || moment(data.passwordResetRequestedOn)
+          !data.passwordResetRequestedOn ||
+          moment(data.passwordResetRequestedOn)
             .add(10, 'm')
             .isBefore(new Date())
         ) {
@@ -234,7 +231,7 @@ module.exports = {
           [primaryKey]: data[primaryKey],
         });
       })
-      .catch((err) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'global_error'],
           message: err.message || 'global_error',
@@ -266,7 +263,7 @@ module.exports = {
           resetToken,
         },
       })
-      .then((u) => {
+      .then(u => {
         if (!u || u.length < 1) {
           throw new ExtendedError({
             code: 401,
@@ -276,8 +273,8 @@ module.exports = {
         }
         user = u;
         if (
-          !user.passwordResetRequestedOn
-          || moment(user.passwordResetRequestedOn)
+          !user.passwordResetRequestedOn ||
+          moment(user.passwordResetRequestedOn)
             .add(20, 'm')
             .isBefore(new Date())
         ) {
@@ -290,13 +287,13 @@ module.exports = {
         user.password = req.body.password;
         return AuthService.beforeUpdate(user);
       })
-      .catch((err) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'not_found'],
           message: err.message || 'not_found',
         });
       })
-      .then((result) => {
+      .then(result => {
         if (result) {
           user.resetToken = '';
           return axel.models.user.em.update(user, {
@@ -306,20 +303,20 @@ module.exports = {
           });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         res.status(err.code ? parseInt(err.code) : 400).json({
           errors: [err.message || 'update_error'],
           message: err.message || 'update_error',
         });
       })
-      .then((success) => {
+      .then(success => {
         if (success) {
           res.status(200).json({
             body: 'password_reset_success',
           });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         res.status(400).json({
           message: 'global_error',
           errors: [err.message],
@@ -351,10 +348,10 @@ module.exports = {
 
     axel.models.user.em
       .findAndCountAll({ where: query, raw: false, nested: true }, options)
-      .then((result) => {
+      .then(result => {
         let data;
         if (result && Array.isArray(result.rows)) {
-          data = result.rows.map((user) => {
+          data = result.rows.map(user => {
             delete user.encryptedPassword;
             if (user.roles && typeof user.roles === 'string') {
               try {
@@ -383,7 +380,7 @@ module.exports = {
           body: [],
         });
       })
-      .catch((err) => {
+      .catch(err => {
         resp.status(500).json({
           errors: [err.message],
           message: err.message,
@@ -403,7 +400,7 @@ module.exports = {
       .findByPk({
         [primaryKey]: id,
       })
-      .then((doc) => {
+      .then(doc => {
         if (!doc) {
           return resp.status(404).json({
             message: 'not_found',
@@ -434,7 +431,7 @@ module.exports = {
           body: doc,
         });
       })
-      .catch((err) => {
+      .catch(err => {
         resp.status(500).json({
           errors: [err],
           message: err.message,
@@ -453,7 +450,7 @@ module.exports = {
     }
     axel.models.user.em
       .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
-      .then((doc) => {
+      .then(doc => {
         if (doc) {
           return resp.status(200).json({
             body: true,
@@ -463,7 +460,7 @@ module.exports = {
           body: false,
         });
       })
-      .catch((err) => {
+      .catch(err => {
         ErrorUtils.errorCallback(err, resp);
       });
   },
@@ -500,7 +497,7 @@ module.exports = {
 
     axel.models.user.em
       .findByPk(id)
-      .then((u) => {
+      .then(u => {
         user = u;
         if (!user) {
           throw new ExtendedError({
@@ -522,15 +519,11 @@ module.exports = {
         // prevent frontend from hijacking encrypted password
         delete req.body.encryptedPassword;
 
-        // PREVENT USERS FROM MODIFYFING USERS ROLES·
+        // PREVENT USERS FROM MODIFYING USERS ROLES·
         if (!(req.user && AuthService.hasRole(req.user, 'ADMIN'))) {
           delete newUser.roles;
         }
-        if (
-          user.roles.indexOf('DEVELOPER') > -1
-          && newUser.roles
-          && newUser.roles.indexOf('DEVELOPER') === -1
-        ) {
+        if (user.roles.indexOf('DEVELOPER') > -1 && newUser.roles && newUser.roles.indexOf('DEVELOPER') === -1) {
           newUser.roles.push('DEVELOPER');
         }
 
@@ -557,7 +550,7 @@ module.exports = {
           });
         }
       })
-      .then((doc) => {
+      .then(doc => {
         if (doc) {
           if (data.roles && typeof data.roles === 'string') {
             try {
@@ -569,13 +562,13 @@ module.exports = {
         }
       })
       .then(() => axel.models.user.em.findByPk(parseInt(id)))
-      .then((userModel) => {
+      .then(userModel => {
         delete userModel.encryptedPassword;
         res.json({
           user: userModel,
         });
       })
-      .catch((err) => {
+      .catch(err => {
         ErrorUtils.errorCallback(err, res);
       });
   },
@@ -589,7 +582,7 @@ module.exports = {
     const collection = axel.models.user.em;
     collection
       .findByPk(id)
-      .then((user) => {
+      .then(user => {
         if (!user) {
           throw new ExtendedError({
             code: 404,
@@ -599,14 +592,11 @@ module.exports = {
         }
 
         const deletedSuffix = `deleted-${Date.now()}-${Math.floor(Math.random() * 100000 + 1)}`;
-        return collection
-          .destroy(
-            {
-              where: {
-                [primaryKey]: user[primaryKey],
-              },
-            },
-          );
+        return collection.destroy({
+          where: {
+            [primaryKey]: user[primaryKey],
+          },
+        });
         /*
         // this section is in case of soft deletion
         return collection
@@ -632,7 +622,7 @@ module.exports = {
           body: true,
         });
       })
-      .catch((err) => {
+      .catch(err => {
         ErrorUtils.errorCallback(err, resp);
       });
   },
