@@ -1,0 +1,4 @@
+- name: Mega-Linter
+  # You may pin to the exact commit or the version.
+  # uses: nvuillam/mega-linter@907088e3aa58b41e49a4a1ada73d9ba6bd141f29
+  uses: nvuillam/mega-linter@v4.30.0
