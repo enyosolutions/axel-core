@@ -1,27 +1,27 @@
 // const mongo =  require('mongodb');
-const crypto = require('crypto');
-const stringify = require('json-stringify-safe');
-const Sequelize = require('sequelize');
-const _ = require('lodash');
-const { ExtendedError } = require('./ExtendedError.js');
-const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
+const crypto = require('crypto')
+const stringify = require('json-stringify-safe')
+const Sequelize = require('sequelize')
+const _ = require('lodash')
+const { ExtendedError } = require('./ExtendedError.js')
+const ErrorUtils = require('./ErrorUtils.js') // adjust path as needed
 
 // declare const Sequelize;
 
 const Utils = {
-  md5(str) {
+  md5 (str) {
     return crypto
       .createHash('md5')
       .update(str)
-      .digest('hex');
+      .digest('hex')
   },
-  formUrlEncoded(x) {
-    return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
+  formUrlEncoded (x) {
+    return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '')
   },
-  slugify(text) {
-    const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
-    const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
-    const p = new RegExp(a.split('').join('|'), 'g');
+  slugify (text) {
+    const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;'
+    const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------'
+    const p = new RegExp(a.split('').join('|'), 'g')
 
     return text
       .toString()
@@ -31,7 +31,7 @@ const Utils = {
       .replace(/&/g, '-and-') // Replace & with 'and'
       .replace(/[^\w\-]+/g, '') // Remove all non-word chars
       .replace(/\-\-+/g, '-') // Replace multiple - with single -
-      .trim();
+      .trim()
   },
 
   safeError: ErrorUtils.safeError,
@@ -45,57 +45,57 @@ const Utils = {
   checkIsMongoId: (id, resp) => {
     if (!id) {
       return resp.status(404).json({
-        errors: ['missing_id'],
-      });
+        errors: ['missing_id']
+      })
     }
 
     if (id.length < 24 && Number.isNaN(Number(id))) {
-      axel.logger.warn('WRONG ID :: ', id);
+      axel.logger.warn('WRONG ID :: ', id)
       resp.status(404).json({
         errors: ['wrong_id_format'],
-        message: 'wrong_id_format',
-      });
-      return false;
+        message: 'wrong_id_format'
+      })
+      return false
     }
-    return true;
+    return true
   },
 
   /**
    *
    * Inject userId if required
    */
-  injectUserId(data, user, fields = null) {
+  injectUserId (data, user, fields = null) {
     if (!fields) {
-      fields = ['userId'];
+      fields = ['userId']
     }
     if (typeof fields === 'string') {
-      fields = [fields];
+      fields = [fields]
     }
-    const primaryKey = axel.config.framework.primaryKey;
-    fields.forEach(f => {
+    const primaryKey = axel.config.framework.primaryKey
+    fields.forEach((f) => {
       if (!data[f] && user && user[primaryKey]) {
-        data[f] = user[primaryKey];
+        data[f] = user[primaryKey]
       }
-    });
+    })
 
-    return data;
+    return data
   },
 
   /**
    * Format a string for an sql search, by appending % where needed
    */
-  sqlFormatForSearchMode(str, mode) {
-    mode = mode || axel.config.framework.defaultApiSearchMode;
-    const Op = Sequelize.Op;
+  sqlFormatForSearchMode (str, mode) {
+    mode = mode || axel.config.framework.defaultApiSearchMode
+    const Op = Sequelize.Op
     switch (mode) {
       default:
       case 'exact':
-        return { [Op.eq]: str };
+        return { [Op.eq]: str }
       case 'full':
       case 'wildcard':
-        return { [Op.like]: `%${str}%` };
+        return { [Op.like]: `%${str}%` }
       case 'start':
-        return { [Op.like]: `${str}%` };
+        return { [Op.like]: `${str}%` }
     }
   },
 
@@ -114,268 +114,268 @@ const Utils = {
    *     }]
    * @returns
    */
-  injectQueryParams(
+  injectQueryParams (
     req,
     query = {
       userId: undefined,
       filters: undefined,
       tags: undefined,
-      createdOn: undefined,
+      createdOn: undefined
     },
     options = {}
   ) {
     if (req.query.options) {
-      options.searchMode = options.searchMode || (req.query.options && req.query.options.searchMode);
+      options.searchMode = options.searchMode || (req.query.options && req.query.options.searchMode)
     }
-    const Op = Sequelize.Op;
+    const Op = Sequelize.Op
     // filters from the ui. Ex table fields
     // @deprecated use _filters
     if (req.query.filters && _.isObject(req.query.filters)) {
-      const filters = req.query.filters;
+      const filters = req.query.filters
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (filters[i]) {
-            query[i] = Utils.sqlFormatForSearchMode(filters[i], options.searchMode);
+            query[i] = Utils.sqlFormatForSearchMode(filters[i], options.searchMode)
           }
-        });
+        })
     }
 
     // filters from the ui. Ex table fields
     if (req.query._filters && _.isObject(req.query._filters)) {
-      const filters = req.query._filters;
+      const filters = req.query._filters
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (filters[i]) {
-            query[i] = { [Op.like]: `${filters[i]}%` };
+            query[i] = { [Op.like]: `${filters[i]}%` }
           }
-        });
+        })
     }
 
     if (req.query.tags && _.isObject(req.query.tags)) {
       const tags = _.isArray(req.query.tags)
         ? req.query.tags
         : _.isString(req.query.tags)
-        ? req.query.tags.split(',')
-        : [];
+          ? req.query.tags.split(',')
+          : []
       query.tags = {
-        $all: tags,
-      };
+        $all: tags
+      }
     }
 
     if (req.query.range && _.isObject(req.query.range)) {
-      const { startDate, endDate } = req.query.range;
+      const { startDate, endDate } = req.query.range
       if (startDate && (_.isString(startDate) || _.isNumber(startDate))) {
         if (!query.createdOn) {
-          query.createdOn = {};
+          query.createdOn = {}
         }
-        query.createdOn[Op.gte] = new Date(startDate);
+        query.createdOn[Op.gte] = new Date(startDate)
       }
 
       if (endDate && (_.isString(endDate) || _.isNumber(endDate))) {
         if (!query.createdOn) {
-          query.createdOn = {};
+          query.createdOn = {}
         }
-        query.createdOn[Op.lte] = new Date(endDate);
+        query.createdOn[Op.lte] = new Date(endDate)
       }
     }
 
-    const userId = req.params.userId || req.query.userId;
+    const userId = req.params.userId || req.query.userId
     if (userId) {
-      query.userId = userId;
+      query.userId = userId
     }
 
     // automatic override of all queries params
     // if (req.query.query) {
     //   query = req.query.query;
     // }
-    return query;
+    return query
   },
 
-  injectSortParams(req, options = {}) {
+  injectSortParams (req, options = {}) {
     if (!options.sort) {
       if (req.query.sort && _.isObject(req.query.sort)) {
-        const sort = req.query.sort;
-        options.sort = {};
-        Object.keys(sort).forEach(i => {
-          options.sort[i] = parseInt(sort[i]);
-        });
+        const sort = req.query.sort
+        options.sort = {}
+        Object.keys(sort).forEach((i) => {
+          options.sort[i] = parseInt(sort[i])
+        })
       } else {
         options.sort = {
-          createdOn: -1,
-        };
+          createdOn: -1
+        }
       }
     }
-    return options;
+    return options
   },
 
-  injectPaginationQuery(
+  injectPaginationQuery (
     req,
     options = {
       sort: null,
-      primaryKey: '',
+      primaryKey: ''
     }
   ) {
-    const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
-    const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
-    const primaryKey = axel.config.framework.primaryKey;
+    const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false
+    const startPage = req.query.page ? _.toNumber(req.query.page) : 0
+    const primaryKey = axel.config.framework.primaryKey
 
     let limit = isListOfValues
       ? axel.config.framework.defaultLovPagination
       : req.query.perPage
-      ? req.query.perPage
-      : axel.config.framework.defaultPagination;
-    limit = _.toNumber(limit);
-    const offset = startPage * limit;
-    const sortOptions = req.query.sort || options.sort;
-    const order = _.toPairs(sortOptions || { [options.primaryKey || primaryKey]: 'DESC' });
+        ? req.query.perPage
+        : axel.config.framework.defaultPagination
+    limit = _.toNumber(limit)
+    const offset = startPage * limit
+    const sortOptions = req.query.sort || options.sort
+    const order = _.toPairs(sortOptions || { [options.primaryKey || primaryKey]: 'DESC' })
     return {
       listOfValues: isListOfValues,
       startPage,
       limit,
       offset,
-      order,
-    };
+      order
+    }
   },
 
-  injectSearchParams(req, query = {}) {
+  injectSearchParams (req, query = {}) {
     if (req.query.search) {
       if (typeof req.query.search === 'string') {
-        req.query.search = req.query.search.trim();
+        req.query.search = req.query.search.trim()
       }
       query.$text = {
         $search: req.query.search,
-        $language: req.query.locale || 'en',
-      };
+        $language: req.query.locale || 'en'
+      }
     }
 
-    return query;
+    return query
   },
 
-  injectSqlSearchParams(
+  injectSqlSearchParams (
     req,
     query = {},
     options = {
       modelName: '',
-      fields: undefined,
+      fields: undefined
     }
   ) {
-    const Op = Sequelize.Op;
+    const Op = Sequelize.Op
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
-      throw new Error('search_params_injections_missing_model_name');
+      throw new Error('search_params_injections_missing_model_name')
     }
     if (req.query.search) {
-      const params = {};
+      const params = {}
       if (!query[Op.or]) {
-        query[Op.or] = [];
+        query[Op.or] = []
       }
-      let fields;
+      let fields
       if (options.modelName) {
-        const dataModel = axel.models[options.modelName].entity;
-        fields = Object.keys(dataModel.attributes);
+        const dataModel = axel.models[options.modelName].entity
+        fields = Object.keys(dataModel.attributes)
       } else {
-        fields = options.fields;
+        fields = options.fields
       }
       if (fields) {
-        fields.forEach(i => {
-          query[Op.or].push({ [i]: { [Op.like]: `%${req.query.search}%` } });
-        });
+        fields.forEach((i) => {
+          query[Op.or].push({ [i]: { [Op.like]: `%${req.query.search}%` } })
+        })
       }
     }
 
-    return query;
+    return query
   },
 
   /**
    * Removes undefined fields from the object query since the cause sequelize to crash
    * @param query
    */
-  cleanSqlQuery(query) {
+  cleanSqlQuery (query) {
     if (!query) {
-      return query;
+      return query
     }
-    Object.keys(query).forEach(key => {
+    Object.keys(query).forEach((key) => {
       if (query[key] === undefined) {
-        delete query[key];
+        delete query[key]
       }
-    });
-    return query;
+    })
+    return query
   },
 
-  removeAdditionalProperty(scheme, data) {
-    return _.pick(data, _.keys(scheme.schema.properties));
+  removeAdditionalProperty (scheme, data) {
+    return _.pick(data, _.keys(scheme.schema.properties))
   },
 
-  dashedToNormal(str) {
-    return str.replace(/\s+/g, '-').toLowerCase();
+  dashedToNormal (str) {
+    return str.replace(/\s+/g, '-').toLowerCase()
   },
 
-  formatName(firstname = null, lastname = null, company = null, optional = false) {
-    let name = '';
+  formatName (firstname = null, lastname = null, company = null, optional = false) {
+    let name = ''
     if (!firstname && !lastname && !company) {
-      return name;
+      return name
     }
 
     if (firstname || lastname) {
-      name = `${firstname} ${lastname}`;
+      name = `${firstname} ${lastname}`
       if (company && !optional) {
-        name += ` [${company}]`;
+        name += ` [${company}]`
       }
     } else {
-      name = company;
+      name = company
     }
 
-    return name ? name.trim() : '';
+    return name ? name.trim() : ''
   },
 
-  objectTrim(item) {
-    Object.keys(item).forEach(key => {
+  objectTrim (item) {
+    Object.keys(item).forEach((key) => {
       if (_.isString(item[key])) {
-        item[key] = item[key].trim();
+        item[key] = item[key].trim()
       }
-    });
-    return item;
+    })
+    return item
   },
 
-  validateDate(date) {
-    const timestamp = Date.parse(date);
+  validateDate (date) {
+    const timestamp = Date.parse(date)
     if (Number.isNaN(timestamp) === true) {
-      return false;
+      return false
     }
-    return true;
+    return true
   },
 
-  getEntityManager(req, res) {
-    const endpoint = _.isString(req) ? req : req.params.endpoint;
+  getEntityManager (req, res) {
+    const endpoint = _.isString(req) ? req : req.params.endpoint
     if (!axel.models[endpoint] || !axel.models[endpoint].repository) {
-      console.warn('REQUESTED  ENDPOINT', endpoint, 'DOES NOT EXISTS');
+      console.warn('REQUESTED  ENDPOINT', endpoint, 'DOES NOT EXISTS')
       res.status(404).json({
         errors: ['model_not_found_error'],
-        message: 'model_not_found_error',
-      });
-      return false;
+        message: 'model_not_found_error'
+      })
+      return false
     }
-    return axel.models[endpoint].em;
+    return axel.models[endpoint].em
   },
 
-  getRawObject(item) {
+  getRawObject (item) {
     if (Array.isArray(item)) {
-      return item.map(Utils.getRawObject);
+      return item.map(Utils.getRawObject)
     }
 
     if (item.rows && Array.isArray(item.rows)) {
-      return item.rows.map(Utils.getRawObject);
+      return item.rows.map(Utils.getRawObject)
     }
 
-    const output = item.get();
+    const output = item.get()
     /* eslint-disable no-underscore-dangle,no-unused-expressions */
     item._options.includeNames &&
-      item._options.includeNames.forEach(inc => {
-        output[inc] = Utils.getRawObject(item[inc]);
-      });
-    return output;
-  },
-};
+      item._options.includeNames.forEach((inc) => {
+        output[inc] = Utils.getRawObject(item[inc])
+      })
+    return output
+  }
+}
 
-module.exports = Utils;
+module.exports = Utils

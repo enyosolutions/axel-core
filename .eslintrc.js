@@ -86,6 +86,7 @@ module.exports = {
     //   "version": ">=10.0.0",
     //   "ignores": []
     // }]
+    semi: [2, 'always'],
     'promise/always-return': 'warn',
     'promise/no-return-wrap': 'warn',
     'promise/param-names': 'warn',

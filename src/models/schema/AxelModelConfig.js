@@ -16,32 +16,32 @@ module.exports = {
         $id: 'id',
         type: 'number',
         title: 'config id', // serves for front form fields
-        description: 'The id of this item', // serves for front form hint
+        description: 'The id of this item' // serves for front form hint
       },
       identity: {
         type: 'string',
         field: {
           required: true,
           disabled: true,
-          readonly: true,
-        },
+          readonly: true
+        }
       },
 
       pageTitle: {
         type: 'string',
-        title: 'Custom title for this page',
+        title: 'Custom title for this page'
       },
       icon: {
-        type: 'string',
+        type: 'string'
       },
       name: {
         type: 'string',
         field: {
-          required: true,
-        },
+          required: true
+        }
       },
       namePlural: {
-        type: 'string',
+        type: 'string'
       },
       nestedLayoutMode: {
         type: 'string',
@@ -68,17 +68,17 @@ module.exports = {
           detailPageMode: {
             type: 'string',
             default: 'sidebar',
-            enum: ['modal', 'fullscreen', 'sidebar', 'page'],
+            enum: ['modal', 'fullscreen', 'sidebar', 'page']
           }, // fade | slide | full
-          columnsDisplayed: { type: 'integer', default: false },
-        },
+          columnsDisplayed: { type: 'integer', default: false }
+        }
       },
       actions: {
         type: 'object',
         title: 'Possible actions',
         column: {
           type: 'string',
-          title: 'Possible actions',
+          title: 'Possible actions'
         },
         default: {},
         properties: {
@@ -101,8 +101,8 @@ module.exports = {
           bulkDelete: { type: 'boolean', default: true },
           bulkEdit: { type: 'boolean', default: true },
           itemsPerRow: { type: 'boolean', default: true },
-          editLayout: { type: 'boolean', default: true },
-        },
+          editLayout: { type: 'boolean', default: true }
+        }
       },
       customInlineActions: { type: 'array' },
       customTopActions: { type: 'array' },
@@ -117,9 +117,9 @@ module.exports = {
             title: 'layout of the form',
             type: 'object',
             default: null,
-            field: { type: 'JsonTextarea' },
-          },
-        },
+            field: { type: 'JsonTextarea' }
+          }
+        }
       },
       tableRowClickAction: {
         type: 'string',
@@ -142,7 +142,7 @@ module.exports = {
           'Define the number of items to get from the api for the table. This prevents overloading the table with too much data'
       }
     },
-    required: ['identity'],
+    required: ['identity']
   },
   admin: {
     name: 'Model config',
@@ -154,8 +154,8 @@ module.exports = {
       create: false,
       edit: true,
       view: true,
-      delete: true,
+      delete: true
     },
-    options: { detailPageMode: 'page' },
-  },
-};
+    options: { detailPageMode: 'page' }
+  }
+}

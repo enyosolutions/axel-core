@@ -1,116 +1,115 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const _ = require('lodash');
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const _ = require('lodash')
 
 const {
   VerifyCallback, VerifyErrors, sign, verify: jverify
-} = jwt;
+} = jwt
 
-
-const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id';
-const saltRounds = 10;
+const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id'
+const saltRounds = 10
 
 const issue = (payload, expiry = '7d') => sign(
   payload,
   axel.config.tokenSecret, // Token Secret that we sign it with
   {
-    expiresIn: expiry, // Token Expire time
-  },
-);
+    expiresIn: expiry // Token Expire time
+  }
+)
 
 // @fixme only id should be inserted in the token. The rest should fetched from the database / cache  with each request
 const generateToken = (user, fields = null) => issue(
   fields && Array.isArray(fields) ? _.pick(user, fields)
     : {
-      [primaryKey]: user[primaryKey],
-      username: user.username,
-      email: user.email,
-      roles: user.roles,
-    }
-);
+        [primaryKey]: user[primaryKey],
+        username: user.username,
+        email: user.email,
+        roles: user.roles
+      }
+)
 
 // Verifies token on a request
-function verify(token, callback) {
+function verify (token, callback) {
   return jverify(
     token, // The token to be verified
     axel.config.tokenSecret, // Same token we used to sign
     {}, // No Option,
     // for more see https://github.com/auth0/node-jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback
-    callback, // Pass errors or decoded token to callback
-  );
+    callback // Pass errors or decoded token to callback
+  )
 }
 
-function beforeCreate(user) {
+function beforeCreate (user) {
   return new Promise((resolve, reject) => {
     bcrypt.hash(user.password, saltRounds, (error, hash) => {
       if (error) {
-        return reject(error);
+        return reject(error)
       }
-      user.encryptedPassword = hash;
-      delete user.password;
-      delete user.cPassword;
-      delete user.confirmPassword;
-      resolve(user);
-    });
-  });
+      user.encryptedPassword = hash
+      delete user.password
+      delete user.cPassword
+      delete user.confirmPassword
+      resolve(user)
+    })
+  })
 }
 
-function beforeUpdate(user) {
+function beforeUpdate (user) {
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(saltRounds, (err, salt) => {
-      if (err) return reject(err);
+      if (err) return reject(err)
       if (user.password) {
         bcrypt.hash(user.password, salt, (err2, hash) => {
           if (err2) {
-            return reject(err2);
+            return reject(err2)
           }
-          user.encryptedPassword = hash;
-          delete user.password;
-          delete user.cPassword;
-          delete user.confirmPassword;
-          resolve(true);
-        });
+          user.encryptedPassword = hash
+          delete user.password
+          delete user.cPassword
+          delete user.confirmPassword
+          resolve(true)
+        })
       } else {
-        resolve(true);
+        resolve(true)
       }
-    });
-  });
+    })
+  })
 }
 
-function comparePassword(password, user) {
+function comparePassword (password, user) {
   return new Promise((resolve, reject) => {
     if (!user || !user.encryptedPassword) {
-      reject(new Error('error_invalid_credentials'));
+      reject(new Error('error_invalid_credentials'))
     }
     bcrypt.compare(password, user.encryptedPassword, (err, match) => {
-      if (err) resolve(err);
+      if (err) resolve(err)
       if (match) {
-        resolve(true);
+        resolve(true)
       } else {
-        reject(new Error('error_invalid_credentials'));
+        reject(new Error('error_invalid_credentials'))
       }
-    });
-  });
+    })
+  })
 }
 
 // @todo add support for injection of roles checking methods
-function tokenDecryptMiddleware(req, res, next) {
-  let hasHeader = false;
+function tokenDecryptMiddleware (req, res, next) {
+  let hasHeader = false
   if (
-    req.headers
-    && req.headers.authorization
-    && req.headers.authorization.indexOf('Bearer') > -1
+    req.headers &&
+    req.headers.authorization &&
+    req.headers.authorization.indexOf('Bearer') > -1
   ) {
-    const parts = req.headers.authorization.split(' ');
+    const parts = req.headers.authorization.split(' ')
     if (parts.length === 2) {
-      const scheme = parts[0];
-      const credentials = parts[1];
+      const scheme = parts[0]
+      const credentials = parts[1]
       if (/^Bearer$/i.test(scheme)) {
-        const token = credentials;
-        hasHeader = true;
+        const token = credentials
+        hasHeader = true
         verify(token, (err, decryptedToken) => {
           if (!err) {
-            req.user = decryptedToken; // This is the decrypted token or the payload you provided
+            req.user = decryptedToken // This is the decrypted token or the payload you provided
             // App.session.token = decryptedToken;
             // This is the decrypted token or the payload you provided
             // You should add more validation here
@@ -118,8 +117,8 @@ function tokenDecryptMiddleware(req, res, next) {
             // >> user still exists and is still allowed to use the api.
             // get the user from the database
           }
-          next();
-        });
+          next()
+        })
       }
     }
   }
@@ -127,72 +126,72 @@ function tokenDecryptMiddleware(req, res, next) {
 
   // if there is no token
   if (!hasHeader) {
-    next();
+    next()
   }
 }
 
-function getExtendedRoles(role) {
-  let myRoles = [];
+function getExtendedRoles (role) {
+  let myRoles = []
   if (
-    axel.config.framework.roles[role]
-    && axel.config.framework.roles[role].inherits
-    && Array.isArray(axel.config.framework.roles[role].inherits)
+    axel.config.framework.roles[role] &&
+    axel.config.framework.roles[role].inherits &&
+    Array.isArray(axel.config.framework.roles[role].inherits)
   ) {
-    myRoles = myRoles.concat(axel.config.framework.roles[role].inherits);
+    myRoles = myRoles.concat(axel.config.framework.roles[role].inherits)
     axel.config.framework.roles[role].inherits.forEach((r) => {
-      myRoles = myRoles.concat(getExtendedRoles(r));
-    });
+      myRoles = myRoles.concat(getExtendedRoles(r))
+    })
   }
-  return _.uniq(myRoles);
+  return _.uniq(myRoles)
 }
 
-function hasRole(user, role) {
-  return user && user.roles && user.roles.indexOf(role) > -1;
+function hasRole (user, role) {
+  return user && user.roles && user.roles.indexOf(role) > -1
 }
 
-function hasAnyRole(user, _requiredRoles) {
+function hasAnyRole (user, _requiredRoles) {
   if (!user || !user.roles) {
-    return false;
+    return false
   }
-  let requiredRoles = [];
+  let requiredRoles = []
   if (typeof _requiredRoles === 'string') {
-    requiredRoles = [_requiredRoles];
+    requiredRoles = [_requiredRoles]
   } else {
-    requiredRoles = _requiredRoles;
+    requiredRoles = _requiredRoles
   }
-  let myRoles = (user && user.roles) || user;
+  let myRoles = (user && user.roles) || user
 
   if (typeof (myRoles) === 'string') {
-    myRoles = JSON.parse(myRoles);
+    myRoles = JSON.parse(myRoles)
   }
   // Check if role exists
   for (let i = 0; i < requiredRoles.length; i++) {
-    const role = requiredRoles[i];
+    const role = requiredRoles[i]
     if (!axel.config.framework.roles[role]) {
       axel.logger.warn(
         'ACTION REQUIRES AN EXISTING ROLE',
         role,
-        Object.keys(axel.config.framework.roles),
-      );
-      return false;
+        Object.keys(axel.config.framework.roles)
+      )
+      return false
     }
   }
   if (!Array.isArray(myRoles)) {
-    return false;
+    return false
   }
   myRoles.forEach((role) => {
-    myRoles = myRoles.concat(getExtendedRoles(role));
-  });
-  let canAccess = false;
+    myRoles = myRoles.concat(getExtendedRoles(role))
+  })
+  let canAccess = false
   for (let i = 0; i < requiredRoles.length; i++) {
-    const role = requiredRoles[i];
+    const role = requiredRoles[i]
     if (myRoles.indexOf(role) > -1) {
-      canAccess = true;
-      break;
+      canAccess = true
+      break
     }
   }
 
-  return canAccess;
+  return canAccess
 }
 
 module.exports = {
@@ -205,5 +204,5 @@ module.exports = {
   hasRole,
   issue,
   tokenDecryptMiddleware,
-  verify,
-};
+  verify
+}

@@ -12,7 +12,6 @@ const l = require('./services/logger.js');
 
 const debug = d('axel:config');
 
-
 function loadConfig() {
   const dir = `${process.cwd()}/src/config/`;
   const files = readdirSync(path.resolve(dir));
@@ -103,6 +102,5 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = axel.config.node_env || 'production';
 }
 axel.init();
-
 
 module.exports = axel;

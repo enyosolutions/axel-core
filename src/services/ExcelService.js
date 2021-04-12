@@ -1,7 +1,6 @@
-const XLSX = require('xlsx');
-const _ = require('lodash');
-const path = require('path');
-
+const XLSX = require('xlsx')
+const _ = require('lodash')
+const path = require('path')
 
 const ExcelService = {
   /**
@@ -12,25 +11,25 @@ const ExcelService = {
    * @param  {[Object]} options [formating rules : columns dictionary and eager filtering or not]
    * @return {[Object]}         [a formatted json object]
    */
-  formatJson(json, options = {}) {
+  formatJson (json, options = {}) {
     return json.map((item) => {
       if (options.columns && Object.keys(options.columns).length) {
-        const newObject = {};
+        const newObject = {}
         Object.keys(item).forEach((key) => {
-          let newKey = options.columns && options.columns[key];
+          let newKey = options.columns && options.columns[key]
           if (newKey || options.eager) {
-            newKey = _.isString(newKey) ? newKey : key;
-            newObject[newKey] = item[key];
+            newKey = _.isString(newKey) ? newKey : key
+            newObject[newKey] = item[key]
           }
-        });
+        })
 
-        return newObject;
+        return newObject
       }
-      return item;
-    });
+      return item
+    })
   },
 
-  parse(url, options = { sheet: 0 }) {
+  parse (url, options = { sheet: 0 }) {
     const defaultOptions = {
       sheet: 0, // default to first sheet
       header: true, // if the excel has a header
@@ -39,37 +38,37 @@ const ExcelService = {
       },
       eager: true, // if true  and column dictionary if provided return values
       // that are not in the dictionnary. else only return values that are in the columns
-      parser: 'json', // html | json | csv | txt
-    };
-    options = _.merge(defaultOptions, options);
+      parser: 'json' // html | json | csv | txt
+    }
+    options = _.merge(defaultOptions, options)
 
-    const workbook = XLSX.readFile(url);
-    const worksheet = workbook.Sheets[workbook.SheetNames[options.sheet || 0]];
-    let json;
+    const workbook = XLSX.readFile(url)
+    const worksheet = workbook.Sheets[workbook.SheetNames[options.sheet || 0]]
+    let json
     switch (options.parser) {
       case 'json':
       default:
         /* eslint-disable no-case-declarations */
         json = XLSX.utils.sheet_to_json(worksheet, {
-          header: options.header,
-        });
-        return this.formatJson(json, options);
+          header: options.header
+        })
+        return this.formatJson(json, options)
       case 'html':
         return XLSX.utils.sheet_to_html(worksheet, {
-          header: options.header,
-        });
+          header: options.header
+        })
       case 'csv':
         return XLSX.utils.sheet_to_csv(worksheet, {
-          header: options.header,
-        });
+          header: options.header
+        })
       case 'txt':
         return XLSX.utils.sheet_to_txt(worksheet, {
-          header: options.header,
-        });
+          header: options.header
+        })
     }
   },
 
-  export(data, url, options = {}) {
+  export (data, url, options = {}) {
     const defaultOptions = {
       sheet: 0, // default to first sheet
       header: true, // if the excel has a header
@@ -78,25 +77,25 @@ const ExcelService = {
       },
       eager: true, // if true  and column dictionary if provided return values that
       // are not in the dictionnary. else only return values that are in the columns
-      parser: 'json', // html | json | csv | txt
-    };
-    options = _.merge(defaultOptions, options);
-
-    url = path.resolve('assets/data', `${url}.xlsx`);
-    try {
-      data = this.formatJson(data, options);
-      const ws = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, ws, 'Sheet1');
-      XLSX.writeFile(workbook, url);
-    } catch (e) {
-      console.warn('export error', e);
-      return e;
-      48;
+      parser: 'json' // html | json | csv | txt
     }
-    url = axel.config.appUrl + url.substr(url.indexOf('assets') + 6);
-    return url;
-  },
-};
+    options = _.merge(defaultOptions, options)
 
-module.exports = ExcelService;
+    url = path.resolve('assets/data', `${url}.xlsx`)
+    try {
+      data = this.formatJson(data, options)
+      const ws = XLSX.utils.json_to_sheet(data)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, ws, 'Sheet1')
+      XLSX.writeFile(workbook, url)
+    } catch (e) {
+      console.warn('export error', e)
+      return e
+      48
+    }
+    url = axel.config.appUrl + url.substr(url.indexOf('assets') + 6)
+    return url
+  }
+}
+
+module.exports = ExcelService

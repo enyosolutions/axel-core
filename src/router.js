@@ -86,6 +86,10 @@ function loadRoutePolicies(target, policies) {
 }
 
 function loadSecurityPolicy(target, policies) {
+  if (!target) {
+    debug('Policy', policies);
+    throw new Error('error_missing_policy_target');
+  }
   if (axel.config.security.secureAllEndpoints && target.secure !== false) {
     if (!axel.config.security.securityPolicy) {
       axel.logger.warn('[ROUTER] missing config default security policy middleware');
@@ -101,15 +105,18 @@ function loadSecurityPolicy(target, policies) {
 function connectRoute(app, source, _target) {
   let verb = 'all';
   let route;
+  let target = {};
   const policies = [];
-  const target = _target || {};
   const sourceArray = source.split(' ');
   if (typeof _target === 'string') {
     const [controller, action] = _target.split('.');
     target.controller = controller;
     target.action = action;
-  } else if (target.controller) {
-    target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'}`;
+  } else {
+    target = _target;
+    if (target.controller) {
+      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'}`;
+    }
   }
   if (sourceArray.length === 2) {
     verb = sourceArray[0].toLowerCase();
@@ -118,7 +125,7 @@ function connectRoute(app, source, _target) {
     route = sourceArray[0];
   }
   debug('connecting route', sourceArray);
-  loadSecurityPolicy();
+  loadSecurityPolicy(target, policies);
   loadControllerPolicies(target, policies);
   const routePolicies = loadRoutePolicies(target, policies);
 
@@ -126,12 +133,10 @@ function connectRoute(app, source, _target) {
     app[verb](source, wrapRoute(target));
     return Promise.resolve();
   }
-
   if (target && target.use && typeof target.use === 'function') {
     app.use(source, routePolicies, wrapRoute(target.use));
     return Promise.resolve(app);
   }
-
   if (target.view) {
     app[verb](
       route,
@@ -144,9 +149,8 @@ function connectRoute(app, source, _target) {
     );
     return Promise.resolve();
   }
-
   // Replace aliased routes
-  const controllerRoute = target.controller[0] === '@'
+  const controllerRoute = target.controller && target.controller[0] === '@'
     ? `${__dirname}${target.controller.replace('@axel', '').replace('@app', '..')}.js`
     : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
   axel.logger.trace('[ROUTING] connecting route', route, verb.toUpperCase(), {

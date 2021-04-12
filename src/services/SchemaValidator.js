@@ -1,137 +1,136 @@
-const Ajv = require('ajv');
-const _ = require('lodash');
-const debug = require('debug')('axel:schemavalidator');
+const Ajv = require('ajv')
+const _ = require('lodash')
+const debug = require('debug')('axel:schemavalidator')
 
-
-function getGrammaticalSingular(type) {
+function getGrammaticalSingular (type) {
   switch (type) {
     case 'string':
-      return 'a string';
+      return 'a string'
     case 'number':
-      return 'a number';
+      return 'a number'
     case 'integer':
-      return 'an integer';
+      return 'an integer'
     case 'object':
-      return 'an object';
+      return 'an object'
     case 'array':
-      return 'an array';
+      return 'an array'
     case 'boolean':
-      return 'a boolean';
+      return 'a boolean'
     case 'null':
-      return 'null';
+      return 'null'
     default:
-      return `a ${type}`;
+      return `a ${type}`
   }
 }
 
-function getFieldName(error) {
+function getFieldName (error) {
   return (
-    error.params.missingProperty
-    || error.params.additionalProperty
-    || (error.dataPath && error.dataPath.replace('.', ''))
-  );
+    error.params.missingProperty ||
+    error.params.additionalProperty ||
+    (error.dataPath && error.dataPath.replace('.', ''))
+  )
 }
 
-function getFormatErrorMessage(error) {
+function getFormatErrorMessage (error) {
   switch (error.params.format) {
     case 'date-time':
     case 'date':
-      return 'should be a date';
+      return 'should be a date'
     case 'email':
-      return 'should be a valid email address';
+      return 'should be a valid email address'
     case 'ipv4':
-      return 'should be a dotted-quad IPv4 address';
+      return 'should be a dotted-quad IPv4 address'
     case 'ipv6':
-      return 'should be a valid IPv6 address';
+      return 'should be a valid IPv6 address'
     case 'uri':
-      return 'should be a valid uri';
+      return 'should be a valid uri'
     default:
-      return JSON.stringify(error);
+      return JSON.stringify(error)
   }
 }
 
-function getValidMessage(error) {
+function getValidMessage (error) {
   switch (error.keyword) {
     case 'required':
-      return 'is required';
+      return 'is required'
     case 'minimum':
-      return `must be greater than ${error.params.limit}`;
+      return `must be greater than ${error.params.limit}`
     case 'maximum':
-      return `must be less than ${error.params.limit}`;
+      return `must be less than ${error.params.limit}`
     case 'type':
-      return `should be ${getGrammaticalSingular(error.params.type)}`;
+      return `should be ${getGrammaticalSingular(error.params.type)}`
     case 'minLength':
-      return `must be longer than ${error.params.limit} characters`;
+      return `must be longer than ${error.params.limit} characters`
     case 'maxLength':
-      return `must be shorter than ${error.params.limit} characters`;
+      return `must be shorter than ${error.params.limit} characters`
     case 'maxItems':
-      return `must have no more than ${error.params.limit} items`;
+      return `must have no more than ${error.params.limit} items`
     case 'minItems':
-      return `must have at least ${error.params.limit} items`;
+      return `must have at least ${error.params.limit} items`
     case 'format':
-      return getFormatErrorMessage(error);
+      return getFormatErrorMessage(error)
     case 'pattern':
-      return 'has invalid format';
+      return 'has invalid format'
     case 'additionalProperties':
-      return 'additional property not allowed';
+      return 'additional property not allowed'
     default:
-      return error.message;
+      return error.message
   }
 }
 
-function addMessage(fields, error, fieldName) {
-  const field = fieldName || getFieldName(error);
-  const message = getValidMessage(error);
+function addMessage (fields, error, fieldName) {
+  const field = fieldName || getFieldName(error)
+  const message = getValidMessage(error)
 
   if (!fields[field]) {
-    fields[field] = [];
+    fields[field] = []
   }
 
-  fields[field].push(`${field} ${message}`);
+  fields[field].push(`${field} ${message}`)
 }
 
-function normaliseErrorMessages(errors) {
-  axel.logger.log(errors);
-  const fields = {};
+function normaliseErrorMessages (errors) {
+  axel.logger.log(errors)
+  const fields = {}
   errors.forEach((error) => {
-    addMessage(fields, error);
-  });
+    addMessage(fields, error)
+  })
 
   return {
-    fields,
-  };
+    fields
+  }
 }
 
 class SchemaValidator {
-  constructor() {
+  constructor () {
     this.ajv = new Ajv({
       useDefaults: true,
       coerceTypes: true,
       allErrors: true,
       removeAdditional: false,
-      extendRefs: true,
-    });
+      extendRefs: true
+    })
     this.ajvStrict = new Ajv({
       useDefaults: true,
       coerceTypes: true,
       allErrors: true,
       removeAdditional: true,
-      extendRefs: true,
-    });
+      extendRefs: true
+    })
 
-    this.validators = {};
-    this.strictValidators = {};
-    this.missingSchemas = {};
-    this.initialized = false;
+    this.validators = {}
+    this.strictValidators = {}
+    this.missingSchemas = {}
+    this.initialized = false
   }
 
-  init() {
-    axel.logger.info('VALIDATOR: INIT');
-    this.loadSchemas();
-    this.initialized = true;
+  init () {
+    axel.logger.info('VALIDATOR: INIT')
+    this.loadSchemas()
+    this.initialized = true
   }
 
-  loadSchemas() {
+  loadSchemas () {
     /* eslint-disable */
 
     let existingSchemas = Object.keys(axel.models).filter(i => axel.models[i].schema)

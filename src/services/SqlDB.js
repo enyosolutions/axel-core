@@ -1,13 +1,13 @@
-const fs = require('fs');
-const _ = require('lodash');
-const Sequelize = require('sequelize');
-const axel = require('../axel.js');
+const fs = require('fs')
+const _ = require('lodash')
+const Sequelize = require('sequelize')
+const axel = require('../axel.js')
 
-async function loadSequelize() {
+async function loadSequelize () {
   if (axel.config.sqldb) {
-    const datastore = axel.config.sqldb;
-    axel.logger.debug('ORM ::', 'Connecting to database ', datastore.database);
-    axel.logger.debug('ORM ::', 'Connecting to database ', datastore);
+    const datastore = axel.config.sqldb
+    axel.logger.debug('ORM ::', 'Connecting to database ', datastore.database)
+    axel.logger.debug('ORM ::', 'Connecting to database ', datastore)
     const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
       ...datastore,
       host: datastore.host,
@@ -16,33 +16,33 @@ async function loadSequelize() {
       options: datastore.options,
       retry: datastore.retry,
       query: datastore.query ? datastore.query : {
-        raw: true,
+        raw: true
       },
       pool: {
         max: 10,
         min: 1,
         acquire: 30000,
         idle: 20000,
-        handleDisconnects: true,
+        handleDisconnects: true
       },
       define: {
         charset: 'utf8',
-        collate: 'utf8_general_ci',
-      },
-    });
+        collate: 'utf8_general_ci'
+      }
+    })
 
     try {
-      await sequelize.authenticate();
+      await sequelize.authenticate()
       axel.logger.warn(
         '✅ SQL DB Connection has been established successfully. %o',
-        datastore.options,
-      );
-      return sequelize;
+        datastore.options
+      )
+      return sequelize
     } catch (err) {
-      axel.logger.error('Unable to connect to the database:', err);
-      process.exit(-1);
+      axel.logger.error('Unable to connect to the database:', err)
+      process.exit(-1)
     }
   }
 }
-const sqlDB = loadSequelize();
-module.exports = sqlDB;
+const sqlDB = loadSequelize()
+module.exports = sqlDB

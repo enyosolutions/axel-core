@@ -92,7 +92,6 @@ module.exports = {
   // A preset that is used as a base for Jest's configuration
   // preset: 'ts-jest',
 
-
   // Run tests from one or more projects
   // projects: undefined,
 
@@ -174,7 +173,7 @@ module.exports = {
     '^.+\\.mjs$': 'babel-jest',
     '^.+\\.js$': 'babel-jest'
     // '^.+\\.ts?$': 'ts-jest',
-  },
+  }
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
   //   "/node_modules/"
@@ -191,4 +190,4 @@ module.exports = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
-};
+}

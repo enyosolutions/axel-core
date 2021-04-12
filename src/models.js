@@ -82,8 +82,8 @@ const loadSqlModel = (filePath, sequelize) => {
       {
         freezeTableName: true,
         query: {
-          raw: true,
-        },
+          raw: true
+        }
       },
       model.entity.options
     );
@@ -232,7 +232,7 @@ const loadSqlModels = () => {
         }
         if (model.entity && model.entity.defaultScope && model.entity.defaultScope instanceof Function) {
           model.repository.addScope('defaultScope', model.entity.defaultScope(sqlModels), {
-            override: true,
+            override: true
           });
         }
       });

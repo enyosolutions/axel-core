@@ -6,15 +6,15 @@
  *                 how this model works and what it represents here.
  */
 
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize')
 const {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
-  bulkJsonParseHook,
-} = require('../../services/SequelizeHooks.js');
+  bulkJsonParseHook
+} = require('../../services/SequelizeHooks.js')
 
-const jsonFields = ['config'];
+const jsonFields = ['config']
 
 const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
@@ -24,20 +24,20 @@ const AxelModelFieldConfig = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
+        allowNull: false
       },
 
       parentIdentity: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       config: {
-        type: Sequelize.TEXT,
-      },
+        type: Sequelize.TEXT
+      }
 
     },
     options: {
@@ -59,35 +59,35 @@ const AxelModelFieldConfig = {
         beforeValidate: jsonStringifyHook(jsonFields, {}),
         afterFind: bulkJsonParseHook(jsonFields, {}),
         beforeBulkCreate: bulkJsonStringifyHook(jsonFields, {}),
-        beforeBulkUpdate: bulkJsonStringifyHook(jsonFields, {}),
+        beforeBulkUpdate: bulkJsonStringifyHook(jsonFields, {})
       },
       indexes: [
         {
           unique: true,
-          fields: ['parentIdentity', 'name'],
+          fields: ['parentIdentity', 'name']
         },
         {
           unique: false,
-          fields: ['parentIdentity'],
+          fields: ['parentIdentity']
         },
         {
           unique: false,
-          fields: ['name'],
-        },
-      ],
+          fields: ['name']
+        }
+      ]
     },
     // Create relations
     associations: (models) => {
       models.axelModelFieldConfig.belongsTo(models.axelModelConfig, {
         targetKey: 'identity',
-        foreignKey: 'parentIdentity',
-      });
+        foreignKey: 'parentIdentity'
+      })
     },
     // define default join
     // @ts-ignore
-    defaultScope: models => ({}),
-  },
-};
+    defaultScope: models => ({})
+  }
+}
 
-module.exports = AxelModelFieldConfig;
-module.exports.AxelModelFieldConfig = AxelModelFieldConfig;
+module.exports = AxelModelFieldConfig
+module.exports.AxelModelFieldConfig = AxelModelFieldConfig

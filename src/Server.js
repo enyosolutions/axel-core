@@ -10,12 +10,10 @@ const debug = require('debug')('axel:server');
 const l = require('./services/logger.js');
 const errorHandler = require('./middlewares/error-handler');
 
-
 console.time('STARTUP TIME');
 const app = express();
 const exit = process.exit;
 const root = path.normalize(process.cwd());
-
 
 class Server {
   constructor() {
@@ -27,7 +25,8 @@ class Server {
     this.initCompleted = false;
     this.middlewares = {};
 
-    axel.init()
+    axel
+      .init()
       .then(() => {
         debug('', 'init in server.js');
         axel.app = app;
@@ -44,25 +43,24 @@ class Server {
           });
         }
 
-
         app.disable('x-powered-by');
 
         app.set('view engine', 'ejs');
         app.use(
           bodyParser.json({
             limit: process.env.REQUEST_LIMIT || '100mb',
-          }),
+          })
         );
         app.use(
           bodyParser.urlencoded({
             extended: true,
             limit: process.env.REQUEST_LIMIT || '100mb',
-          }),
+          })
         );
         app.use(
           bodyParser.text({
             limit: process.env.REQUEST_LIMIT || '100mb',
-          }),
+          })
         );
         if (axel.config && axel.config.security && axel.config.security.cors) {
           app.use(cors(axel.config.security.cors));
@@ -107,37 +105,43 @@ class Server {
       await this.beforeFn(app);
     }
 
-    return this.modelsFn(app)
-      // .then(() => installValidator(app, this.routes))
-      .then(() => this.router(app))
-      .then(async () => {
-        app.use(errorHandler);
-        if (!process.env.NODE_ENV) {
-          process.env.NODE_ENV = 'development';
-        }
-        if (this.afterFn) {
-          this.afterFn(app);
-        }
-        app.emit('app-ready', { axel });
-      })
-      .catch((e) => {
-        l.error(e);
-        exit(1);
-      });
+    return (
+      this.modelsFn(app)
+        // .then(() => installValidator(app, this.routes))
+        .then(() => this.router(app))
+        .then(async () => {
+          app.use(errorHandler);
+          if (!process.env.NODE_ENV) {
+            process.env.NODE_ENV = 'development';
+          }
+          if (this.afterFn) {
+            this.afterFn(app);
+          }
+          app.emit('app-ready', { axel });
+        })
+        .catch((e) => {
+          l.error(e);
+          exit(1);
+        })
+    );
   }
 
   async listen(port) {
     const welcome = p => () => {
       l.info(
         `up and running in ${process.env.NODE_ENV
-        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       debug(
         `up and running in ${process.env.NODE_ENV
-        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`,
+          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       l.info('\n');
       l.info('__________________________________');
+      l.info('__________________________________');
+      l.info(' ');
+      l.log('          ヽ(o＾▽＾o)ノ        ');
+      l.info(' ');
       l.info(`HOST: http://localhost:${p}`);
       l.info(`NODE_ENV: ${process.env.NODE_ENV}`);
       l.info('__________________________________');

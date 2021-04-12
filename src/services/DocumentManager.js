@@ -6,65 +6,64 @@
  *            type:string, mimetype: string, size: float, entity:string, entityId: FK}
  */
 
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const mkdirp = require('mkdirp');
-const _ = require('lodash');
-const Utils = require('../services/Utils.js');
+const fs = require('fs')
+const path = require('path')
+const multer = require('multer')
+const mkdirp = require('mkdirp')
+const _ = require('lodash')
+const Utils = require('../services/Utils.js')
 
-let s3;
-
+let s3
 
 const getStorage = (pathSuffix, filePrefix) => {
-  const destPath = path.join(process.cwd(), 'assets/data', pathSuffix);
-  fs.mkdirSync(destPath, { recursive: true });
+  const destPath = path.join(process.cwd(), 'assets/data', pathSuffix)
+  fs.mkdirSync(destPath, { recursive: true })
 
   return multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, destPath);
+      cb(null, destPath)
     },
     filename: (req, file, cb) => {
-      const fileName = file.originalname;
-      const fileNameParts = fileName.split('.');
+      const fileName = file.originalname
+      const fileNameParts = fileName.split('.')
 
-      cb(null, `${filePrefix}-${Utils.slugify(fileNameParts[0])}.${fileNameParts.pop()}`);
-    },
-  });
-};
+      cb(null, `${filePrefix}-${Utils.slugify(fileNameParts[0])}.${fileNameParts.pop()}`)
+    }
+  })
+}
 
 const DocumentManager = {
   storage: 'local',
   s3,
 
-  httpUpload(
+  httpUpload (
     req,
     res,
-    options = { path: '', filePrefix: '' },
+    options = { path: '', filePrefix: '' }
   ) {
     const promise = new Promise((resolve, reject) => {
       // don't allow the total upload size to exceed ~10MB
       // @ts-ignore
-      const storage = getStorage(options.path, options.filePrefix);
+      const storage = getStorage(options.path, options.filePrefix)
 
       multer({
         storage,
         limits: {
-          fieldSize: 250 * 1024 * 1024,
-        },
+          fieldSize: 250 * 1024 * 1024
+        }
       }).single('file')(req, res, (err) => {
         if (err) {
-          return reject(err);
+          return reject(err)
         }
-        const fileName = req.file.originalname;
-        const fileNameParts = fileName.split('.');
+        const fileName = req.file.originalname
+        const fileNameParts = fileName.split('.')
 
         resolve(
           `${axel.config.appUrl}/data/${options.path}/${options.filePrefix}-${Utils.slugify(
-            fileNameParts[0],
-          )}.${fileNameParts.pop()}`,
-        );
-      });
+            fileNameParts[0]
+          )}.${fileNameParts.pop()}`
+        )
+      })
 
       /*
       req.file('file').upload(
@@ -144,64 +143,64 @@ const DocumentManager = {
       //     resolve(out);
       //   });
       // });
-    });
-    return promise;
+    })
+    return promise
   },
 
-  base64Upload(image,
+  base64Upload (image,
     options = {}) {
     options = _.merge({
       targetFolder: '/data/workshop/', filename: '', includeHost: true, publicPath: '/public/'
-    }, options);
-    const filename = options.filename || `${Date.now()}-${_.random(100000)}-${Utils.md5(image.name)}.${image.name.split('.').pop()}`;
-    const host = axel.config.cdnUrl || axel.config.apiUrl;
-    let filepath = `${options.targetFolder || '/data/'}${filename}`;
-    filepath = filepath.replace(/\/\//g, '/');
-    const base64 = image && image.base64;
-    let fullPath = `${process.cwd()}/${options.publicPath}/${filepath}`;
-    mkdirp.sync(`${process.cwd()}/${options.publicPath}/${options.targetFolder || '/data/'}`);
-    fullPath = fullPath.replace(/\/\//g, '/');
+    }, options)
+    const filename = options.filename || `${Date.now()}-${_.random(100000)}-${Utils.md5(image.name)}.${image.name.split('.').pop()}`
+    const host = axel.config.cdnUrl || axel.config.apiUrl
+    let filepath = `${options.targetFolder || '/data/'}${filename}`
+    filepath = filepath.replace(/\/\//g, '/')
+    const base64 = image && image.base64
+    let fullPath = `${process.cwd()}/${options.publicPath}/${filepath}`
+    mkdirp.sync(`${process.cwd()}/${options.publicPath}/${options.targetFolder || '/data/'}`)
+    fullPath = fullPath.replace(/\/\//g, '/')
     fs.writeFileSync(fullPath,
-      Buffer.from(base64, 'base64'));
+      Buffer.from(base64, 'base64'))
 
-    return { url: `${options.includeHost ? host : ''}${filepath}`, path: fullPath };
+    return { url: `${options.includeHost ? host : ''}${filepath}`, path: fullPath }
   },
 
-  deleteFile(imageUrl, resp,
+  deleteFile (imageUrl, resp,
     options = {}) {
     options = _.merge({
       targetFolder: '/data/workshop/', publicPath: '/public/'
-    }, options);
+    }, options)
     return new Promise((resolve, reject) => {
       if (!imageUrl) {
-        return reject(new Error('missing_file_to_delete'));
+        return reject(new Error('missing_file_to_delete'))
       }
-      const host = axel.config.cdnUrl || axel.config.apiUrl;
-      let oldImage = imageUrl.replace(host, '');
+      const host = axel.config.cdnUrl || axel.config.apiUrl
+      let oldImage = imageUrl.replace(host, '')
       if (oldImage[0] && oldImage[0] === '/') {
-        oldImage = oldImage.substr(1);
+        oldImage = oldImage.substr(1)
       }
       try {
-        let fullPath = `${process.cwd()}/${options.publicPath}/${oldImage}`;
-        fullPath = fullPath.replace(/\/\//g, '/');
-        fs.unlinkSync(`${fullPath}`);
-        resolve(true);
+        let fullPath = `${process.cwd()}/${options.publicPath}/${oldImage}`
+        fullPath = fullPath.replace(/\/\//g, '/')
+        fs.unlinkSync(`${fullPath}`)
+        resolve(true)
       } catch (err) {
-        console.warn(err.message, imageUrl);
-        reject(err);
+        console.warn(err.message, imageUrl)
+        reject(err)
       }
-    });
+    })
   },
 
-  post(
+  post (
     document,
     options = {
       storage: null,
       entity: null,
-      entityId: null,
-    },
+      entityId: null
+    }
   ) {
-    axel.logger.info(options);
+    axel.logger.info(options)
   },
 
   // duplicate(doc, options, entityId, entity) {
@@ -266,27 +265,27 @@ const DocumentManager = {
   //   });
   // },
 
-  delete(doc) {
+  delete (doc) {
     return new Promise((resolve, reject) => {
       if (doc.indexOf('assets') !== -1) {
-        doc = doc.substr(doc.indexOf('assets') + 6);
+        doc = doc.substr(doc.indexOf('assets') + 6)
       }
       if (doc.indexOf(axel.config.appUrl) !== -1) {
-        doc = doc.replace(axel.config.appUrl, '');
+        doc = doc.replace(axel.config.appUrl, '')
       }
       fs.unlink(`${process.cwd()}/assets/${doc}`, (err) => {
         if (err) {
           if (err.code && err.code === 'ENOENT') {
-            resolve(true);
+            resolve(true)
           }
-          reject(err);
-          return;
+          reject(err)
+          return
         }
-        resolve(true);
-      });
-    });
-  },
-};
+        resolve(true)
+      })
+    })
+  }
+}
 
-module.exports = DocumentManager;
-module.exports.DocumentManager = DocumentManager;
+module.exports = DocumentManager
+module.exports.DocumentManager = DocumentManager
