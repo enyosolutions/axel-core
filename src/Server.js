@@ -34,7 +34,7 @@ class Server {
         app.set('appPath', root);
 
         if (this.middlewares) {
-          Object.keys(this.middlewares).forEach((m) => {
+          Object.keys(this.middlewares).forEach(m => {
             debug('Loading middleware', m, this.middlewares[m]);
             if (!this.middlewares[m] || !_.isFunction(this.middlewares[m])) {
               throw new Error(`middleware ${m} is not a function`);
@@ -110,16 +110,16 @@ class Server {
         // .then(() => installValidator(app, this.routes))
         .then(() => this.router(app))
         .then(async () => {
-          app.use(errorHandler);
           if (!process.env.NODE_ENV) {
             process.env.NODE_ENV = 'development';
           }
           if (this.afterFn) {
             this.afterFn(app);
           }
+          app.use(errorHandler);
           app.emit('app-ready', { axel });
         })
-        .catch((e) => {
+        .catch(e => {
           l.error(e);
           exit(1);
         })
@@ -129,12 +129,12 @@ class Server {
   async listen(port) {
     const welcome = p => () => {
       l.info(
-        `up and running in ${process.env.NODE_ENV
-          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
+        `up and running in ${process.env.NODE_ENV ||
+          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       debug(
-        `up and running in ${process.env.NODE_ENV
-          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
+        `up and running in ${process.env.NODE_ENV ||
+          'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       l.info('\n');
       l.info('__________________________________');
