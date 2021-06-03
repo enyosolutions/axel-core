@@ -40,11 +40,10 @@ function loadControllerPolicies(target, policies) {
     const controllerPolicies = axel.config.policies[target.controller] || axel.config.policies[policyControllerName];
     if (controllerPolicies) {
       const policy = controllerPolicies[target.action];
-      if (target.action === 'create') { console.log({ target, policy }, controllerPolicies[target.action]); }
       if (policy) {
         const policyType = typeof policy;
         if (!['array', 'boolean', 'string'].includes(policyType) && !Array.isArray(policy)) {
-          console.log('policy', target.controller, policy);
+          console.warn('policy', target.controller, policy);
           throw new Error(`Policy definition in config must not be ${policyType} provided`);
         }
         if (Array.isArray(policy)) {
@@ -72,8 +71,11 @@ function loadRoutePolicies(target, policies = []) {
   if (target.policy && !target.policies) {
     target.policies = [target.policy];
   }
+
+
   if (target.policies && !Array.isArray(target.policies)) {
-    throw new Error(`Policies should be an array (${target})`);
+    console.log('target, policies', target);
+    throw new Error(`Policy should be an array (${JSON.stringify(target)})`);
   }
   policies = policies.concat(target.policies || []);
   policies = _.uniq(policies).filter(p => p && (typeof p === 'function' || typeof p === 'string'));

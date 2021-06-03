@@ -47,12 +47,12 @@ class AxelManager {
     } catch (err) {
       console.warn('[AXELMANAGER][WARNING]', err.message);
     }
-    console.log('\n\n\n\n\n\n');
-    console.log('[AXELMANAGER] WS is opening');
+    debug('\n\n\n');
+    debug('[AXELMANAGER] WS is opening');
     const io = socketIO(app.locals.server);
     app.locals.io = io;
     io.on('connect', socket => {
-      console.log('[AXELMANAGER] WS client connected', socket.id);
+      debug('[AXELMANAGER] WS client connected', socket.id);
       const counter = 0;
 
       socket.on('/axel-manager/api', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
@@ -79,7 +79,7 @@ class AxelManager {
               let count = withSchema ? 4 : 3;
               // catching api signals in order for the file to generate properly
               process.once('SIGUSR2', () => {
-                console.log('[AXELMANAGER] Captured interruption signal....', count--);
+                debug('[AXELMANAGER] Captured interruption signal....', count--);
 
                 if (count <= 0) {
                   setTimeout(() => {
