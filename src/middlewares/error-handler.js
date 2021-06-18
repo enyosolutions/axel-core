@@ -2,7 +2,6 @@ const ErrorUtils = require('../services/ErrorUtils');
 
 function developmentErrorHandler(err, req, res, next) {
   const { code, message, errors } = ErrorUtils.errorCallback(err);
-  axel.logger.error(err);
   if (res.headersSent) {
     return next(err);
   }

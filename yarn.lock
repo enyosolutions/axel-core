@@ -1810,10 +1810,10 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.11.0.tgz#d61f46d83b2519250e2784daf5b09479a8b41c59"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
 
-axel-cli@^0.3.4:
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/axel-cli/-/axel-cli-0.3.4.tgz#1a7ec2428569a2925aba2a85948675d59ae6f296"
-  integrity sha512-bMiXo+GB0tTlX3xRWo8dXGWyOQqBGKyG/99iUmiWgnRztm3eo8nA2tgJaQwN7uELOFNDGum9UGLwl4aB0b/3Ig==
+axel-cli@^0.3.10:
+  version "0.3.10"
+  resolved "https://registry.yarnpkg.com/axel-cli/-/axel-cli-0.3.10.tgz#6edbd17a586cbc2f9a00cbe63efff2b746919495"
+  integrity sha512-5JSzrsWaofhFOc5ZsYdafeOR8OVhShTmGnXZkLyFwLN0gW5MT0ZYRi40RuKkMemEXWuP/5VK4pXdDhIOL54QRg==
   dependencies:
     "@commitlint/cli" "^8.3.5"
     "@oclif/command" "^1"
@@ -3114,10 +3114,10 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-ejs@^3.1.5:
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.5.tgz#aed723844dc20acb4b170cd9ab1017e476a0d93b"
-  integrity sha512-dldq3ZfFtgVTJMLjOe+/3sROTzALlL9E34V4/sDtUd/KlBSS0s6U1/+WPE1B4sj9CXHJpL1M6rhNJnc9Wbal9w==
+ejs@^3.1.6:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.6.tgz#5bfd0a0689743bb5268b3550cceeebbc1702822a"
+  integrity sha512-9lt9Zse4hPucPkoP7FHDF0LQAlGyF9JVpnClFLFH3aSSbxmyoqINRpp/9wePWJTUl4KOQwRL72Iw3InHPDkoGw==
   dependencies:
     jake "^10.6.1"
 
