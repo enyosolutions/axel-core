@@ -2,7 +2,9 @@
 const crypto = require('crypto');
 const stringify = require('json-stringify-safe');
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 const _ = require('lodash');
+
 const { ExtendedError } = require('./ExtendedError.js');
 const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
 
@@ -86,7 +88,6 @@ const Utils = {
    */
   sqlFormatForSearchMode(str, mode) {
     mode = mode || axel.config.framework.defaultApiSearchMode;
-    const Op = Sequelize.Op;
     switch (mode) {
       default:
       case 'exact':
@@ -127,9 +128,7 @@ const Utils = {
     if (req.query.options) {
       options.searchMode = options.searchMode || (req.query.options && req.query.options.searchMode);
     }
-    const Op = Sequelize.Op;
     // filters from the ui. Ex table fields
-    // @deprecated use _filters
     if (req.query.filters && _.isObject(req.query.filters)) {
       const filters = req.query.filters;
       Object.keys(filters)
@@ -140,7 +139,22 @@ const Utils = {
             delete req.query.filters[i];
           }
           if (filters[i]) {
-            query[i] = Utils.sqlFormatForSearchMode(filters[i], options.searchMode);
+            const filters = req.query.filters[i];
+            if (Array.isArray(filters)) {
+              query[i] = { [Op.in]: filters };
+            } else if (_.isObject(filters)) {
+              if (Object.keys(filters).length > 1) {
+                query[i] = { [Op.and]: [] };
+                Object.keys(filters).forEach((filter) => {
+                  query[i][Op.and].push(this.getQueryForFilter(filter, filters[filter]));
+                });
+              } else {
+                const key = Object.keys(filters)[0];
+                query[i] = this.getQueryForFilter(key, filters[key], options.searchMode);
+              }
+            } else {
+              query[i] = this.sqlFormatForSearchMode(filters, options.searchMode);
+            }
           }
         });
     }
@@ -196,6 +210,57 @@ const Utils = {
     // }
     return query;
   },
+
+
+  getQueryForFilter(filter, value, searchMode = 'start') {
+    switch (filter) {
+      case '$isNull':
+        return { [Op.is]: null };
+      case '$isNotNull':
+        return { [Op.not]: null };
+      case '$isDefined':
+        return {
+          [Op.not]: null,
+          [Op.ne]: ''
+        };
+      case '$isNotDefined':
+        return {
+          [Op.or]: [
+            { [Op.is]: null },
+            { [Op.eq]: '' }
+          ]
+        };
+      case '$startsWith':
+        return { [Op[filter.replace('$', '')]]: `${value}%` };
+      case '$endsWith':
+        return { [Op[filter.replace('$', '')]]: `%${value}` };
+      case '$substring':
+        return { [Op[filter.replace('$', '')]]: `%${value}%` };
+      case '$eq':
+      case '$ne':
+      case '$gt':
+      case '$gte':
+      case '$lt':
+      case '$lte':
+      case '$like':
+      case '$notLike':
+      case '$in':
+      case '$notIn':
+        return { [Op[filter.replace('$', '')]]: value };
+      case '$between':
+      case '$notBetween':
+        return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
+      case '$custom':
+        return value;
+      default:
+        if (searchMode === 'exact') {
+          return this.sqlFormatForSearchMode(value, searchMode);
+        }
+        return this.sqlFormatForSearchMode(value, searchMode);
+    }
+  },
+
+
 
   /**
    * Inject params from the request into the include array that we'll user to include relation from the database
@@ -352,7 +417,6 @@ const Utils = {
       fields: undefined
     }
   ) {
-    const Op = Sequelize.Op;
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
       throw new Error('search_params_injections_missing_model_name');
     }
