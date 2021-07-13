@@ -51,7 +51,8 @@ function loadControllerPolicies(target, policies) {
         } else if (policyType === 'string') {
           policies.push(policy);
         } else if (policyType === 'boolean') {
-          //
+          // remove the default security policy
+          target.secure = false;
         } else {
           console.log('warning weird policy detected', policy, policyType);
         }
@@ -135,8 +136,8 @@ function connectRoute(app, source, _target) {
   } else {
     route = sourceArray[0];
   }
-  policies = loadDefaultSecurityPolicy(target, policies);
   policies = loadControllerPolicies(target, policies);
+  policies = loadDefaultSecurityPolicy(target, policies);
   const routePolicies = loadRoutePolicies(target, policies);
   if (typeof target === 'function') {
     app[verb](source, wrapRoute(target));

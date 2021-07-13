@@ -370,13 +370,13 @@ const Utils = {
     req,
     options = {
       sort: null,
-      primaryKey: ''
+      primaryKey: '',
+      model: null
     }
   ) {
     const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
-    const primaryKey = axel.config.framework.primaryKey;
-
+    const primaryKey = (options && options.primaryKey) || (model && model.primaryKeyField) || axel.config.framework.primaryKey;
     let limit = isListOfValues
       ? axel.config.framework.defaultLovPagination
       : req.query.perPage
