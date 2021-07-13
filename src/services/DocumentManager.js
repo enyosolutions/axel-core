@@ -36,7 +36,7 @@ const DocumentManager = {
   storage: 'local',
   s3,
 
-  httpUpload (
+  httpUpload(
     req,
     res,
     options = { path: '', filePrefix: '' }
@@ -59,7 +59,7 @@ const DocumentManager = {
         const fileNameParts = fileName.split('.')
 
         resolve(
-          `${axel.config.appUrl}/data/${options.path}/${options.filePrefix}-${Utils.slugify(
+          `${axel.config.cdnUrl || axel.config.appUrl}/data/${options.path}/${options.filePrefix}-${Utils.slugify(
             fileNameParts[0]
           )}.${fileNameParts.pop()}`
         )
@@ -147,13 +147,13 @@ const DocumentManager = {
     return promise
   },
 
-  base64Upload (image,
+  base64Upload(image,
     options = {}) {
     options = _.merge({
       targetFolder: '/data/workshop/', filename: '', includeHost: true, publicPath: '/public/'
     }, options)
     const filename = options.filename || `${Date.now()}-${_.random(100000)}-${Utils.md5(image.name)}.${image.name.split('.').pop()}`
-    const host = axel.config.cdnUrl || axel.config.apiUrl
+    const host = axel.config.cdnUrl || axel.config.appUrl
     let filepath = `${options.targetFolder || '/data/'}${filename}`
     filepath = filepath.replace(/\/\//g, '/')
     const base64 = image && image.base64
@@ -166,7 +166,7 @@ const DocumentManager = {
     return { url: `${options.includeHost ? host : ''}${filepath}`, path: fullPath }
   },
 
-  deleteFile (imageUrl, resp,
+  deleteFile(imageUrl, resp,
     options = {}) {
     options = _.merge({
       targetFolder: '/data/workshop/', publicPath: '/public/'
@@ -175,7 +175,7 @@ const DocumentManager = {
       if (!imageUrl) {
         return reject(new Error('missing_file_to_delete'))
       }
-      const host = axel.config.cdnUrl || axel.config.apiUrl
+      const host = axel.config.cdnUrl || axel.config.appUrl
       let oldImage = imageUrl.replace(host, '')
       if (oldImage[0] && oldImage[0] === '/') {
         oldImage = oldImage.substr(1)
@@ -192,7 +192,7 @@ const DocumentManager = {
     })
   },
 
-  post (
+  post(
     document,
     options = {
       storage: null,
@@ -265,7 +265,7 @@ const DocumentManager = {
   //   });
   // },
 
-  delete (doc) {
+  delete(doc) {
     return new Promise((resolve, reject) => {
       if (doc.indexOf('assets') !== -1) {
         doc = doc.substr(doc.indexOf('assets') + 6)
