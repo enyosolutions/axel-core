@@ -13,7 +13,7 @@ const loadSchemaModel = (filePath) => {
   /* eslint-enable */
 
   if (!model.identity) {
-    throw new Error(`ORM ::  missing identity for ${filePath}`);
+    throw new Error(`[ORM]  missing identity for ${filePath}`);
   }
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);
@@ -27,9 +27,9 @@ const loadSqlAttributes = (model) => {
   Object.entries(model.entity.attributes).forEach(([, attr]) => {
     if (typeof attr.type === 'string') {
       const type = attr.type
-        .replace('DataTypes.', '')
-        .replace('sequelize.', '')
-        .replace(/\(.+\)/, '');
+      .replace('DataTypes.', '')
+      .replace('sequelize.', '')
+      .replace(/\(.+\)/, '');
       const args = attr.type.match(/\(.+\)/);
       const resolvedType = _.get(DataTypes, type);
       if (resolvedType) {
@@ -37,10 +37,10 @@ const loadSqlAttributes = (model) => {
         if (args && args[0]) {
           attr.type = attr.type(
             ...args[0]
-              .replace(/\(|\)/g, '')
-              .split(',')
-              .map(s => s.replace(/["']/g, '').trim())
-          );
+            .replace(/\(|\)/g, '')
+            .split(',')
+            .map(s => s.replace(/["']/g, '').trim())
+            );
         }
       }
     }
@@ -49,14 +49,14 @@ const loadSqlAttributes = (model) => {
 
 const loadSqlModel = (filePath, sequelize) => {
   if (sequelize) {
-    axel.logger.verbose('ORM :: loading sequelize model  %s', filePath);
+    axel.logger.verbose('[ORM] loading sequelize model  %s', filePath);
 
     let model;
     try {
       /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
     } catch (err) {
-      console.warn('[WARN] ', filePath, err);
+      console.warn('[ORM][WARN] ', filePath, err);
     }
     if (!model) {
       throw new Error('missing_model_' + filePath);
@@ -66,26 +66,26 @@ const loadSqlModel = (filePath, sequelize) => {
     axel.logger.verbose('Loading identity', model);
     debug('Loading entity', model.identity);
     if (!model.identity) {
-      throw new Error(`ORM ::  missing sql identity for ${filePath}`);
+      throw new Error(`[ORM]  missing sql identity for ${filePath}`);
     }
     if (!model.entity) {
-      throw new Error(`ORM ::  missing sql entity for ${filePath}`);
+      throw new Error(`[ORM]  missing sql entity for ${filePath}`);
     }
     if (!tableName) {
-      throw new Error(`ORM ::  missing sql tableName for ${filePath}`);
+      throw new Error(`[ORM]  missing sql tableName for ${filePath}`);
     }
 
     if (!model.entity.options) {
       model.entity.options = {};
     }
     model.entity.options = _.merge(
-      {
-        freezeTableName: true,
-        query: {
-          raw: true
-        }
-      },
-      model.entity.options
+    {
+      freezeTableName: true,
+      query: {
+        raw: true
+      }
+    },
+    model.entity.options
     );
     if (model.entity.attributes) {
       loadSqlAttributes(model);
@@ -94,7 +94,7 @@ const loadSqlModel = (filePath, sequelize) => {
       _.upperFirst(_.camelCase(model.identity)),
       model.entity.attributes,
       model.entity.options
-    );
+      );
     // SqlModel.sequelize = Sequelize;
 
     if (!axel.models[model.identity]) {
@@ -109,13 +109,13 @@ const loadSqlModel = (filePath, sequelize) => {
 
     return axel.models[model.identity];
   }
-  axel.logger.verbose('ORM :: skipping file %s', filePath);
+  axel.logger.verbose('[ORM] skipping file %s', filePath);
 };
 
 const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
-    axel.logger.info('ORM :: loading schema models');
+    axel.logger.info('[ORM] loading schema models');
     const modelsLocation = `${process.cwd()}/src/api/models/schema`;
 
     if (!axel.models) {
@@ -127,25 +127,25 @@ const loadSchemaModels = () => {
         return reject(err);
       }
       files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
-      axel.logger.info('ORM :: found %s schemas files', files.length);
+      axel.logger.info('[ORM] found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
       const promises = files.map((file) => {
         const filePath = `${modelsLocation}/${file}`;
-        axel.logger.verbose('ORM :: loading schema model', filePath);
+        axel.logger.verbose('[ORM] loading schema model', filePath);
         return loadSchemaModel(filePath);
       });
 
       Promise.all(promises)
-        .then(() => {
-          axel.logger.debug('ORM :: schema final callback');
-          debug('ORM :: schema final callback');
-          resolve();
-        })
-        .catch((errAsync) => {
-          axel.logger.warn(errAsync);
-          debug(errAsync);
-          return reject(errAsync);
-        });
+      .then(() => {
+        axel.logger.debug('[ORM] schema final callback');
+        debug('[ORM] schema final callback');
+        resolve();
+      })
+      .catch((errAsync) => {
+        axel.logger.warn(errAsync);
+        debug(errAsync);
+        return reject(errAsync);
+      });
     });
   });
 };
@@ -153,7 +153,7 @@ const loadSchemaModels = () => {
 /**
  * @description load all the sql defined models
  */
-const loadSqlModels = () => {
+ const loadSqlModels = () => {
   debug('loadSqlModels');
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
@@ -179,13 +179,13 @@ const loadSqlModels = () => {
     debug('bye bye');
 
     const modelsLocation = `${process.cwd()}/src/api/models/sequelize`;
-    debug('ORM :: sql models location', modelsLocation);
+    debug('[ORM] sql models location', modelsLocation);
     if (!axel.models) {
       axel.models = {};
     }
     let files = fs.readdirSync(modelsLocation);
     files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
-    axel.logger.info('ORM :: found %s sequelize models files', files.length);
+    axel.logger.info('[ORM] found %s sequelize models files', files.length);
     debug('MODELS :: found %s sequelize models files', files.length);
     const loadedModels = files.map((file) => {
       const filePath = `${modelsLocation}/${file}`;
@@ -194,8 +194,8 @@ const loadSqlModels = () => {
       return model;
     });
     try {
-      axel.logger.verbose('ORM :: loading associations');
-      debug('ORM :: loading associations', loadedModels.map(m => m.identity));
+      axel.logger.verbose('[ORM] loading associations');
+      debug('[ORM] loading associations', loadedModels.map(m => m.identity));
       Object.keys(loadedModels).forEach((key) => {
         const model = loadedModels[key];
         if (model.entity && model.entity.attributes) {
@@ -237,7 +237,7 @@ const loadSqlModels = () => {
         }
       });
 
-      axel.logger.verbose('ORM :: sequelize final callback');
+      axel.logger.verbose('[ORM] sequelize final callback');
       resolve();
     } catch (errAsync) {
       axel.logger.warn(errAsync);
@@ -249,15 +249,17 @@ const loadSqlModels = () => {
 const findModelsDifferences = () => new Promise((resolve, reject) => {
   try {
     /* eslint-disable */
-      axel.logger.verbose('ORM :: compare definitions');
-      axel.logger.info('\n\n\n');
-      axel.logger.info('___________________________');
-      Object.keys(axel.models).forEach(key => {
-        const model = axel.models[key];
-        if (model.entity && model.schema) {
-          const sqlProperties = Object.keys(model.entity.attributes);
-          const jsonProperties = Object.keys(model.schema.properties);
-
+    axel.logger.verbose('[ORM] compare definitions');
+    axel.logger.info('\n\n\n');
+    axel.logger.info('___________________________');
+    const diffTable1 = [];
+    const diffTable2 = [];
+    Object.keys(axel.models).forEach(key => {
+      const model = axel.models[key];
+      if (model.entity && model.schema) {
+        const sqlProperties = Object.keys(model.entity.attributes);
+        const jsonProperties = Object.keys(model.schema.properties);
+          // skipping timestamp props
           if (model.entity.options && model.entity.options.timestamps) {
             const options = model.entity.options;
             sqlProperties.push(options.createdAt || 'createdAt');
@@ -267,23 +269,28 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
           let diff1 = _.difference(sqlProperties, jsonProperties);
           let diff2 = _.difference(jsonProperties, sqlProperties);
           if (diff1.length) {
-            axel.logger.warn('ORM :: model : ', key, ' => Fields present in sql but not in json');
-            // diff1 = diff1.unshift('ORM ::', 'Fields present in sql but not in json');
-            axel.logger.warn(diff1.join(' | '));
+            diffTable1.push({model: key, fields: diff1.join(' | ')})
           }
           if (diff2.length) {
-            axel.logger.warn('ORM :: model : ', key, ' => Fields present in json but not in sql');
-            axel.logger.warn(diff2.join(' | '));
+            diffTable2.push({model: key, fields: diff2.join(' | ')})
           }
         }
       });
-      /* eslint-enable */
-    axel.logger.info('___________________________');
-    axel.logger.info('\n\n\n');
-    resolve();
-  } catch (err) {
-    reject(err);
-  }
+      if (diffTable1.length) {
+       axel.logger.warn('[ORM] Fields present in sql but not in json');
+       console.table(diffTable1);
+     }
+     if (diffTable2.length) {
+       axel.logger.warn('[ORM] Fields present in json but not in sql');
+       console.table(diffTable2);
+     }
+   /* eslint-enable */
+   axel.logger.info('___________________________');
+   axel.logger.info('\n\n\n');
+   resolve();
+ } catch (err) {
+  reject(err);
+}
 });
 
 function unifyEntityManagers() {
@@ -345,10 +352,10 @@ function unifyEntityManagers() {
       // COUNT
       model.em.unifiedCount = function(query, options) {
         return model.em.count(
-          {
-            where: query,
-          },
-          options
+        {
+          where: query,
+        },
+        options
         );
       };
 
@@ -389,7 +396,9 @@ function injectUnifiedFunctions(model) {
 async function modelsLoader(app) {
   await loadSchemaModels();
   await loadSqlModels();
-  await findModelsDifferences();
+  if (process.env.NODE_ENV !== 'production') {
+    await findModelsDifferences();
+  }
   await unifyEntityManagers();
   return Promise.resolve();
 }

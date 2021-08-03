@@ -6,7 +6,7 @@ const axel = require('../axel.js')
 async function loadSequelize() {
   if (axel.config.sqldb) {
     const datastore = axel.config.sqldb
-    axel.logger.debug('ORM ::', 'Connecting to database ', datastore.database)
+    axel.logger.debug('[ORM] Connecting to database ', datastore.database)
     const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
       ...datastore,
       host: datastore.host,
@@ -33,12 +33,12 @@ async function loadSequelize() {
     try {
       await sequelize.authenticate()
       axel.logger.warn(
-        '✅ SQL DB Connection has been established successfully. %o',
+        '[ORM] ✅ SQL DB Connection has been established successfully. %o',
         datastore.options
       )
       return sequelize
     } catch (err) {
-      axel.logger.error('Unable to connect to the database:', err)
+      axel.logger.error('[ORM] Unable to connect to the database:', err)
       process.exit(-1)
     }
   }
