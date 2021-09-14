@@ -129,7 +129,7 @@ class CrudSqlController {
         nested: true
       })
       .then((result) => {
-        items = result.rows
+        items = result.rows.map(item => item.get());
         if (listOfValues) {
           items = items.map(item => ({
             [primaryKey]: item[primaryKey],

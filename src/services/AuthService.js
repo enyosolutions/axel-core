@@ -22,14 +22,14 @@ const issue = (payload, expiry = '7d') => sign(
 )
 
 // @fixme only id should be inserted in the token. The rest should fetched from the database / cache  with each request
-const generateToken = (user, fields = null) => issue(
+const generateToken = (user, fields = null, expiry = '7d') => issue(
   fields && Array.isArray(fields) ? _.pick(user, fields)
     : {
       [primaryKey]: user[primaryKey],
       username: user.username,
       email: user.email,
       roles: user.roles
-    }
+    }, expiry
 )
 
 // Verifies token on a request
