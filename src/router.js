@@ -88,7 +88,7 @@ function loadRoutePolicies(target, policies = []) {
     } else if (axel.policies[p]) {
       routePolicies.push(axel.policies[p]);
     } else {
-      throw new Error('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
+      throw new Error(`[ROUTER] unknown policy [${p}] => Make sure it exists in your policy folder`);
       //   axel.logger.warn('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
     }
   });

@@ -117,7 +117,7 @@ class AxelManager {
               fields: Object.keys(modelDef.entity.attributes).map(idx => ({
                 name: idx,
                 ...modelDef.entity.attributes[idx],
-                type: undefined,
+                type: modelDef.properties,
               })),
             }));
             cb(null, {

@@ -10,6 +10,7 @@ async function loadSequelize() {
     const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
       ...datastore,
       host: datastore.host,
+      port: datastore.port,
       dialect: datastore.options.dialect,
       logging: datastore.options.logging,
       options: datastore.options,
