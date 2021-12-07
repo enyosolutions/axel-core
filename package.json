@@ -1,6 +1,6 @@
 {
   "name": "axel-core",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Axel: Express + OhMyGoodness",
   "main": "src/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "src"
   ],
   "dependencies": {
-    "axel-cli": "^0.3.10",
+    "axel-cli": "^0.3.13",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
