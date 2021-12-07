@@ -72,7 +72,6 @@ export default new Vuex.Store({
       const promise = this._vm.$socket.get('/axel-manager/admin-models');
       return promise
         .then(res => {
-          console.log('res', res.body)
           const apiModels = res.body.map(model => {
             model.title = model.title || startCase(model.name);
             model = {
@@ -89,7 +88,6 @@ export default new Vuex.Store({
             };
             return model;
           });
-          console.log('apiModels', apiModels)
           commit('models', apiModels);
         })
         .catch(err => {

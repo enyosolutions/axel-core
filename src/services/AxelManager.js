@@ -372,7 +372,7 @@ class AxelManager {
         switch (req.method) {
           case 'POST':
             try {
-              const auth = AuthService.generateToken({ firstName: 'ADMIN', roles: ['ADMIN'] }, null, '6h');
+              const auth = AuthService.generateToken({ id: 1, firstName: 'ADMIN', roles: ['ADMIN'] }, null, '6h');
               console.log("auth", auth);
               cb(null, { body: auth })
             }
