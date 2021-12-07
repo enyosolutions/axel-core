@@ -9,6 +9,9 @@ const debug = d('axel:AuthService');
 const {
   VerifyCallback, VerifyErrors, sign, verify: jverify
 } = jwt
+if (!axel.config.tokenSecret) {
+  throw new Error('missing tokenSecret in your config');
+}
 
 const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id'
 const saltRounds = 10

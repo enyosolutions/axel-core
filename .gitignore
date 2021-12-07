@@ -5,6 +5,7 @@ api/.env
 api/.env.local
 api/src/config/local.*
 api/src/config/local.ts
+axel-manager/dist/axel-manager.html
 
 
 ################################################
@@ -19,6 +20,8 @@ api/src/config/local.ts
 api/assets/data/*
 !api/assets/data/static/.gitkeep
 !api/assets/data/static/*
+src/ivews/js
+src/views/css
 dump.rdb
 
 

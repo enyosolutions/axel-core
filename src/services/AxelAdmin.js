@@ -20,7 +20,7 @@ class AxelAdmin {
    * @returns {Promise<any>}
    * @memberof AxelAdmin
    */
-  async init (app) {
+  async init(app) {
     if (!axel.sqldb) {
       return Promise.reject(new Error('missing_sqldb'))
     }
@@ -71,7 +71,7 @@ class AxelAdmin {
    * @returns {Promise<void>}
    * @memberof AxelAdmin
    */
-  updateFieldsConfig (model) {
+  updateFieldsConfig(model) {
     if (!model.schema) {
       return Promise.resolve()
     }
@@ -104,7 +104,7 @@ class AxelAdmin {
       ))
   }
 
-  insertModelsIntoDb () {
+  insertModelsIntoDb() {
     axel.logger.debug('[AxelAdmin] insertModelsIntoDb')
     if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
       return Promise.resolve()
@@ -128,7 +128,7 @@ class AxelAdmin {
       ))
   }
 
-  connectToRouter () {
+  connectToRouter() {
     // create api routes for getting merged configurations (see AppController.models(req, res))
   }
 
@@ -139,7 +139,7 @@ class AxelAdmin {
 * @returns {Obj}
 * @memberof AxelAdmin
 */
-  jsonSchemaToFrontModel (model) {
+  jsonSchemaToFrontModel(model) {
     return {
       ...model.admin,
       id: model.id,
@@ -164,7 +164,7 @@ class AxelAdmin {
     }
   }
 
-  prepareNestedModel (nestedModelDefinition, models) {
+  prepareNestedModel(nestedModelDefinition, models) {
     if (nestedModelDefinition.extends && models[nestedModelDefinition.extends]) {
       const sourceModel = models[nestedModelDefinition.extends]
       if (!sourceModel) {
@@ -176,11 +176,11 @@ class AxelAdmin {
     return nestedModelDefinition
   }
 
-  prepareNestedModels (nestedModelArray = [], models) {
+  prepareNestedModels(nestedModelArray = [], models) {
     return nestedModelArray.map(model => this.prepareNestedModel(model, models))
   }
 
-  mergeModels (...args) {
+  mergeModels(...args) {
     return _.mergeWith(args[0], args[1], (a, b) => {
       if (_.isArray(a) && b !== null && b !== undefined) {
         return a
@@ -199,7 +199,7 @@ class AxelAdmin {
 * @returns {string} url
 * @memberof AxelAdmin
 */
-  prefixUrl (url) {
+  prefixUrl(url) {
     const formatedUrl = axel.config.framework.automaticApi &&
       url &&
       url.indexOf(axel.config.framework.automaticApiPrefix) === -1
@@ -208,14 +208,14 @@ class AxelAdmin {
     return formatedUrl ? formatedUrl.replace(/\\/g, '/') : url
   }
 
-  serveModels (req, res) {
+  serveModels(req, res) {
     const mappedSavedConfig = {}
     let promise = Promise.resolve()
     if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
       promise = axel.models.axelModelConfig.em
         .findAll({ logging: false })
     }
-    promise
+    return promise
       .then((savedConfig) => {
         if (savedConfig && savedConfig.length) {
           savedConfig.forEach((config) => {
@@ -254,11 +254,19 @@ class AxelAdmin {
         models.forEach((m) => {
           m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig)
         })
-        return res.json({
-          body: models
-        })
+        if (res) {
+          return res.json({
+            body: models
+          })
+        }
+        return models;
       })
-      .catch(err => ErrorUtils.errorCallback(err, res))
+      .catch(err => {
+        if (res) {
+          return ErrorUtils.errorCallback(err, res)
+        }
+        throw err;
+      })
   }
 }
 

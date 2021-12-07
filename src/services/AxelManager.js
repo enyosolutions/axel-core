@@ -5,6 +5,8 @@ const socketIO = require('socket.io');
 const axelCli = require('axel-cli');
 const { resolve } = require('path');
 const AxelAdmin = require('./AxelAdmin');
+const AuthService = require('./AuthService');
+const axel = require('../axel');
 const debug = require('debug')('axel:manager');
 
 const {
@@ -42,8 +44,9 @@ class AxelManager {
    */
   init(app) {
     try {
-      debug('Copying manager to the front project', `${process.cwd()}/views/axel-manager.ejs`);
-      fs.copyFileSync(resolve(__dirname, '../views/axel-manager.ejs'), `${process.cwd()}/views/axel-manager.ejs`);
+      debug('Copying manager to the front project', `${process.cwd()}/views/axel-manager.html`);
+      //   fs.copyFileSync(resolve(__dirname, '../views/axel-manager.ejs'), `${process.cwd()}/views/axel-manager.ejs`);
+      fs.copyFileSync(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'), `${process.cwd()}/public/axel-manager.html`);
     } catch (err) {
       console.warn('[AXELMANAGER][WARNING]', err.message);
     }
@@ -344,7 +347,62 @@ class AxelManager {
               .catch(cb);
         }
       });
+
+      /** Get models definition */
+      socket.on('/axel-manager/admin-models', (req = { method: 'GET', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
+          cb = req;
+        }
+        switch (req.method) {
+          case 'GET':
+            AxelAdmin.serveModels().then(models => {
+              cb(null, { body: models })
+            })
+              .catch(err => cb(err.message))
+          default:
+            break;
+        }
+      });
+
+      /** Get models definition */
+      socket.on('/axel-manager/auth', (req = { method: 'POST', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
+          cb = req;
+        }
+        switch (req.method) {
+          case 'POST':
+            try {
+              const auth = AuthService.generateToken({ firstName: 'ADMIN', roles: ['ADMIN'] }, null, '6h');
+              console.log("auth", auth);
+              cb(null, { body: auth })
+            }
+            catch (err) {
+              cb(err.message);
+            }
+          default:
+            break;
+        }
+      });
+      /** Get models definition */
+      socket.on('/axel-manager/config', (req = { method: 'POST', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
+          cb = req;
+        }
+        switch (req.method) {
+          case 'GET':
+            try {
+              cb(null, { body: axel.config })
+            }
+            catch (err) {
+              cb(err.message);
+            }
+          default:
+            break;
+        }
+      });
+
     });
+
   }
 }
 
