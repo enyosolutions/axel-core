@@ -11,11 +11,12 @@ Also each needed a lot of configuration (parameters) for each page.
 Hence we decided to improve our workflow with various ready to use components.
 
 ## features
-Build a back office in a single day.
-Connect to an existing REST api and start working.
-Import and export data to Excel easily.
-Display table and edit their contents easily.
-Link objects with their foreign counterpart easily (foreign key support, nested tab support).
+
+- Build a back office in a single day.
+- Connect to an existing REST api and start working.
+- Import and export data to Excel easily.
+- Display table and edit their contents easily.
+- Link objects with their foreign counterpart easily (foreign key support, nested tab support).
 
 
 https://enyosolutions-team.github.io/axel-documentation/
