@@ -11,6 +11,7 @@
     "start": "node dist/index.js",
     "build": "cross-env TS_NODE_FILES=true npx tsc",
     "docs": "node_modules/.bin/jsdoc -c jsdoc.json",
+    "build:manager": "cd axel-manager && yarn build",
     "lint": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}'",
     "lint:fix": "eslint -c .eslintrc.js '{src, test}/*.{js,ts,tsx}' --fix --quiet",
     "lint:watch": "nodemon --exec 'npm run lint:fix'",

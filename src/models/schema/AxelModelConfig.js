@@ -129,7 +129,19 @@ module.exports = {
         properties: {
           layout: {
             title: 'layout of the form',
-            type: 'object',
+            type: 'array',
+            items: {
+              properties: {
+                legend: { type: 'string' },
+                cols: {
+                  type: 'number', min: 0, max: 12
+                },
+                fields: {
+                  type: 'array',
+                  items: { type: 'string' }
+                }
+              }
+            },
             default: null,
             field: { type: 'JsonTextarea' }
           }
@@ -163,13 +175,13 @@ module.exports = {
       },
       kanbanOptions: {
         title: 'List Options',
-        description: 'Options for list view',
+        description: 'Options for kanban view',
         type: ['object', 'null'],
         default: {},
       },
       tableOptions: {
         title: 'List Options',
-        description: 'Options for list view',
+        description: 'Options for table view',
         type: ['object', 'null'],
         default: {},
       },
