@@ -1,8 +1,14 @@
 <template>
   <!-- Sidebar -->
-  <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+  <ul
+    class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+    id="accordionSidebar"
+  >
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+    <a
+      class="sidebar-brand d-flex align-items-center justify-content-center"
+      href="/"
+    >
       <div class="sidebar-brand-icon rotate-n-15">
         <img
           src="/axel-manager/img/axel.png"
@@ -11,7 +17,7 @@
         />
       </div>
       <div class="sidebar-brand-text mx-3">
-        {{ config.appName || 'Framework manager' }}
+        {{ appConfig ? appConfig.appName : 'Framework manager' }}
       </div>
     </a>
 
@@ -54,7 +60,9 @@
       >
         <div class="bg-white py-2 collapse-inner show rounded">
           <h6 class="collapse-header">Actions</h6>
-          <a class="collapse-item" href="#" @click="resetModelsAdminConfig()">Reset admin models</a>
+          <router-link class="collapse-item" to="/app/dashboard"
+            >Edit db models and api</router-link
+          >
         </div>
       </div>
     </li>
@@ -78,7 +86,7 @@
         "
       >
         <i class="fas fa-fw fa-cog"></i>
-        <span>Models</span>
+        <span>Admin Models</span>
       </a>
       <div
         id="collapseTwo"
@@ -89,13 +97,34 @@
       >
         <div class="bg-white py-2 collapse-inner show rounded">
           <h6 class="collapse-header">Actions</h6>
-          <router-link
-            v-for="model in $store.state.models"
-            :key="model.identity"
-            class="collapse-item"
-            :to="`/app/models/${model.identity}`"
-            >{{ model.title || model.name }}</router-link
+          <a class="collapse-item" href="#" @click="getModels()"
+            >Refresh models</a
           >
+          <a class="collapse-item" href="#" @click="resetModelsAdminConfig()"
+            >Reset models</a
+          >
+          <hr />
+          <div
+            v-for="model in $store.state.models"
+            class="collapse-item"
+            :key="model.identity"
+          >
+            <router-link :to="`/app/models/${model.identity}`">{{
+              model.title || model.name
+            }}</router-link>
+            <!--
+            <router-link
+              class="float-right"
+              :to="`/app/models/axelModelConfig/${model.identity}/edit`"
+              ><i class="fa fa-pen"></i
+            ></router-link>
+            <router-link
+              class="float-right"
+              :to="`/app/models/axelModelFieldConfig/${model.identity}/edit`"
+              ><i class="fa fa-list"></i
+            ></router-link>
+            -->
+          </div>
         </div>
       </div>
     </li>
@@ -142,13 +171,17 @@
 
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
-      <button class="rounded-circle border-0" id="sidebarToggle" @click="toggleSidebar"></button>
+      <button
+        class="rounded-circle border-0"
+        id="sidebarToggle"
+        @click="toggleSidebar"
+      ></button>
     </div>
   </ul>
   <!-- End of Sidebar -->
 </template>
 <script>
-// import { mapState } from 'vuex';
+import { mapState } from 'vuex';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Swal2 from 'sweetalert2';
@@ -196,24 +229,22 @@ export default {
     */
   },
   computed: {
-    /*
-    ...mapState({
-      menuItems: state => state.menu.searchData,
-      megamenuItems: state => state.menu.megamenu,
-      user: state => state.user.user,
-      organisation: state => state.user.organisation,
-    }),
-    */
+    ...mapState(['appConfig']),
     searchResultIsEmpty() {
       return (
         !this.menuItems.length &&
-        !Object.values(this.apiSearchResults).reduce((prev, next) => next.count + prev, 0)
+        !Object.values(this.apiSearchResults).reduce(
+          (prev, next) => next.count + prev,
+          0
+        )
       );
     },
   },
   methods: {
     toggleSidebar() {
-      if (document.querySelector('body').classList.contains('sidebar-toggled')) {
+      if (
+        document.querySelector('body').classList.contains('sidebar-toggled')
+      ) {
         document.querySelector('body').classList.remove('sidebar-toggled');
         document.querySelector('.sidebar').classList.remove('toggled');
       } else {
@@ -223,12 +254,16 @@ export default {
     },
     searchTerm() {
       this.$store.dispatch('menu/searchTerm', this.terms);
-      ['client', 'request'].map(type =>
+      ['client', 'request'].map((type) =>
         this.$store
-          .dispatch('menu/searchItems', { query: `${this.terms}*`, type, perPage: 8 })
-          .then(data => {
+          .dispatch('menu/searchItems', {
+            query: `${this.terms}*`,
+            type,
+            perPage: 8,
+          })
+          .then((data) => {
             this.apiSearchResults[type] = data;
-          }),
+          })
       );
     },
     logout() {},
@@ -243,7 +278,7 @@ export default {
           .get('/api/notifications', {
             body: { organisationId: this.organisation && this.organisation.id },
           })
-          .then(notifs => {
+          .then((notifs) => {
             console.log('notifs', notifs);
             this.notifications = notifs;
           });
@@ -251,18 +286,25 @@ export default {
     },
 
     async resetModelsAdminConfig() {
-      this.$socket
-        .post('/axel-manager/reset-models-config', { body: { ...this.newApi } })
-        .then(() => {
-          return Swal2.fire({
-            title: 'Models successfully resetted',
-            icon: 'success',
-            toast: true,
+      this.$awConfirm(
+        'are you sure ?  this will delete all your existing modifications'
+      ).then(() => {
+        this.$socket
+          .post('/axel-manager/reset-models-config', {
+            body: { ...this.newApi },
+          })
+          .then(() => {
+            this.$store.dispatch('getModels');
+            return Swal2.fire({
+              title: 'Models successfully resetted',
+              icon: 'success',
+              toast: true,
+            });
+          })
+          .catch((err) => {
+            return Swal2.fire({ title: err.message, icon: 'error' });
           });
-        })
-        .catch(err => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
+      });
     },
 
     getModels() {
@@ -274,7 +316,7 @@ export default {
   },
   watch: {
     // eslint-disable-next-line
-    '$i18n.locale': function(to, from) {
+    '$i18n.locale': function (to, from) {
       if (from !== to) {
         this.$router.go(this.$route.path);
       }

@@ -27,9 +27,9 @@ const loadSqlAttributes = (model) => {
   Object.entries(model.entity.attributes).forEach(([, attr]) => {
     if (typeof attr.type === 'string') {
       const type = attr.type
-      .replace('DataTypes.', '')
-      .replace('sequelize.', '')
-      .replace(/\(.+\)/, '');
+        .replace('DataTypes.', '')
+        .replace('sequelize.', '')
+        .replace(/\(.+\)/, '');
       const args = attr.type.match(/\(.+\)/);
       const resolvedType = _.get(DataTypes, type);
       if (resolvedType) {
@@ -37,10 +37,10 @@ const loadSqlAttributes = (model) => {
         if (args && args[0]) {
           attr.type = attr.type(
             ...args[0]
-            .replace(/\(|\)/g, '')
-            .split(',')
-            .map(s => s.replace(/["']/g, '').trim())
-            );
+              .replace(/\(|\)/g, '')
+              .split(',')
+              .map(s => s.replace(/["']/g, '').trim())
+          );
         }
       }
     }
@@ -79,13 +79,13 @@ const loadSqlModel = (filePath, sequelize) => {
       model.entity.options = {};
     }
     model.entity.options = _.merge(
-    {
-      freezeTableName: true,
-      query: {
-        raw: true
-      }
-    },
-    model.entity.options
+      {
+        freezeTableName: true,
+        query: {
+          raw: true
+        }
+      },
+      model.entity.options
     );
     if (model.entity.attributes) {
       loadSqlAttributes(model);
@@ -94,7 +94,7 @@ const loadSqlModel = (filePath, sequelize) => {
       _.upperFirst(_.camelCase(model.identity)),
       model.entity.attributes,
       model.entity.options
-      );
+    );
     // SqlModel.sequelize = Sequelize;
 
     if (!axel.models[model.identity]) {
@@ -136,16 +136,16 @@ const loadSchemaModels = () => {
       });
 
       Promise.all(promises)
-      .then(() => {
-        axel.logger.debug('[ORM] schema final callback');
-        debug('[ORM] schema final callback');
-        resolve();
-      })
-      .catch((errAsync) => {
-        axel.logger.warn(errAsync);
-        debug(errAsync);
-        return reject(errAsync);
-      });
+        .then(() => {
+          axel.logger.debug('[ORM] schema final callback');
+          debug('[ORM] schema final callback');
+          resolve();
+        })
+        .catch((errAsync) => {
+          axel.logger.warn(errAsync);
+          debug(errAsync);
+          return reject(errAsync);
+        });
     });
   });
 };
@@ -153,7 +153,7 @@ const loadSchemaModels = () => {
 /**
  * @description load all the sql defined models
  */
- const loadSqlModels = () => {
+const loadSqlModels = () => {
   debug('loadSqlModels');
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
@@ -285,12 +285,12 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
        console.table(diffTable2);
      }
    /* eslint-enable */
-   axel.logger.info('___________________________');
-   axel.logger.info('\n\n\n');
-   resolve();
- } catch (err) {
-  reject(err);
-}
+    axel.logger.info('___________________________');
+    axel.logger.info('\n\n\n');
+    resolve();
+  } catch (err) {
+    reject(err);
+  }
 });
 
 function unifyEntityManagers() {

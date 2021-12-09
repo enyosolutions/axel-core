@@ -2,40 +2,18 @@
   <div>
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-      <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-      <a
-        href="#"
-        class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
-        data-toggle="modal"
-        data-target="#newApiModal"
-        @click="
-          resetApiForm();
-          modelEditModalMode = 'api';
-        "
-        ><i class="fas fa-plus fa-sm text-white-50"></i> New Api</a
+      <h1
+        class="h3 mb-0 text-gray-800 text-center w-100"
+        style="font-size: 200px"
       >
+        NOT FOUND
+      </h1>
     </div>
 
     <!-- Content Row -->
     <div class="row">
-      NOT FOUND
-    </div>
-
-    <div class="row">
-      <!-- Content Row -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card shadow mb-4">
-            <div
-              class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
-            >
-              <h6 class="m-0 font-weight-bold text-primary">Raw</h6>
-            </div>
-            <div class="card-body">
-              <pre id="jstree"></pre>
-            </div>
-          </div>
-        </div>
+      <div class="col-12 text-center w-100">
+        Sorry the page you are looking for is not here...
       </div>
     </div>
   </div>
@@ -57,11 +35,11 @@ export default {
       if (!this.newApi.name) {
         return null;
       }
-      return this.models.find(m => m.name === this.newApi.name);
+      return this.models.find((m) => m.name === this.newApi.name);
     },
   },
   watch: {
-    'socket.connected': function(newVal, oldVal) {
+    'socket.connected': function (newVal, oldVal) {
       if (!newVal && oldVal !== newVal) {
         this.blockingModal = Swal2.fire(DisconnectedConfig);
       } else if (this.blockingModal) {
@@ -100,7 +78,7 @@ export default {
 
     this.$socket.on('disconnect', () => {});
 
-    this.$socket.on('hello', second => {
+    this.$socket.on('hello', (second) => {
       console.log('hello', second);
     });
 
@@ -132,16 +110,16 @@ export default {
       Swal2.fire({
         title: 'Copy paste the list of fields',
         input: 'textarea',
-      }).then(result => {
+      }).then((result) => {
         if (result.value) {
           let fields = result.value
             .split('\n')
-            .map(f => f.trim())
-            .filter(f => f);
+            .map((f) => f.trim())
+            .filter((f) => f);
           if (fields.length === 1) {
-            fields = fields[0].split(',').map(f => f.trim());
+            fields = fields[0].split(',').map((f) => f.trim());
           }
-          fields.forEach(fieldName => {
+          fields.forEach((fieldName) => {
             if (fieldName.includes(' ')) {
               fieldName = this.toCamelCase(fieldName);
             }
@@ -171,12 +149,15 @@ export default {
     async listModels() {
       this.models = [];
       this.$socket
-        .get('/axel-manager/models', { body: { full: true }, query: { full: true } })
-        .then(data => {
+        .get('/axel-manager/models', {
+          body: { full: true },
+          query: { full: true },
+        })
+        .then((data) => {
           this.models = data.body && data.body.models;
           this.tables = data.body && data.body.tables;
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn(err.message);
         });
     },
@@ -185,10 +166,10 @@ export default {
       this.routes = [];
       this.$socket
         .get('/axel-manager/routes')
-        .then(data => {
+        .then((data) => {
           this.routes = data.body;
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn(err.message);
         });
     },
@@ -198,18 +179,18 @@ export default {
       this.$socket.emit(
         '/axel-manager/models/sync',
         { method: 'POST', body: { id: modelName, force, alter } },
-        err => {
+        (err) => {
           if (err) {
             console.warn(err);
             this.$notify(
               `Error while updating Model ${modelName} [${err.message || err}]`,
-              'error',
+              'error'
             );
             return;
           }
           this.$notify(`Model ${modelName} was updated`, 'success');
           this.listModels();
-        },
+        }
       );
     },
 
@@ -237,9 +218,12 @@ export default {
             document.getElementById('swal-type').value,
             document.getElementById('swal-force').value == 'true',
           ];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 3) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -249,12 +233,19 @@ export default {
       });
       this.$socket
         .post('/axel-manager/controllers', {
-          body: { name: values.value[0], type: values.value[1], force: values.value[2] },
+          body: {
+            name: values.value[0],
+            type: values.value[1],
+            force: values.value[2],
+          },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Controller successfully created', icon: 'success' });
+          return Swal2.fire({
+            title: 'Controller successfully created',
+            icon: 'success',
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -283,9 +274,12 @@ export default {
             document.getElementById('swal-type').value,
             document.getElementById('swal-force').value == 'true',
           ];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 3) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -295,12 +289,19 @@ export default {
       });
       this.$socket
         .post('/axel-manager/controllers', {
-          body: { name: values.value[0], type: values.value[1], force: values.value[2] },
+          body: {
+            name: values.value[0],
+            type: values.value[1],
+            force: values.value[2],
+          },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Controller successfully created', icon: 'success' });
+          return Swal2.fire({
+            title: 'Controller successfully created',
+            icon: 'success',
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -316,9 +317,12 @@ export default {
         reverseButtons: true,
         preConfirm: () => {
           let values = [document.getElementById('swal-name').value];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 1) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -329,15 +333,19 @@ export default {
       this.$socket
         .post('/axel-manager/routes', { body: { name: values.value[0] } })
         .then(() => {
-          return Swal2.fire({ title: 'Route successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'Route successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
 
     async validateCreateModelForm() {
-      this.newApi.fields = this.newApi.fields.filter(f => f.name);
+      this.newApi.fields = this.newApi.fields.filter((f) => f.name);
       if (!this.newApi.name) {
         Swal2.fire({ title: 'Missing api name', toast: true });
         return;
@@ -347,12 +355,19 @@ export default {
         return;
       }
       if (!this.newApi.fields.length) {
-        Swal2.fire({ title: '⚠️ Missing api fields', type: 'error', toast: true });
+        Swal2.fire({
+          title: '⚠️ Missing api fields',
+          type: 'error',
+          toast: true,
+        });
         return;
       }
 
-      if (!this.newApi.fields.filter(f => f.primaryKey).length) {
-        Swal2.fire({ title: 'You need to define at least one primary key field', toast: true });
+      if (!this.newApi.fields.filter((f) => f.primaryKey).length) {
+        Swal2.fire({
+          title: 'You need to define at least one primary key field',
+          toast: true,
+        });
         return;
       }
     },
@@ -363,9 +378,13 @@ export default {
         .post('/axel-manager/api', { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
-          return Swal2.fire({ title: 'Api successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'Api successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -376,9 +395,13 @@ export default {
         .post('/axel-manager/models', { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
-          return Swal2.fire({ title: 'MOdel successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'MOdel successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message || err, icon: 'error' });
         });
     },
@@ -394,9 +417,13 @@ export default {
           },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Model successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'Model successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log('err', err);
 
           return Swal2.fire({ title: err.message || err, icon: 'error' });
@@ -413,7 +440,7 @@ export default {
             toast: true,
           });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -423,9 +450,11 @@ export default {
     },
 
     toCamelCase(string) {
-      string = string.toLowerCase().replace(/(?:(^.)|([-_\s]+.))/g, function(match) {
-        return match.charAt(match.length - 1).toUpperCase();
-      });
+      string = string
+        .toLowerCase()
+        .replace(/(?:(^.)|([-_\s]+.))/g, function (match) {
+          return match.charAt(match.length - 1).toUpperCase();
+        });
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
   },

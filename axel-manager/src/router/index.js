@@ -44,6 +44,14 @@ const routes = [
         }
       },
       {
+        path: '404',
+        name: 'NotFound',
+        component: NotFound,
+        meta: {
+          title: 'NotFOund | axel',
+        }
+      },
+      {
         path: 'models/:identity',
         name: 'CrudWrapper',
         component: CrudWrapper,
@@ -80,7 +88,7 @@ const routes = [
   },
   {
     path: '*',
-    component: NotFound,
+    redirect: { name: 'NotFound' }
   },
 ];
 

@@ -25,7 +25,7 @@ const primaryKey = axel.models[entity] && axel.models[entity].primaryKeyField
   : axel.config.framework.primaryKey
 
 class AxelModelConfigController {
-  list (req, resp) {
+  list(req, resp) {
     let items = []
 
     const {
@@ -52,7 +52,7 @@ class AxelModelConfigController {
       })
       .then((result) => {
         items = result.rows
-        items = items.map(item => AxelAdmin.mergeModels(
+        items = items.map(item => AxelAdmin.mergeData(
           AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
           item.config
         ))
@@ -76,7 +76,7 @@ class AxelModelConfigController {
       })
   }
 
-  get (req, resp) {
+  get(req, resp) {
     const id = req.params.id
     if (!id) {
       return false
@@ -111,7 +111,7 @@ class AxelModelConfigController {
         if (item) {
           item = item.get()
           if (axel.models[item.identity]) {
-            item = AxelAdmin.mergeModels(
+            item = AxelAdmin.mergeData(
               AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
               item.config
             )
@@ -157,7 +157,7 @@ class AxelModelConfigController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  put (req, resp) {
+  put(req, resp) {
     const id = req.params.id
     const data = req.body
 
@@ -235,7 +235,7 @@ class AxelModelConfigController {
    * @param  {[type]} resp [description]
    * @return {[type]}      [description]
    */
-  delete (req, resp) {
+  delete(req, resp) {
     const id = req.params.id
 
     const repository = Utils.getEntityManager(entity, resp)

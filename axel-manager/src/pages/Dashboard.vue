@@ -19,7 +19,9 @@
     <div class="row">
       <div class="col-4 col-xs-12">
         <div class="card shadow mb-4">
-          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <div
+            class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
+          >
             <h6 class="m-0 font-weight-bold text-primary">
               Models
               <span class="badge badge-primary">{{ models.length }}</span>
@@ -48,7 +50,10 @@
                   <td>
                     <span class="text-secondary">ALL</span>
                     <div class="float-right">
-                      <button class="btn btn-primary badge" @click="syncModel('$ALL')">
+                      <button
+                        class="btn btn-primary badge"
+                        @click="syncModel('$ALL')"
+                      >
                         sync
                       </button>
                       <button
@@ -78,7 +83,10 @@
                       >
                         <i class="fa fa-edit"></i> Edit
                       </button>
-                      <button class="btn btn-primary badge" @click="syncModel(model.name)">
+                      <button
+                        class="btn btn-primary badge"
+                        @click="syncModel(model.name)"
+                      >
                         sync
                       </button>
                       <button
@@ -103,10 +111,14 @@
 
       <div class="col-4 col-xs-12">
         <div class="card shadow mb-4">
-          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <div
+            class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
+          >
             <h6 class="m-0 font-weight-bold text-primary">
               Controllers
-              <span class="badge badge-primary">{{ Object.keys(controllers).length }}</span>
+              <span class="badge badge-primary">{{
+                Object.keys(controllers).length
+              }}</span>
             </h6>
             <div class="btn-group float-right">
               <button class="btn btn-link mr-2" @click="listControllers()">
@@ -135,10 +147,14 @@
 
       <div class="col-4">
         <div class="card shadow mb-4">
-          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <div
+            class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
+          >
             <h6 class="m-0 font-weight-bold text-primary">
               Routes
-              <span class="badge badge-primary">{{ Object.keys(controllers).length }}</span>
+              <span class="badge badge-primary">{{
+                Object.keys(controllers).length
+              }}</span>
             </h6>
             <div class="float-right">
               <button class="btn btn-link p-0" @click="listRoutes()">
@@ -199,7 +215,9 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Create new {{ modelEditModalMode }}</h5>
+            <h5 class="modal-title" id="exampleModalLabel">
+              Create new {{ modelEditModalMode }}
+            </h5>
             <button
               class="close"
               type="button"
@@ -223,10 +241,17 @@
             </div>
             <div
               class="form-group"
-              v-if="modelEditModalMode == 'api' || modelEditModalMode == 'model'"
+              v-if="
+                modelEditModalMode == 'api' || modelEditModalMode == 'model'
+              "
             >
               <label> DB type</label>
-              <select v-model="newApi.type" type="text" class="form-control" placeholder="Api type">
+              <select
+                v-model="newApi.type"
+                type="text"
+                class="form-control"
+                placeholder="Api type"
+              >
                 <option disabled selected>Api type</option>
                 <option value="sql">Sql</option>
                 <option value="mongo">Mongo</option>
@@ -243,33 +268,30 @@
             </div>
             <hr />
             <div class="form-group">
-              <table class="table table-bordered" id="dataTable" cellspacing="0">
+              <div class="float-right">
+                <button
+                  class="btn btn-link p-0"
+                  @click="importFields()"
+                  title="Bullk add field"
+                  data-tooltip="Bulk add field"
+                >
+                  <i class="fa fa-list-alt"></i>
+                </button>
+                <button
+                  class="btn btn-link p-0"
+                  @click="addField()"
+                  title="Add field"
+                  data-tooltip="Add field"
+                >
+                  <i class="fa fa-plus"></i>
+                </button>
+              </div>
+              <table
+                class="table table-bordered"
+                id="dataTable"
+                cellspacing="0"
+              >
                 <thead>
-                  <tr>
-                    Fields
-
-                    <div class="float-right">
-                      <button
-                        class="btn btn-link p-0"
-                        @click="importFields()"
-                        title="Bullk add field"
-                        data-tooltip="BUlk add field"
-                      >
-                        <i class="fa fa-list-alt"></i>
-                      </button>
-                      <button
-                        class="btn btn-link p-0"
-                        @click="addField()"
-                        title="Add field"
-                        data-tooltip="Add field"
-                      >
-                        <i class="fa fa-plus"></i>
-                      </button>
-                    </div>
-                  </tr>
-                </thead>
-
-                <tbody>
                   <tr>
                     <td>Name</td>
                     <td>Type</td>
@@ -278,9 +300,14 @@
                     <td>Autoincrement</td>
                     <td>Actions</td>
                   </tr>
+                </thead>
+
+                <tbody>
                   <template
                     v-if="
-                      modelEditModalMode === 'add-field' && selectedModel && selectedModel.fields
+                      modelEditModalMode === 'add-field' &&
+                      selectedModel &&
+                      selectedModel.fields
                     "
                   >
                     <tr v-for="field of selectedModel.fields" :key="field.name">
@@ -308,7 +335,9 @@
                         class="form-control"
                         placeholder="Field type"
                       >
-                        <option v-for="type in fieldTypes" :key="type">{{ type }}</option>
+                        <option v-for="type in fieldTypes" :key="type">
+                          {{ type }}
+                        </option>
                       </select>
                     </td>
                     <td>
@@ -348,6 +377,19 @@
                   </tr>
                 </tbody>
               </table>
+              <hr />
+              <div class="text-right">
+                <input
+                  v-if="modelEditModalMode == 'add-field'"
+                  id="forceSync"
+                  type="checkbox"
+                  class="form-control-"
+                  placeholder="force"
+                  v-model="syncNewFields"
+                  value="true"
+                />
+                <label for="forceSync"> Sync to database</label>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -392,7 +434,6 @@
 <script>
 // import { mapState } from 'vuex';
 import Swal2 from 'sweetalert2';
-import DisconnectedConfig from '@/components/swal/Disconnected';
 import { openModal, closeModal } from '@/services/modal';
 
 export default {
@@ -407,15 +448,12 @@ export default {
       if (!this.newApi.name) {
         return null;
       }
-      return this.models.find(m => m.name === this.newApi.name);
+      return this.models.find((m) => m.name === this.newApi.name);
     },
   },
   watch: {
-    'socket.connected': function(newVal, oldVal) {
-      if (!newVal && oldVal !== newVal) {
-        this.blockingModal = Swal2.fire(DisconnectedConfig);
-      } else if (this.blockingModal) {
-        this.blockingModal.close();
+    '$socket.connected': function (newVal) {
+      if (newVal) {
         this.refreshLists();
       }
     },
@@ -441,16 +479,21 @@ export default {
       },
       fieldTypes: ['string', 'text', 'integer', 'boolean', 'date', 'datetime'],
       modelEditModalMode: 'api', // api | model || add-field
+      socket: this.$socket,
+      syncNewFields: false,
     };
   },
   mounted() {
+    if (this.$socket.connected) {
+      this.refreshLists();
+    }
     this.$socket.on('connect', () => {
       this.refreshLists();
     });
 
     this.$socket.on('disconnect', () => {});
 
-    this.$socket.on('hello', second => {
+    this.$socket.on('hello', (second) => {
       console.log('hello', second);
     });
 
@@ -484,16 +527,16 @@ export default {
       Swal2.fire({
         title: 'Copy paste the list of fields',
         input: 'textarea',
-      }).then(result => {
+      }).then((result) => {
         if (result.value) {
           let fields = result.value
             .split('\n')
-            .map(f => f.trim())
-            .filter(f => f);
+            .map((f) => f.trim())
+            .filter((f) => f);
           if (fields.length === 1) {
-            fields = fields[0].split(',').map(f => f.trim());
+            fields = fields[0].split(',').map((f) => f.trim());
           }
-          fields.forEach(fieldName => {
+          fields.forEach((fieldName) => {
             if (fieldName.includes(' ')) {
               fieldName = this.toCamelCase(fieldName);
             }
@@ -523,12 +566,17 @@ export default {
     async listModels() {
       this.models = [];
       this.$socket
-        .get('/axel-manager/models', { body: { full: true }, query: { full: true } })
-        .then(data => {
-          this.models = data.body && data.body.models;
+        .get('/axel-manager/models', {
+          body: { full: true },
+          query: { full: true },
+        })
+        .then((data) => {
+          this.models =
+            data.body &&
+            data.body.models.filter((model) => !model.name.startsWith('axel'));
           this.tables = data.body && data.body.tables;
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn(err.message);
         });
     },
@@ -537,10 +585,10 @@ export default {
       this.routes = [];
       this.$socket
         .get('/axel-manager/routes')
-        .then(data => {
+        .then((data) => {
           this.routes = data.body;
         })
-        .catch(err => {
+        .catch((err) => {
           console.warn(err.message);
         });
     },
@@ -550,18 +598,18 @@ export default {
       this.$socket.emit(
         '/axel-manager/models/sync',
         { method: 'POST', body: { id: modelName, force, alter } },
-        err => {
+        (err) => {
           if (err) {
             console.warn(err);
             this.$notify(
               `Error while updating Model ${modelName} [${err.message || err}]`,
-              'error',
+              'error'
             );
             return;
           }
           this.$notify(`Model ${modelName} was updated`, 'success');
           this.listModels();
-        },
+        }
       );
     },
 
@@ -589,9 +637,12 @@ export default {
             document.getElementById('swal-type').value,
             document.getElementById('swal-force').value == 'true',
           ];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 3) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -601,12 +652,19 @@ export default {
       });
       this.$socket
         .post('/axel-manager/controllers', {
-          body: { name: values.value[0], type: values.value[1], force: values.value[2] },
+          body: {
+            name: values.value[0],
+            type: values.value[1],
+            force: values.value[2],
+          },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Controller successfully created', icon: 'success' });
+          return Swal2.fire({
+            title: 'Controller successfully created',
+            icon: 'success',
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -635,9 +693,12 @@ export default {
             document.getElementById('swal-type').value,
             document.getElementById('swal-force').value == 'true',
           ];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 3) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -647,12 +708,19 @@ export default {
       });
       this.$socket
         .post('/axel-manager/controllers', {
-          body: { name: values.value[0], type: values.value[1], force: values.value[2] },
+          body: {
+            name: values.value[0],
+            type: values.value[1],
+            force: values.value[2],
+          },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Controller successfully created', icon: 'success' });
+          return Swal2.fire({
+            title: 'Controller successfully created',
+            icon: 'success',
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -668,9 +736,12 @@ export default {
         reverseButtons: true,
         preConfirm: () => {
           let values = [document.getElementById('swal-name').value];
-          values = values.filter(v => v);
+          values = values.filter((v) => v);
           if (values.length < 1) {
-            return Swal2.fire({ title: 'Please fill in all the data', icon: 'error' });
+            return Swal2.fire({
+              title: 'Please fill in all the data',
+              icon: 'error',
+            });
           }
           if (values[2] == 'true') {
             values[2] = true;
@@ -681,15 +752,19 @@ export default {
       this.$socket
         .post('/axel-manager/routes', { body: { name: values.value[0] } })
         .then(() => {
-          return Swal2.fire({ title: 'Route successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'Route successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
 
     async validateCreateModelForm() {
-      this.newApi.fields = this.newApi.fields.filter(f => f.name);
+      this.newApi.fields = this.newApi.fields.filter((f) => f.name);
       if (!this.newApi.name) {
         Swal2.fire({ title: 'Missing api name', toast: true });
         return;
@@ -699,12 +774,19 @@ export default {
         return;
       }
       if (!this.newApi.fields.length) {
-        Swal2.fire({ title: '⚠️ Missing api fields', type: 'error', toast: true });
+        Swal2.fire({
+          title: '⚠️ Missing api fields',
+          type: 'error',
+          toast: true,
+        });
         return;
       }
 
-      if (!this.newApi.fields.filter(f => f.primaryKey).length) {
-        Swal2.fire({ title: 'You need to define at least one primary key field', toast: true });
+      if (!this.newApi.fields.filter((f) => f.primaryKey).length) {
+        Swal2.fire({
+          title: 'You need to define at least one primary key field',
+          toast: true,
+        });
         return;
       }
     },
@@ -715,9 +797,13 @@ export default {
         .post('/axel-manager/api', { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
-          return Swal2.fire({ title: 'Api successfully created', icon: 'success', toast: true });
+          return Swal2.fire({
+            title: 'Api successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message, icon: 'error' });
         });
     },
@@ -728,9 +814,14 @@ export default {
         .post('/axel-manager/models', { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
-          return Swal2.fire({ title: 'MOdel successfully created', icon: 'success', toast: true });
+          closeModal('newApiModal');
+          return Swal2.fire({
+            title: 'MOdel successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           return Swal2.fire({ title: err.message || err, icon: 'error' });
         });
     },
@@ -743,41 +834,35 @@ export default {
             ...this.newApi,
             model: this.newApi.name,
             name: undefined,
+            sync: this.syncNewFields,
           },
         })
         .then(() => {
-          return Swal2.fire({ title: 'Model successfully created', icon: 'success', toast: true });
+          closeModal('newApiModal');
+          return Swal2.fire({
+            title: 'Model successfully created',
+            icon: 'success',
+            toast: true,
+          });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log('err', err);
 
           return Swal2.fire({ title: err.message || err, icon: 'error' });
         });
     },
 
-    async resetModelsAdminConfig() {
-      this.$socket
-        .post('/axel-manager/reset-models-config', { body: { ...this.newApi } })
-        .then(() => {
-          return Swal2.fire({
-            title: 'Models successfully resetted',
-            icon: 'success',
-            toast: true,
-          });
-        })
-        .catch(err => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
-    },
     resetApiForm() {
       this.newApi = Object.assign({}, this.newApiTemplate);
       this.newApi.fields = [];
     },
 
     toCamelCase(string) {
-      string = string.toLowerCase().replace(/(?:(^.)|([-_\s]+.))/g, function(match) {
-        return match.charAt(match.length - 1).toUpperCase();
-      });
+      string = string
+        .toLowerCase()
+        .replace(/(?:(^.)|([-_\s]+.))/g, function (match) {
+          return match.charAt(match.length - 1).toUpperCase();
+        });
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
   },

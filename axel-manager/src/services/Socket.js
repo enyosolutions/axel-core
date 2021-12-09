@@ -8,7 +8,7 @@ export default {
     console.log('socket connecting...');
     const socket = io(config.apiUrl !== '/' ? config.apiUrl.replace('http', 'ws') : null,
       {
-        path: '/realtime',
+        //   path: '/realtime',
         transports: ['websocket', 'polling'],
         transportOptions: {
           polling: {
@@ -28,7 +28,9 @@ export default {
     socket._call = function apiCall(method, event, options) {
       return new Promise((resolve, reject) => {
         socket.emit(event, { ...options, method }, (err, data) => {
-          console.log('[socket callback]', err, data);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[socket callback]', err, data);
+          }
           if (err) {
             console.error(err);
             reject(err);
@@ -44,7 +46,7 @@ export default {
     socket.put = socket._call.bind(undefined, 'PUT');
     socket.delete = socket._call.bind(undefined, 'DELETE');
 
-    socket.onopen((a) => {
+    socket.onopen(() => {
       console.log('[SOCKET] connected');
     });
     socket.on('connect', () => {
@@ -53,8 +55,8 @@ export default {
     });
 
     socket.on('disconnect', (a) => {
-      console.log('socket reconnecting...', a);
-      socket.connect();
+      console.log('[SOCKET] reconnecting...', a);
+      setTimeout(() => socket.connect(), 2000);
     });
 
     socket.on('ping', (second) => {
@@ -65,7 +67,12 @@ export default {
     });
 
     setTimeout(() => {
-      socket.connect();
+      socket.connect({
+        reconnection: true,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: Infinity
+      });
     }, 3000);
   }
 };

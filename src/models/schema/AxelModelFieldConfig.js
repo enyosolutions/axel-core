@@ -41,11 +41,10 @@ module.exports = {
       type: {
         type: ['string', 'array'],
         default: 'string',
+        enum: ['string', 'number', 'array', 'object', 'integer', 'boolean'],
         column: {
-          enum: ['string', 'number', 'array', 'object', 'integer']
         },
         field: {
-          options: ['string', 'number', 'array', 'object', 'string', 'object']
         },
         items: [{ type: 'string' }]
       },
@@ -55,26 +54,30 @@ module.exports = {
         field: {}
       },
       relation: {
+        title: 'relation',
         type: ['null', 'string'],
         description: 'The object that this property is related to',
         example: 'user'
       },
       relationKey: {
+        title: 'relationKey',
         type: ['null', 'string'],
         description:
-          'The field of the object that this property is related to (eg relation[foreignKey] == this property',
+          'The field of the object that this property is related to (eg relation[foreignKey])',
         example: 'user'
       },
       relationLabel: {
+        title: 'relationLabel',
         type: ['null', 'string'],
         description:
-          'The field of the object that this property is related to (eg relation[foreignKey] == this property',
+          'foreign object label',
         example: 'user'
       },
       relationUrl: {
+        title: 'relationUrl',
         type: ['null', 'string'],
         description:
-          'The field of the object that this property is related to (eg relation[foreignKey] == this property',
+          'the url to use to fetch the foreign object',
         example: 'user'
       },
       field: {
@@ -83,13 +86,14 @@ module.exports = {
         properties: {
           title: {
             type: 'string',
-            title: 'The title of the field'
+            title: 'Title',
+            description: 'The title of the field',
           },
           type: {
             type: 'string',
             title:
-              'The type of the field',
-            description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields',
+              'Field type',
+            description: 'The type of the field Case sensisitive. custom types are also supported.',
             enum: ['string',
               'input',
               'number',
@@ -97,46 +101,81 @@ module.exports = {
               'list-of-data',
               'EnyoSelect',
               'dateTime',
+              'DateRange',
               'textArea',
               'VSelect',
               'date',
               'datetime',
-              'time']
+              'time',
+              'ImagePicker',
+              'File,',
+              'JsonTextarea',
+
+            ]
           },
           inputType: {
             type: 'string',
             title:
-              'The type of the input field',
+              'Input type',
             description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields'
           },
           required: {
-            type: 'boolean',
-            title: 'Form field value is required'
+            title: 'Required',
+            type: ['boolean', 'string'],
+            description: 'Form field value is required',
+            field: {
+              type: 'checkbox'
+            }
           },
+          /*
           hidden: {
-            type: 'boolean',
-            title: 'Form field is displayed'
+            title: 'Hidden',
+            type: ['boolean', 'string'],
+            description: 'Form field is displayed',
+            field: {
+              type: 'checkbox'
+            }
+          },
+          */
+          visible: {
+            title: 'Visible',
+            type: ['boolean', 'string'],
+            description: 'Form field is displayed',
+            field: {
+              type: 'checkbox'
+            }
           },
           disabled: {
-            type: 'boolean',
-            title: 'Field is disabled'
+            title: 'Disabled',
+            type: ['boolean', 'string'],
+            description: 'Field is disabled',
+            field: {
+              type: 'checkbox'
+            }
           },
           readonly: {
-            type: 'boolean',
-            title: 'Field is read only'
+            title: 'Readonly',
+            type: ['boolean', 'string'],
+            description: 'Field is read only',
+            field: {
+              type: 'checkbox'
+            }
           },
           styleClasses: {
             type: 'string',
-            title: 'The class that will be around the field',
+            title: 'Css classes',
+            description: 'The class that will be around the field',
             example: 'col-md-12'
           },
           min: {
             type: 'number',
-            title: 'the minimum number of characters'
+            title: 'Minimum number of characters',
+            description: 'the minimum number of characters',
           },
           max: {
             type: 'number',
-            title: 'the maximum number of characters'
+            title: 'Maximum number of characters',
+            description: 'the maximum number of characters',
           },
           fieldOptions: {
             title: 'Field options',
@@ -145,7 +184,8 @@ module.exports = {
             properties: {
               multiple: {
                 type: 'boolean',
-                title: 'If the select is multiple (for selects)'
+                title: 'Multiple select',
+                description: 'If the select is multiple (for selects)'
               },
               enum: {
                 type: ['string', 'array'],
@@ -156,7 +196,8 @@ module.exports = {
               },
               url: {
                 type: 'string',
-                title: 'The url to use to load the data for the select (ajax)',
+                title: 'Data url',
+                description: 'The url to use to load the data for the select (ajax)',
                 example: '/user'
               },
               trackBy: {
@@ -278,4 +319,4 @@ module.exports = {
       useCustomLayout: false
     }
   }
-}
+};

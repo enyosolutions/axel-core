@@ -17,7 +17,7 @@
           <!-- Begin Page Content -->
           <div class="container-fluid">
             <transition name="fadeIn" enter-active-class="animated fadeIn">
-              <router-view class="view"></router-view>
+              <router-view class="view" :key="$route.fullPath"></router-view>
             </transition>
           </div>
           <!-- /.container-fluid -->
@@ -37,7 +37,11 @@
       <!-- End of Content Wrapper -->
     </div>
     <!-- End of Page Wrapper -->
-    <div class="modal-backdrop fade show" id="backdrop" style="display: none;"></div>
+    <div
+      class="modal-backdrop fade show"
+      id="backdrop"
+      style="display: none"
+    ></div>
   </div>
 </template>
 
@@ -63,8 +67,8 @@ export default {
   },
   computed: {
     ...mapState({
-      menuItems: state => state.menu && state.menu.data,
-      togglesidebar: state => state.menu.togglesidebar,
+      menuItems: (state) => state.menu && state.menu.data,
+      togglesidebar: (state) => state.menu.togglesidebar,
     }),
   },
   created() {
@@ -76,33 +80,38 @@ export default {
   mounted() {
     this.$store.dispatch('getAuth');
     this.$store.dispatch('getModels');
+    this.$store.dispatch('getConfig');
   },
   watch: {
     $route() {
-      this.menuItems.forEach(items => {
+      return;
+      /*
+      this.menuItems.forEach((items) => {
         if (items.path === this.$route.path) {
           this.$store.dispatch('menu/setActiveRoute', items);
         }
         if (!items.children) {
           return false;
         }
-        items.children.forEach(subItems => {
+        items.children.forEach((subItems) => {
           if (subItems.path === this.$route.path) {
             this.$store.dispatch('menu/setActiveRoute', subItems);
           }
           if (!subItems.children) {
             return false;
           }
-          subItems.children.forEach(subSubItems => {
+          subItems.children.forEach((subSubItems) => {
             if (subSubItems.path === this.$route.path) {
               this.$store.dispatch('menu/setActiveRoute', subSubItems);
             }
           });
         });
       });
+      */
     },
     sidebar_toggle_var() {
-      this.resized = this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
+      this.resized =
+        this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
     },
   },
   methods: {

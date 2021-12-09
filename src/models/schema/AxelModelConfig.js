@@ -15,8 +15,12 @@ module.exports = {
       id: {
         $id: 'id',
         type: 'number',
-        title: 'config id', // serves for front form fields
-        description: 'The id of this item' // serves for front form hint
+        title: 'id', // serves for front form fields
+        description: 'The id of this item', // serves for front form hint
+        field: {
+          disabled: true,
+          readonly: true
+        }
       },
       identity: {
         type: 'string',
@@ -43,6 +47,11 @@ module.exports = {
       namePlural: {
         type: 'string'
       },
+      detailPageMode: {
+        type: 'string',
+        default: 'sidebar',
+        enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform']
+      }, // fade | slide | full
       nestedLayoutMode: {
         type: 'string',
         enum: ['horizontal-tabs', 'vertical-tabs', 'list'],
@@ -56,7 +65,17 @@ module.exports = {
         default: {},
         column: { type: 'string' },
         properties: {
-          dataPaginationMode: { type: 'string', default: 'local' },
+          detailPageMode: {
+            type: 'string',
+            default: 'sidebar',
+            title: '@Deprecated use schema.detailPageMode directly',
+            enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform']
+          }, // fade | slide | full
+          dataPaginationMode: {
+            type: 'string',
+            default: 'local',
+            enum: ['remote', 'local'],
+          },
           apiUrl: { type: 'string', default: '' },
           createPath: { type: 'string', default: '' },
           viewPath: { type: 'string', default: '' },
@@ -65,11 +84,6 @@ module.exports = {
           autoRefresh: { type: 'boolean', field: { disabled: true } }, // or integer in seconds
           initialDisplayMode: { type: 'string', default: 'table' },
           modalMode: { type: 'string', default: 'slide' }, // fade | slide | full
-          detailPageMode: {
-            type: 'string',
-            default: 'sidebar',
-            enum: ['modal', 'fullscreen', 'sidebar', 'page']
-          }, // fade | slide | full
           columnsDisplayed: { type: 'integer', default: false }
         }
       },
@@ -135,11 +149,36 @@ module.exports = {
         values: ['view', 'edit', 'none', 'delete'],
         description: 'The action to execute when the user double clicks on a row'
       },
+      listOptions: {
+        title: 'List Options',
+        description: 'Options for list view',
+        type: ['object', 'null'],
+        default: {},
+        properties: {
+          titleField: { type: 'string' },
+          subtitleField: { type: 'string' },
+          descriptionField: { type: 'string' },
+          perRow: { type: 'number' },
+        }
+      },
+      kanbanOptions: {
+        title: 'List Options',
+        description: 'Options for list view',
+        type: ['object', 'null'],
+        default: {},
+      },
+      tableOptions: {
+        title: 'List Options',
+        description: 'Options for list view',
+        type: ['object', 'null'],
+        default: {},
+      },
       tableDataLimit: {
+        title: 'tableDataLimit',
         type: 'number',
         default: 1000,
         description:
-          'Define the number of items to get from the api for the table. This prevents overloading the table with too much data'
+          'Definesthe number of items to get from the api for the table. This prevents overloading the table with too much data'
       }
     },
     required: ['identity']
@@ -156,6 +195,6 @@ module.exports = {
       view: true,
       delete: true
     },
-    options: { detailPageMode: 'page' }
+    detailPageMode: 'page',
   }
-}
+};

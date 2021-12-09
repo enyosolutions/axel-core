@@ -1,11 +1,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { startCase } from 'lodash';
+import { startCase, get } from 'lodash';
 import config from '@/config';
 // import * as models from '../models';
 
 // import 'es6-promise/auto';
 import modules from './modules';
+import { editLayout, editFields } from '../models/actions';
 
 const modelDefaultOptions = {
   mode: 'remote',
@@ -25,8 +26,10 @@ const modelDefaultActions = {
   dateFilter: false,
   view: true,
   delete: true,
+  changeDisplayMode: true,
   import: false,
   export: false,
+  columns: true,
 };
 
 
@@ -36,7 +39,10 @@ export default new Vuex.Store({
   state: {
     currentLocale: localStorage.getItem(`${config.appKey}_locale`) || config.defaultLocale,
     token: null,
-    models: []
+    models: [],
+    primaryColor: localStorage.getItem(`${config.appKey}_primaryColor`),
+    secondaryColor: localStorage.getItem(`${config.appKey}_secondaryColor`),
+    appConfig: {}
   },
   mutations: {
     models(state, appModels) {
@@ -49,6 +55,19 @@ export default new Vuex.Store({
       state.locale = locale;
       localStorage.setItem(`${config.appKey}_locale`, locale);
     },
+
+    colors(state, { primaryColor, secondaryColor }) {
+      if (primaryColor) {
+        localStorage.setItem(`${config.appKey}_primaryColor`, primaryColor);
+        state.primaryColor = primaryColor;
+        localStorage.setItem(`${config.appKey}_secondaryColor`, secondaryColor);
+        state.secondaryColor = secondaryColor;
+
+        document.documentElement.style.setProperty('--primary', primaryColor);
+        document.documentElement.style.setProperty('--secondary', secondaryColor);
+      }
+    },
+
   },
   actions: {
     changeLocale(context, locale) {
@@ -86,6 +105,10 @@ export default new Vuex.Store({
               },
               nestedDisplayMode: model.nestedDisplayMode || 'object',
             };
+            model.customTitleBarActions = [
+              editLayout,
+              editFields,
+            ]
             return model;
           });
           commit('models', apiModels);
@@ -94,6 +117,23 @@ export default new Vuex.Store({
           console.error('getModels', err);
         });
     },
+    getConfig({ commit, state }) {
+      const promise = this._vm.$socket.get('/axel-manager/config');
+      return promise
+        .then(res => {
+          // commit('models', apiModels);
+          state.appConfig = res.body;
+          commit('colors', {
+            primaryColor: get(res, 'body.framework.primaryColor'),
+            secondaryColor: get(res, 'body.framework.secondaryColor'),
+          });
+        })
+        .catch(err => {
+          console.error('getModels', err);
+        });
+    },
+
+
     refreshListOfValues(context) {
       const { dispatch } = context;
       dispatch('getModels');

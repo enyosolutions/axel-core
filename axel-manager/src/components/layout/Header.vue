@@ -1,20 +1,25 @@
 <template>
   <div class="">
     <!-- Topbar -->
-    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+    <nav
+      class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+    >
       <!-- Sidebar Toggle (Topbar) -->
-      <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+      <button
+        id="sidebarToggleTop"
+        class="btn btn-link d-md-none rounded-circle mr-3"
+      >
         <i class="fa fa-bars"></i>
       </button>
 
       <!-- Topbar Search -->
-      <h4 class="text-primary">
+      <h4 class="text-primary" v-if="appConfig">
         app:
         <span class="badge badge-primary">{{ appConfig.app }}</span>
         | env:
         <span class="badge badge-primary"> {{ appConfig.env }}</span>
         | NODE_ENV:
-        <span class="badge badge-info">{{ appConfig.NODE_ENV }}</span>
+        <span class="badge badge-info">{{ appConfig.node_env }}</span>
       </h4>
       <form
         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
@@ -122,11 +127,10 @@
               </div>
               <div class="font-weight-bold">
                 <div class="text-truncate">
-                  Hi there! I am wondering if you can help me with a problem I've been having.
+                  Hi there! I am wondering if you can help me with a problem
+                  I've been having.
                 </div>
-                <div class="small text-gray-500">
-                  Emily Fowler · 58m
-                </div>
+                <div class="small text-gray-500">Emily Fowler · 58m</div>
               </div>
             </a>
             <a class="dropdown-item d-flex align-items-center" href="#">
@@ -140,8 +144,8 @@
               </div>
               <div>
                 <div class="text-truncate">
-                  I have the photos that you ordered last month, how would you like them sent to
-                  you?
+                  I have the photos that you ordered last month, how would you
+                  like them sent to you?
                 </div>
                 <div class="small text-gray-500">Jae Chun · 1d</div>
               </div>
@@ -157,12 +161,10 @@
               </div>
               <div>
                 <div class="text-truncate">
-                  Last month's report looks great, I am very happy with the progress so far, keep up
-                  the good work!
+                  Last month's report looks great, I am very happy with the
+                  progress so far, keep up the good work!
                 </div>
-                <div class="small text-gray-500">
-                  Morgan Alvarez · 2d
-                </div>
+                <div class="small text-gray-500">Morgan Alvarez · 2d</div>
               </div>
             </a>
             <a class="dropdown-item d-flex align-items-center" href="#">
@@ -176,15 +178,15 @@
               </div>
               <div>
                 <div class="text-truncate">
-                  Am I a good boy? The reason I ask is because someone told me that people say this
-                  to all dogs, even if they aren't good...
+                  Am I a good boy? The reason I ask is because someone told me
+                  that people say this to all dogs, even if they aren't good...
                 </div>
-                <div class="small text-gray-500">
-                  Chicken the Dog · 2w
-                </div>
+                <div class="small text-gray-500">Chicken the Dog · 2w</div>
               </div>
             </a>
-            <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
+            <a class="dropdown-item text-center small text-gray-500" href="#"
+              >Read More Messages</a
+            >
           </div>
         </li>
 
@@ -249,6 +251,9 @@
 <script>
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import DisconnectedConfig from '@/components/swal/Disconnected';
+import Swal2 from 'sweetalert2';
+import { mapState } from 'vuex';
 
 dayjs.extend(relativeTime);
 
@@ -271,7 +276,6 @@ export default {
       mixLayout: 'light-only',
       apiSearchResults: {},
       notifications: [],
-      appConfig: {},
       socket: this.$socket,
     };
   },
@@ -289,18 +293,23 @@ export default {
     */
   },
   computed: {
+    ...mapState(['appConfig']),
     isConnected() {
       return this.socket && this.socket.connected;
     },
     userRoles() {
-      return this.$store.state.user.user.roles && Array.isArray(this.$store.state.user.user.roles)
+      return this.$store.state.user.user.roles &&
+        Array.isArray(this.$store.state.user.user.roles)
         ? this.$store.state.user.user.roles.join('x')
         : '';
     },
     searchResultIsEmpty() {
       return (
         !this.menuItems.length &&
-        !Object.values(this.apiSearchResults).reduce((prev, next) => next.count + prev, 0)
+        !Object.values(this.apiSearchResults).reduce(
+          (prev, next) => next.count + prev,
+          0
+        )
       );
     },
   },
@@ -335,12 +344,16 @@ export default {
     },
     searchTerm() {
       this.$store.dispatch('menu/searchTerm', this.terms);
-      ['client', 'request'].map(type =>
+      ['client', 'request'].map((type) =>
         this.$store
-          .dispatch('menu/searchItems', { query: `${this.terms}*`, type, perPage: 8 })
-          .then(data => {
+          .dispatch('menu/searchItems', {
+            query: `${this.terms}*`,
+            type,
+            perPage: 8,
+          })
+          .then((data) => {
             this.apiSearchResults[type] = data;
-          }),
+          })
       );
     },
     changeLocale(locale) {
@@ -369,7 +382,9 @@ export default {
         } else if (document.documentElement.mozRequestFullScreen) {
           document.documentElement.mozRequestFullScreen();
         } else if (document.documentElement.webkitRequestFullScreen) {
-          document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+          document.documentElement.webkitRequestFullScreen(
+            Element.ALLOW_KEYBOARD_INPUT
+          );
         }
       } else if (document.cancelFullScreen) {
         document.cancelFullScreen();
@@ -394,7 +409,7 @@ export default {
           .get('/api/notifications', {
             body: { organisationId: this.organisation && this.organisation.id },
           })
-          .then(notifs => {
+          .then((notifs) => {
             console.log('notifs', notifs);
             this.notifications = notifs;
           });
@@ -402,8 +417,15 @@ export default {
     },
   },
   watch: {
+    'socket.connected': function (newVal, oldVal) {
+      if (!newVal && oldVal !== newVal) {
+        this.blockingModal = Swal2.fire(DisconnectedConfig);
+      } else if (this.blockingModal) {
+        this.blockingModal.close();
+      }
+    },
     // eslint-disable-next-line
-    '$i18n.locale': function(to, from) {
+    '$i18n.locale': function (to, from) {
       if (from !== to) {
         this.$router.go(this.$route.path);
       }
