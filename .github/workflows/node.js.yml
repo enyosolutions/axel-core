@@ -8,7 +8,6 @@ on:
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -26,8 +25,7 @@ jobs:
     - run: npm ci
     - run: npm run lint
     - run: npm test
-
- build:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
