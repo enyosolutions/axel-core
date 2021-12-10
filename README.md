@@ -26,10 +26,16 @@ https://enyosolutions-team.github.io/axel-documentation/guide/axel-framework/
 
 ## getting started
 
+```
+## Install the cli tooling
 -  npm install -g axel-cli
+
+## Create a new project
 - `axel new my-project-name`
+
+## Open the project
 - `cd my-project-name`
-- ```
+
 # Install deps
 npm install
 
