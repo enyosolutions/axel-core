@@ -26,7 +26,7 @@ https://enyosolutions-team.github.io/axel-documentation/guide/axel-framework/
 
 ## getting started
 
-```
+```bash
 ## Install the cli tooling
 -  npm install -g axel-cli
 
