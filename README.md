@@ -22,3 +22,29 @@ Hence we decided to improve our workflow with various ready to use components.
 https://enyosolutions-team.github.io/axel-documentation/
 
 https://enyosolutions-team.github.io/axel-documentation/guide/axel-framework/
+
+
+## getting started
+
+-  npm install -g axel-cli
+- `axel new my-project-name`
+- `cd my-project-name`
+- ```
+# Install deps
+npm install
+
+# Setup environment (if present)
+cp .env.dist .env
+
+# Create the local configuration file
+cp api/src/config/local.js.dist api/src/config/local.js
+
+# Edit config to add bd credentials in the sql db section
+nano api/src/config/local.js
+
+# Run in development mode
+npm run dev
+
+# Run tests
+npm run test
+```
