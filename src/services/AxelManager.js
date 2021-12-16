@@ -33,6 +33,7 @@ class AxelManager {
     debug('[AXELMANAGER] WS is opening');
     const io = socketIO(app.locals.server);
     app.locals.io = io;
+    // https://socket.io/docs/v4/listening-to-events/#socketonanylistener
     io.on('connect', this.routing);
   }
 
@@ -59,11 +60,12 @@ class AxelManager {
           }
 
           try {
-            process.kill(process.pid, 'SIGTERM');
+            process.kill(process.pid, 'SIGUSR2');
             cb(null, {
               body: 'ok',
             });
           } catch (err) {
+            process.kill(process.pid, 'SIGTERM');
             cb(err);
           }
       }

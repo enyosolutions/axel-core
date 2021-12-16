@@ -59,6 +59,24 @@ module.exports = {
         title: 'Layout of the detail page',
         description: 'How the awesomeform is layed out in regards to nested components'
       },
+      detailPageLayout: {
+        title: 'layout of the detail page',
+        type: 'array',
+        items: {
+          properties: {
+            legend: { type: 'string' },
+            cols: {
+              type: 'number', min: 0, max: 12
+            },
+            fields: {
+              type: 'array',
+              items: { type: 'string' }
+            }
+          }
+        },
+        default: [],
+        field: { type: 'layoutEditor' }
+      },
       options: {
         type: 'object',
         field: {},
@@ -205,8 +223,21 @@ module.exports = {
       create: false,
       edit: true,
       view: true,
-      delete: true
+      delete: true,
+      export: true,
+      import: true,
     },
     detailPageMode: 'page',
+    layout: [{
+      legend: 'Infos', fields: ['id', 'identity', 'pageTitle', 'icon', 'name', 'namePlural'], cols: '6', wrapperClasses: 'card mb-1'
+    }, {
+      legend: 'Basic Config', fields: ['detailPageMode', 'nestedLayoutMode', 'tableDataLimit'], cols: '6', wrapperClasses: 'card mb-1'
+    }, {
+      legend: 'Layout', fields: ['layout'], cols: 12, wrapperClasses: 'card mb-1'
+    }, {
+      legend: 'Actions', fields: ['actions'], cols: '6', wrapperClasses: 'card mb-1'
+    }, {
+      legend: 'Options', fields: ['options'], cols: '6', wrapperClasses: 'card mb-1'
+    }]
   }
 };

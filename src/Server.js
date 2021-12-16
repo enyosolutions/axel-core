@@ -130,11 +130,11 @@ class Server {
     const welcome = p => () => {
       l.info(
         `up and running in ${process.env.NODE_ENV
-          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
+        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       debug(
         `up and running in ${process.env.NODE_ENV
-          || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
+        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
       );
       l.info('\n');
       l.info('__________________________________');
@@ -149,9 +149,14 @@ class Server {
       console.timeEnd('STARTUP TIME');
       app.emit('server-ready', { axel });
     };
-    app.locals.server = http.createServer(app);
-    app.locals.server.listen(port, welcome(port));
-    return app;
+    try {
+      app.locals.server = http.createServer(app);
+      app.locals.server.listen(port, welcome(port));
+      return app;
+    } catch (err) {
+      console.warn(err.message);
+      process.exit(-1);
+    }
   }
 }
 module.exports = Server;

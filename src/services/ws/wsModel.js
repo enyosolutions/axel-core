@@ -8,7 +8,7 @@ const {
   sequelizeFieldToSchemaField,
 } = require('axel-cli');
 const AxelAdmin = require('../AxelAdmin');
-
+const { catchSignal } = require('./utils');
 
 const requireWithoutCache = (path) => {
   const modelPath = require.resolve(path);
@@ -20,13 +20,14 @@ const requireWithoutCache = (path) => {
   require.cache[modelPath] = cachedModel;
   return model;
 };
-
 module.exports = (socket) => {
   socket.on('/axel-manager/models', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }
-
+    const {
+      name, type, force, fields, withSchema
+    } = req.body;
     switch (req.method) {
       case 'GET':
       default:
@@ -36,27 +37,39 @@ module.exports = (socket) => {
         // eslint-disable -next-line
         let tables = await axel.sqldb.query('show tables');
         tables = tables.map(t => Object.values(t)[0]);
-        const models = Object.entries(axel.models).map(([modelName, modelDef]) => ({
-          name: modelName,
-          fields: Object.keys(modelDef.entity.attributes).map(idx => ({
-            name: idx,
-            ...modelDef.entity.attributes[idx],
-            type: modelDef.properties,
-          })),
-        }));
-        cb(null, {
-          body: {
-            models,
-            tables,
-          },
-        });
+        try {
+          const models = Object.entries(axel.models).map(([modelName, modelDef]) => ({
+            name: modelName,
+            fields: Object.keys(modelDef.entity.attributes).map(idx => ({
+              name: idx,
+              ...modelDef.entity.attributes[idx],
+              type: modelDef.properties,
+            })),
+          }));
+          cb(null, {
+            body: {
+              models,
+              tables,
+            },
+          });
+        } catch (err) {
+          cb(err.message || err);
+        }
+
         break;
       case 'POST':
-        const {
-          name, type, force, fields, withSchema
-        } = req.body;
+
         if (!name) {
           return cb('missing_param_name');
+        }
+        if (!type) {
+          return cb('missing_param_type');
+        }
+        if (!fields || !fields.length) {
+          return cb('missing_fields');
+        }
+        if (!fields.some(f => f.primaryKey)) {
+          return cb('missing_primary_key');
         }
         try {
           let types = [type];
@@ -75,6 +88,19 @@ module.exports = (socket) => {
           console.warn('[AXELMANAGER]', err);
           cb(err.message || 'See terminal for more details');
         }
+        break;
+      case 'DELETE':
+        const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(name)}.js`;
+        const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(name)}.js`;
+        try {
+          fs.unlinkSync(modelPath);
+          fs.unlinkSync(schemaPath);
+          cb(null, 'OK');
+          process.kill(process.pid, 'SIGUSR2');
+        } catch (err) {
+          cb(err.message || err);
+        }
+        break;
     }
   });
   socket.on('/axel-manager/models/add-fields', async (req = { method: 'PUT', query: {}, body: {} }, cb) => {
@@ -88,10 +114,14 @@ module.exports = (socket) => {
         break;
       case 'POST':
         const {
-          type, withSchema, fields, sync
+          withSchema, fields, sync
         } = req.body;
         if (!req.body || !req.body.model) {
           return cb('Missing model name');
+        }
+
+        if (!fields || !fields.length) {
+          return cb('missing_fields');
         }
         try {
           const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(req.body.model)}.js`;
@@ -108,6 +138,8 @@ module.exports = (socket) => {
               schema.schema.properties[field.name] = sequelizeFieldToSchemaField(field.name, sequelizeField);
             }
           });
+
+          catchSignal('SIGUSR2', 5);
 
           fs.writeFileSync(modelPath, `module.exports = ${serialize(model, { space: 2, unsafe: false })}`, {
             encoding: 'utf8',

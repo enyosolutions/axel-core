@@ -100,6 +100,12 @@
                       >
                         Drop and sync
                       </button>
+                      <button
+                        class="btn btn-danger badge"
+                        @click="deleteModel(model.name)"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -378,12 +384,11 @@
                 </tbody>
               </table>
               <hr />
-              <div class="text-right">
+              <div class="text-right" v-if="modelEditModalMode == 'add-field'">
                 <input
-                  v-if="modelEditModalMode == 'add-field'"
                   id="forceSync"
                   type="checkbox"
-                  class="form-control-"
+                  class="form-control-checkbox"
                   placeholder="force"
                   v-model="syncNewFields"
                   value="true"
@@ -413,7 +418,9 @@
               v-if="modelEditModalMode == 'model'"
               class="btn btn-success"
               @click="createModel"
-              :disabled="!newApi || !newApi.name || !newApi.type"
+              :disabled="
+                !newApi || !newApi.name || !newApi.type || !newApi.fields.length
+              "
             >
               Create Model
             </button>
@@ -421,7 +428,9 @@
               v-if="modelEditModalMode == 'add-field'"
               class="btn btn-success"
               @click="addFieldsToModel()"
-              :disabled="!newApi || !newApi.name || !newApi.type"
+              :disabled="
+                !newApi || !newApi.name || !newApi.type || !newApi.fields.length
+              "
             >
               Add field(s)
             </button>
@@ -669,62 +678,6 @@ export default {
         });
     },
 
-    async createModel() {
-      const values = await Swal2.fire({
-        title: 'Create a new controller',
-        html: `
-                 <input id="swal-name" class="swal2-input" placeholder="Name">
-                 <select id="swal-type" class="swal2-input" placeholder="type">
-                   <option selected>bare</option>
-                   <option>sql</option>
-                   <option disabled>mongo</option>
-                 </select>
-                   <label>
-                 <input id="swal-force" type="checkbox" class="swal2-checkbox" placeholder="force" value="true">
-                 Force
-                 </label>
-                 `,
-        focusConfirm: false,
-        showCancelButton: true,
-        reverseButtons: true,
-        preConfirm: () => {
-          let values = [
-            document.getElementById('swal-name').value,
-            document.getElementById('swal-type').value,
-            document.getElementById('swal-force').value == 'true',
-          ];
-          values = values.filter((v) => v);
-          if (values.length < 3) {
-            return Swal2.fire({
-              title: 'Please fill in all the data',
-              icon: 'error',
-            });
-          }
-          if (values[2] == 'true') {
-            values[2] = true;
-          }
-          return values;
-        },
-      });
-      this.$socket
-        .post('/axel-manager/controllers', {
-          body: {
-            name: values.value[0],
-            type: values.value[1],
-            force: values.value[2],
-          },
-        })
-        .then(() => {
-          return Swal2.fire({
-            title: 'Controller successfully created',
-            icon: 'success',
-          });
-        })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
-    },
-
     async createRoute() {
       const values = await Swal2.fire({
         title: 'Create a new route',
@@ -763,36 +716,39 @@ export default {
         });
     },
 
-    async validateCreateModelForm() {
+    validateCreateModelForm(options = {}) {
+      const { context } = options || {};
       this.newApi.fields = this.newApi.fields.filter((f) => f.name);
       if (!this.newApi.name) {
-        Swal2.fire({ title: 'Missing api name', toast: true });
-        return;
+        Swal2.fire({ title: 'Missing api name' });
+        return false;
       }
       if (!this.newApi.type) {
-        Swal2.fire({ title: '⚠️ Missing api type', toast: true });
-        return;
+        Swal2.fire({ title: '⚠️ Missing api type' });
+        return false;
       }
       if (!this.newApi.fields.length) {
         Swal2.fire({
           title: '⚠️ Missing api fields',
           type: 'error',
-          toast: true,
         });
-        return;
+        return false;
       }
-
-      if (!this.newApi.fields.filter((f) => f.primaryKey).length) {
-        Swal2.fire({
-          title: 'You need to define at least one primary key field',
-          toast: true,
-        });
-        return;
+      if (context && context === 'create') {
+        if (!this.newApi.fields.filter((f) => f.primaryKey).length) {
+          Swal2.fire({
+            title: 'You need to define at least one primary key field',
+          });
+          return false;
+        }
       }
+      return true;
     },
 
     async createApi() {
-      this.validateCreateModelForm();
+      if (!this.validateCreateModelForm({ context: 'create' })) {
+        return;
+      }
       this.$socket
         .post('/axel-manager/api', { body: { ...this.newApi } })
         .then(() => {
@@ -808,13 +764,14 @@ export default {
         });
     },
 
-    async createModelApi() {
-      this.validateCreateModelForm();
+    async createModel() {
+      if (!this.validateCreateModelForm({ context: 'create' })) {
+        return;
+      }
       this.$socket
         .post('/axel-manager/models', { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
-          closeModal('newApiModal');
           return Swal2.fire({
             title: 'MOdel successfully created',
             icon: 'success',
@@ -825,9 +782,32 @@ export default {
           return Swal2.fire({ title: err.message || err, icon: 'error' });
         });
     },
+    /**
+     * Delete model file
+     */
+    async deleteModel(name) {
+      if (!(await this.$awConfirm())) {
+        return;
+      }
+      this.$socket
+        .delete('/axel-manager/models', { body: { name } })
+        .then(() => {
+          this.refreshLists();
+          Swal2.fire({
+            title: 'MOdel successfully deleted',
+            icon: 'success',
+            toast: true,
+          });
+        })
+        .catch((err) => {
+          return Swal2.fire({ title: err.message || err, icon: 'error' });
+        });
+    },
 
     async addFieldsToModel() {
-      this.validateCreateModelForm();
+      if (!this.validateCreateModelForm()) {
+        return;
+      }
       this.$socket
         .post('/axel-manager/models/add-fields', {
           body: {

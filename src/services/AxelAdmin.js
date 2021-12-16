@@ -127,13 +127,15 @@ class AxelAdmin {
       return Promise.resolve();
     }
     return this.clearModelsInDb().then(() => {
-      const insertions = Object.keys(axel.models).map((modelKey) => {
-        const model = axel.models[modelKey];
-        return axel.models.axelModelConfig.em.create({
-          identity: model.identity,
-          config: this.jsonSchemaToFrontModel(model)
+      const insertions = Object.keys(axel.models)
+        .filter(modelKey => ['axelModelFieldConfig', 'axelModelConfig'].includes(modelKey))
+        .map((modelKey) => {
+          const model = axel.models[modelKey];
+          return axel.models.axelModelConfig.em.create({
+            identity: model.identity,
+            config: this.jsonSchemaToFrontModel(model)
+          });
         });
-      });
       return Promise.all(insertions);
     })
       .then(() => Promise.all(

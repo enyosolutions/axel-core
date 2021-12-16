@@ -108,7 +108,7 @@ module.exports = {
               'datetime',
               'time',
               'ImagePicker',
-              'File,',
+              'File',
               'JsonTextarea',
 
             ]
@@ -124,7 +124,7 @@ module.exports = {
             type: ['boolean', 'string'],
             description: 'Form field value is required',
             field: {
-              type: 'checkbox'
+              type: 'BooleanExpressionEditor'
             }
           },
           /*
@@ -142,7 +142,7 @@ module.exports = {
             type: ['boolean', 'string'],
             description: 'Form field is displayed',
             field: {
-              type: 'checkbox'
+              type: 'BooleanExpressionEditor'
             }
           },
           disabled: {
@@ -150,7 +150,7 @@ module.exports = {
             type: ['boolean', 'string'],
             description: 'Field is disabled',
             field: {
-              type: 'checkbox'
+              type: 'BooleanExpressionEditor'
             }
           },
           readonly: {
@@ -158,7 +158,7 @@ module.exports = {
             type: ['boolean', 'string'],
             description: 'Field is read only',
             field: {
-              type: 'checkbox'
+              type: 'BooleanExpressionEditor'
             }
           },
           styleClasses: {
@@ -171,11 +171,17 @@ module.exports = {
             type: 'number',
             title: 'Minimum number of characters',
             description: 'the minimum number of characters',
+            field: {
+              type: 'number'
+            }
           },
           max: {
             type: 'number',
             title: 'Maximum number of characters',
             description: 'the maximum number of characters',
+            field: {
+              type: 'number'
+            }
           },
           fieldOptions: {
             title: 'Field options',
@@ -232,6 +238,7 @@ module.exports = {
 
               displayOptions: {
                 title: 'Display options',
+                type: 'object',
                 description: 'Options to be used specifically on view mode',
                 properties: {
                   type: {
@@ -312,7 +319,9 @@ module.exports = {
       create: false,
       edit: true,
       view: true,
-      delete: true
+      delete: true,
+      export: true,
+      import: true,
     },
     options: {
       detailPageMode: 'page',

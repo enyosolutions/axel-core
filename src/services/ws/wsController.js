@@ -8,6 +8,7 @@ const {
   cliFieldToSequelizeField,
   sequelizeFieldToSchemaField,
 } = require('axel-cli');
+const { catchSignal } = require('./utils');
 
 module.exports = (socket) => {
   const counter = 3;
@@ -34,20 +35,9 @@ module.exports = (socket) => {
             fields,
             withSchema,
           });
-          let count = withSchema ? 4 : 3;
+          const count = withSchema ? 4 : 3;
           // catching api signals in order for the file to generate properly
-          process.once('SIGUSR2', () => {
-            debug('[AXELMANAGER] Captured interruption signal....', count--);
-
-            if (count <= 0) {
-              setTimeout(() => {
-                process.kill(process.pid, 'SIGUSR2');
-                if (count < -10) {
-                  process.exit();
-                }
-              }, 1000);
-            }
-          });
+          catchSignal('SIGUSR2', count);
           cb(null, { body: 'OK' });
         } catch (err) {
           console.warn('[AXELMANAGER]', err);
