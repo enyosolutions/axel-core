@@ -38,7 +38,7 @@ class AxelModelConfigController {
     }
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req, query, {
-        modelName: req.params.entity
+        modelName: req.params.entity || entity
       });
     }
     query = Utils.cleanSqlQuery(query);

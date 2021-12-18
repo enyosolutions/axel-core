@@ -98,6 +98,7 @@ module.exports = (socket) => {
           cb(null, 'OK');
           process.kill(process.pid, 'SIGUSR2');
         } catch (err) {
+          console.warn(err);
           cb(err.message || err);
         }
         break;
@@ -180,6 +181,7 @@ module.exports = (socket) => {
         if (!em) {
           return cb(`error_while_accessing_model${JSON.stringify(id)}`);
         }
+        console.log('[AXELMANAGER] syncing sql model', id, { force, alter });
         em.sync({ force, alter })
           .then((result) => {
             cb(null, { body: 'OK' });
@@ -203,8 +205,12 @@ module.exports = (socket) => {
       default:
         break;
       case 'POST':
-        AxelAdmin.insertModelsIntoDb()
-          .then(() => cb())
+        AxelAdmin.clearModelsInDb()
+          .then(() => {
+            cb();
+            process.kill(process.pid, 'SIGUSR2');
+
+          })
           .catch(cb);
     }
   });

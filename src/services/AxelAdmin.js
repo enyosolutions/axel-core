@@ -67,13 +67,10 @@ class AxelAdmin {
           if (savedModel) {
             return Promise.resolve();
           }
-          return axel.models.axelModelConfig.em.create({ identity: model.identity, config: this.jsonSchemaToFrontModel(model) });
+          return this.insertSingleModelIntoDb(model);
         });
         return Promise.all(insertions);
       })
-      .then(() => Promise.all(
-        Object.entries(axel.models).map(([, entry]) => this.updateFieldsConfig(entry))
-      ))
       .catch(console.warn);
   }
 
@@ -85,7 +82,7 @@ class AxelAdmin {
    * @memberof AxelAdmin
    */
   updateFieldsConfig(model) {
-    if (!model.schema) {
+    if (!model.schema || model.identity.startsWith('axel')) {
       return Promise.resolve();
     }
     return axel.models.axelModelFieldConfig.em
@@ -121,26 +118,49 @@ class AxelAdmin {
       ));
   }
 
-  insertModelsIntoDb() {
+  insertModelsIntoDb(model) {
     axel.logger.debug('[AxelAdmin] insertModelsIntoDb');
     if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
       return Promise.resolve();
     }
+    const insertableModels = Object.keys(axel.models).filter(modelKey => !['axelModelFieldConfig', 'axelModelConfig'].includes(modelKey));
     return this.clearModelsInDb().then(() => {
-      const insertions = Object.keys(axel.models)
-        .filter(modelKey => ['axelModelFieldConfig', 'axelModelConfig'].includes(modelKey))
-        .map((modelKey) => {
-          const model = axel.models[modelKey];
-          return axel.models.axelModelConfig.em.create({
-            identity: model.identity,
-            config: this.jsonSchemaToFrontModel(model)
-          });
+
+      const insertions = insertableModels.map((modelKey) => {
+        const model = axel.models[modelKey];
+        console.log("insert into db", modelKey)
+        return axel.models.axelModelConfig.em.create({
+          identity: model.identity,
+          config: this.jsonSchemaToFrontModel(model)
         });
+      });
       return Promise.all(insertions);
     })
       .then(() => Promise.all(
-        Object.entries(axel.models).map(([, entry]) => this.updateFieldsConfig(entry))
+        insertableModels.map(([, entry]) => this.updateFieldsConfig(axel.models[entry]))
       ));
+  }
+
+
+  insertSingleModelIntoDb(model) {
+    axel.logger.debug('[AxelAdmin] insertModelsIntoDb');
+    if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
+      return Promise.resolve();
+    }
+    if (!model.schema || model.identity.startsWith('axel')) {
+      return Promise.resolve();
+    }
+    let insertableModels = [model.identity];
+
+    const insertions = insertableModels.map((modelKey) => {
+      const model = axel.models[modelKey];
+      return axel.models.axelModelConfig.em.create({
+        identity: model.identity,
+        config: this.jsonSchemaToFrontModel(model)
+      });
+    });
+    return Promise.all(insertions)
+      .then(() => this.updateFieldsConfig(model));
   }
 
   clearModelsInDb() {
@@ -228,6 +248,8 @@ class AxelAdmin {
   loadDbModelsInMemory([savedConfig, savedFields]) {
     const mappedSavedConfig = {};
     if (savedConfig && savedConfig.length) {
+      savedConfig = savedConfig.filter(conf => !['axelModelConfig', 'axelModelFieldConfig'].includes(conf.identity));
+
       savedConfig.forEach((config) => {
         delete config.id;
         delete config.createdOn;
@@ -236,6 +258,7 @@ class AxelAdmin {
 
         if (savedFields && savedFields.length) {
           mappedSavedConfig[config.identity].schema = { properties: {} };
+          savedFields = savedFields.filter(conf => !['axelModelConfig', 'axelModelFieldConfig'].includes(conf.parentIdentity));
           savedFields.forEach((field) => {
             if (field.parentIdentity === config.identity) {
               mappedSavedConfig[config.identity].schema.properties[field.name] = {
@@ -285,7 +308,9 @@ class AxelAdmin {
     let promise = Promise.resolve([]);
     if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
       promise = Promise.all([
-        axel.models.axelModelConfig.em.findAll({ logging: false }),
+        axel.models.axelModelConfig.em.findAll({
+          logging: false
+        }),
         axel.models.axelModelFieldConfig.em
           .findAll({ logging: false })
       ]);

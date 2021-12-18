@@ -53,24 +53,63 @@ module.exports = {
         default: 'string',
         field: {}
       },
+      enum: {
+        type: ['string', 'array'],
+        title: 'Possible values',
+        description: 'The list of values to use for the select.',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            multiple: true,
+            taggable: true
+          }
+        }
+      },
       relation: {
         title: 'relation',
         type: ['null', 'string'],
         description: 'The object that this property is related to',
-        example: 'user'
+        example: 'user',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/models',
+            label: 'name',
+            trackBy: 'identity',
+          }
+        }
       },
       relationKey: {
         title: 'relationKey',
         type: ['null', 'string'],
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/axel-model-field-config?filters%5B%5D=&filters%5BparentIdentity%5D={{ currentItem.relation }}',
+            label: 'name',
+            trackBy: 'name',
+          }
+        },
         description:
-          'The field of the object that this property is related to (eg relation[foreignKey])',
-        example: 'user'
+          'The field of the object that this property is related to (eg relation[foreignKey]). Leave empty to use the relation.primaryKeyField',
+        example: 'id'
       },
       relationLabel: {
         title: 'relationLabel',
         type: ['null', 'string'],
         description:
-          'foreign object label',
+          'The field of the relation used to display. Leave empty to use the relation.displayField',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/axel-model-field-config?filters%5B%5D=&filters%5BparentIdentity%5D={{ currentItem.relation }}',
+            label: 'name',
+            trackBy: 'name',
+          }
+        },
         example: 'user'
       },
       relationUrl: {
@@ -103,7 +142,7 @@ module.exports = {
               'dateTime',
               'DateRange',
               'textArea',
-              'VSelect',
+              'vSelect',
               'date',
               'datetime',
               'time',
@@ -117,7 +156,10 @@ module.exports = {
             type: 'string',
             title:
               'Input type',
-            description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields'
+            description: 'Text input comming from https://vue-generators.gitbook.io/vue-generators/fields',
+            field: {
+              visible: "{{ !!currentItem.field &&currentItem.field.type === 'input' }}"
+            }
           },
           required: {
             title: 'Required',
@@ -161,6 +203,7 @@ module.exports = {
               type: 'BooleanExpressionEditor'
             }
           },
+
           styleClasses: {
             type: 'string',
             title: 'Css classes',
@@ -191,30 +234,61 @@ module.exports = {
               multiple: {
                 type: 'boolean',
                 title: 'Multiple select',
-                description: 'If the select is multiple (for selects)'
+                description: 'If the select is multiple (for selects)',
+                field: {
+                  visible: "{{ !!currentItem.field && ['vSelect', 'select', 'EnyoSelect'].includes(currentItem.field.type) }}"
+                }
               },
               enum: {
                 type: ['string', 'array'],
                 title: 'Values',
                 description: `The list of values to use for the select. If the value is string
                   and starts with $store then the value is taken from the vuejs $store`,
-                example: '$store.listOfValues.users'
+                example: '$store.listOfValues.users',
+                field: {
+                  visible: "{{ !!currentItem.field && ['vSelect', 'select', 'EnyoSelect'].includes(currentItem.field.type) }}"
+                }
               },
               url: {
                 type: 'string',
-                title: 'Data url',
-                description: 'The url to use to load the data for the select (ajax)',
-                example: '/user'
+                title: 'c url',
+                description: 'The url to use to load the data for the select (ajax) [vSelect]',
+                example: '/user',
+                field: {
+                  visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
+                }
+              },
+              taggable: {
+                type: 'boolean',
+                title: 'Select accept new items',
+                description: 'Select accept new items [vSelect]',
+                example: '/user',
+                field: {
+                  visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
+                }
               },
               trackBy: {
                 type: 'string',
                 title: 'The field to use as the value in the select',
-                example: '_id'
+                example: '_id',
+                field: {
+                  visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' }}"
+                }
               },
               label: {
                 type: 'string',
                 title: 'The field to use as the Label in the select',
-                example: 'username'
+                example: 'username',
+                field: {
+                  visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' }}"
+                }
+              },
+              disableRelationActions: {
+                type: 'boolean',
+                title: 'disableRelationActions on the select',
+                field: {
+                  visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' && !!currentItem.relation  }}"
+                }
               },
               prefix: {
                 type: 'string',
@@ -243,10 +317,22 @@ module.exports = {
                 properties: {
                   type: {
                     type: 'string',
-                    title:
-                      'The type that links to the field option. In case of a dateTime selector, this would be date or datetime',
-                    enum: ['date', 'datetime']
-                  }
+                    title: 'Type of field for display',
+                    enum: [
+                      'string',
+                      'number',
+                      'boolean',
+                      'url',
+                      'image',
+                      'date',
+                      'datetime',
+                      'checkbox',
+                      'relation',
+                      'object',
+                    ],
+                    description:
+                      'The type that links to the display',
+                  },
                 }
               }
             }

@@ -52,9 +52,14 @@ const loadSqlModel = (filePath, sequelize) => {
     axel.logger.verbose('[ORM] loading sequelize model  %s', filePath);
 
     let model;
+    let hooks;
     try {
       /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
+      if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
+        hooks = require(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`);
+      }
+
     } catch (err) {
       console.warn('[ORM][WARN] ', filePath, err);
     }
@@ -64,6 +69,19 @@ const loadSqlModel = (filePath, sequelize) => {
     /* eslint-enable */
     const tableName = model.entity && model.entity.options && model.entity.options && model.entity.options.tableName;
     axel.logger.verbose('Loading identity', model);
+    // loading hooks
+    if (hooks && Object.keys(hooks).length) {
+      axel.logger.verbose('Loading hooks for', model);
+      if (_.has(model, 'entity.options.hooks')) {
+        model.entity.options.hooks = {
+          ...hooks,
+          ...model.entity.options.hooks
+        }
+      }
+      else {
+        model.entity.options.hooks = hooks;
+      }
+    }
     debug('Loading entity', model.identity);
     if (!model.identity) {
       throw new Error(`[ORM]  missing sql identity for ${filePath}`);
@@ -259,32 +277,32 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
       if (model.entity && model.schema) {
         const sqlProperties = Object.keys(model.entity.attributes);
         const jsonProperties = Object.keys(model.schema.properties);
-          // skipping timestamp props
-          if (model.entity.options && model.entity.options.timestamps) {
-            const options = model.entity.options;
-            sqlProperties.push(options.createdAt || 'createdAt');
-            sqlProperties.push(options.updatedAt || 'updatedAt');
-          }
-
-          let diff1 = _.difference(sqlProperties, jsonProperties);
-          let diff2 = _.difference(jsonProperties, sqlProperties);
-          if (diff1.length) {
-            diffTable1.push({model: key, fields: diff1.join(' | ')})
-          }
-          if (diff2.length) {
-            diffTable2.push({model: key, fields: diff2.join(' | ')})
-          }
+        // skipping timestamp props
+        if (model.entity.options && model.entity.options.timestamps) {
+          const options = model.entity.options;
+          sqlProperties.push(options.createdAt || 'createdAt');
+          sqlProperties.push(options.updatedAt || 'updatedAt');
         }
-      });
-      if (diffTable1.length) {
-       axel.logger.warn('[ORM] Fields present in sql but not in json');
-       console.table(diffTable1);
-     }
-     if (diffTable2.length) {
-       axel.logger.warn('[ORM] Fields present in json but not in sql');
-       console.table(diffTable2);
-     }
-   /* eslint-enable */
+
+        let diff1 = _.difference(sqlProperties, jsonProperties);
+        let diff2 = _.difference(jsonProperties, sqlProperties);
+        if (diff1.length) {
+          diffTable1.push({ model: key, fields: diff1.join(' | ') })
+        }
+        if (diff2.length) {
+          diffTable2.push({ model: key, fields: diff2.join(' | ') })
+        }
+      }
+    });
+    if (diffTable1.length) {
+      axel.logger.warn('[ORM] Fields present in sql but not in json');
+      console.table(diffTable1);
+    }
+    if (diffTable2.length) {
+      axel.logger.warn('[ORM] Fields present in json but not in sql');
+      console.table(diffTable2);
+    }
+    /* eslint-enable */
     axel.logger.info('___________________________');
     axel.logger.info('\n\n\n');
     resolve();
@@ -299,7 +317,7 @@ function unifyEntityManagers() {
     const model = axel.models[key];
     if (model.repository) {
       model.em = model.repository;
-      model.em.unifiedFind = function(query, options = {}) {
+      model.em.unifiedFind = function (query, options = {}) {
         if (!query) {
           return this.find(query, options);
         }
@@ -312,7 +330,7 @@ function unifyEntityManagers() {
         return this.findAll(query, options);
       };
       // FIND ONE
-      model.em.unifiedFindOne = function(query, options) {
+      model.em.unifiedFindOne = function (query, options) {
         if (!query) {
           return this.find(query, options);
         }
@@ -326,7 +344,7 @@ function unifyEntityManagers() {
         return this.findOne(query, options);
       };
       // UPDATE
-      model.em.unifiedUpdate = function(query, options) {
+      model.em.unifiedUpdate = function (query, options) {
         try {
           if (!query || !options) {
             return this.update(query, options);
@@ -345,27 +363,27 @@ function unifyEntityManagers() {
       };
 
       // UPDATE
-      model.em.unifiedFindOneAndUpdate = function(query, options) {
+      model.em.unifiedFindOneAndUpdate = function (query, options) {
         return model.em.unifiedUpdate(query, options);
       };
 
       // COUNT
-      model.em.unifiedCount = function(query, options) {
+      model.em.unifiedCount = function (query, options) {
         return model.em.count(
-        {
-          where: query,
-        },
-        options
+          {
+            where: query,
+          },
+          options
         );
       };
 
       // INSERT
-      model.em.unifiedInsert = function(query, options, moreOptions) {
+      model.em.unifiedInsert = function (query, options, moreOptions) {
         return this.create(query, options, moreOptions);
       };
 
       // DELETE
-      model.em.unifiedRemove = function(query) {
+      model.em.unifiedRemove = function (query) {
         if (!query) {
           return this.destroy(query);
         }

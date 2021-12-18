@@ -72,7 +72,7 @@
                     {{ model.name }}
                     <div class="float-right">
                       <button
-                        class="btn btn-info badge"
+                        class="btn btn-info badge mr-1"
                         @click="
                           resetApiForm();
                           modelEditModalMode = 'add-field';
@@ -84,13 +84,13 @@
                         <i class="fa fa-edit"></i> Edit
                       </button>
                       <button
-                        class="btn btn-primary badge"
+                        class="btn btn-primary badge mr-1"
                         @click="syncModel(model.name)"
                       >
                         sync
                       </button>
                       <button
-                        class="btn btn-secondary badge"
+                        class="btn btn-secondary badge mr-1"
                         @click="
                           syncModel(model.name || model.identity, {
                             force: true,
@@ -104,7 +104,7 @@
                         class="btn btn-danger badge"
                         @click="deleteModel(model.name)"
                       >
-                        Delete
+                        <i class="fa fa-trash"></i>
                       </button>
                     </div>
                   </td>

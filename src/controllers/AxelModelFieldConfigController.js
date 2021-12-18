@@ -41,7 +41,7 @@ class AxelModelFieldConfigController {
     }
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req, query, {
-        modelName: req.params.endpoint
+        modelName: entity
       });
     }
     query = Utils.cleanSqlQuery(query);
