@@ -62,9 +62,6 @@ export default {
     socket.on('ping', (second) => {
       console.log('ping', second);
     });
-    socket.on('message', (second) => {
-      console.log('message', second);
-    });
 
     setTimeout(() => {
       socket.connect({

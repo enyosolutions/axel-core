@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 // const mongo =  require('mongodb');
 const crypto = require('crypto');
 const stringify = require('json-stringify-safe');
@@ -89,14 +90,14 @@ const Utils = {
   sqlFormatForSearchMode(str, mode) {
     mode = mode || axel.config.framework.defaultApiSearchMode;
     switch (mode) {
-      default:
-      case 'exact':
-        return { [Op.eq]: str };
-      case 'full':
-      case 'wildcard':
-        return { [Op.like]: `%${str}%` };
-      case 'start':
-        return { [Op.like]: `${str}%` };
+        default:
+        case 'exact':
+          return { [Op.eq]: str };
+        case 'full':
+        case 'wildcard':
+          return { [Op.like]: `%${str}%` };
+        case 'start':
+          return { [Op.like]: `${str}%` };
     }
   },
 
@@ -139,21 +140,21 @@ const Utils = {
             delete req.query.filters[i];
           }
           if (filters[i]) {
-            const filters = req.query.filters[i];
-            if (Array.isArray(filters)) {
-              query[i] = { [Op.in]: filters };
-            } else if (_.isObject(filters)) {
-              if (Object.keys(filters).length > 1) {
+            const myFilters = req.query.filters[i];
+            if (Array.isArray(myFilters)) {
+              query[i] = { [Op.in]: myFilters };
+            } else if (_.isObject(myFilters)) {
+              if (Object.keys(myFilters).length > 1) {
                 query[i] = { [Op.and]: [] };
-                Object.keys(filters).forEach((filter) => {
-                  query[i][Op.and].push(this.getQueryForFilter(filter, filters[filter]));
+                Object.keys(myFilters).forEach((filter) => {
+                  query[i][Op.and].push(this.getQueryForFilter(filter, myFilters[filter]));
                 });
               } else {
-                const key = Object.keys(filters)[0];
-                query[i] = this.getQueryForFilter(key, filters[key], options.searchMode);
+                const key = Object.keys(myFilters)[0];
+                query[i] = this.getQueryForFilter(key, myFilters[key], options.searchMode);
               }
             } else {
-              query[i] = this.sqlFormatForSearchMode(filters, options.searchMode);
+              query[i] = this.sqlFormatForSearchMode(myFilters, options.searchMode);
             }
           }
         });
@@ -172,11 +173,14 @@ const Utils = {
     }
 
     if (req.query.tags && _.isObject(req.query.tags)) {
-      const tags = _.isArray(req.query.tags)
-        ? req.query.tags
-        : _.isString(req.query.tags)
+      let tags;
+      if (_.isArray(req.query.tags)) {
+        tags = req.query.tags;
+      } else {
+        tags = _.isString(req.query.tags)
           ? req.query.tags.split(',')
           : [];
+      }
       query.tags = {
         $all: tags
       };
@@ -214,52 +218,51 @@ const Utils = {
 
   getQueryForFilter(filter, value, searchMode = 'start') {
     switch (filter) {
-      case '$isNull':
-        return { [Op.is]: null };
-      case '$isNotNull':
-        return { [Op.not]: null };
-      case '$isDefined':
-        return {
-          [Op.not]: null,
-          [Op.ne]: ''
-        };
-      case '$isNotDefined':
-        return {
-          [Op.or]: [
-            { [Op.is]: null },
-            { [Op.eq]: '' }
-          ]
-        };
-      case '$startsWith':
-        return { [Op[filter.replace('$', '')]]: `${value}%` };
-      case '$endsWith':
-        return { [Op[filter.replace('$', '')]]: `%${value}` };
-      case '$substring':
-        return { [Op[filter.replace('$', '')]]: `%${value}%` };
-      case '$eq':
-      case '$ne':
-      case '$gt':
-      case '$gte':
-      case '$lt':
-      case '$lte':
-      case '$like':
-      case '$notLike':
-      case '$in':
-      case '$notIn':
-        return { [Op[filter.replace('$', '')]]: value };
-      case '$between':
-      case '$notBetween':
-        return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
-      case '$custom':
-        return value;
-      default:
-        if (searchMode === 'exact') {
+        case '$isNull':
+          return { [Op.is]: null };
+        case '$isNotNull':
+          return { [Op.not]: null };
+        case '$isDefined':
+          return {
+            [Op.not]: null,
+            [Op.ne]: ''
+          };
+        case '$isNotDefined':
+          return {
+            [Op.or]: [
+              { [Op.is]: null },
+              { [Op.eq]: '' }
+            ]
+          };
+        case '$startsWith':
+          return { [Op[filter.replace('$', '')]]: `${value}%` };
+        case '$endsWith':
+          return { [Op[filter.replace('$', '')]]: `%${value}` };
+        case '$substring':
+          return { [Op[filter.replace('$', '')]]: `%${value}%` };
+        case '$eq':
+        case '$ne':
+        case '$gt':
+        case '$gte':
+        case '$lt':
+        case '$lte':
+        case '$like':
+        case '$notLike':
+        case '$in':
+        case '$notIn':
+          return { [Op[filter.replace('$', '')]]: value };
+        case '$between':
+        case '$notBetween':
+          return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
+        case '$custom':
+          return value;
+        default:
+          if (searchMode === 'exact') {
+            return this.sqlFormatForSearchMode(value, searchMode);
+          }
           return this.sqlFormatForSearchMode(value, searchMode);
-        }
-        return this.sqlFormatForSearchMode(value, searchMode);
     }
   },
-
 
 
   /**
@@ -376,22 +379,32 @@ const Utils = {
   ) {
     const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
-    const primaryKey = (options && options.primaryKey) || (options && options.model && model.primaryKeyField) || axel.config.framework.primaryKey;
-    let limit = isListOfValues
-      ? axel.config.framework.defaultLovPagination
-      : req.query.perPage
+    const primaryKey = (options && options.primaryKey)
+      || (options && options.model && options.model.primaryKeyField)
+      || axel.config.framework.primaryKey;
+    let limit;
+    if (isListOfValues) {
+      limit = axel.config.framework.defaultLovPagination;
+    } else {
+      limit = req.query.perPage
         ? req.query.perPage
         : axel.config.framework.defaultPagination;
+    }
     limit = _.toNumber(limit);
     const offset = startPage * limit;
     const sortOptions = req.query.sort || options.sort;
     const order = _.toPairs(sortOptions || { [options.primaryKey || primaryKey]: 'DESC' });
+    let attributes = req.query.fields;
+    if (req.query.excludeFields) {
+      attributes = { exclude: ['some_field'] };
+    }
     return {
       listOfValues: isListOfValues,
       startPage,
       limit,
       offset,
-      order
+      order,
+      attributes,
     };
   },
 
@@ -443,9 +456,9 @@ const Utils = {
   },
 
   /**
-   * Removes undefined fields from the object query since the cause sequelize to crash
-   * @param query
-   */
+ * Removes undefined fields from the object query since the cause sequelize to crash
+ * @param query
+ */
   cleanSqlQuery(query) {
     if (!query) {
       return query;
@@ -502,7 +515,7 @@ const Utils = {
   },
 
   getEntityManager(req, res) {
-    const endpoint = _.isString(req) ? req : req.params.endpoint;
+    const endpoint = _.isString(req) ? req : (req.params.endpoint || req.endpoint);
     if (!axel.models[endpoint] || !axel.models[endpoint].repository) {
       console.warn('REQUESTED  ENDPOINT', endpoint, 'DOES NOT EXISTS');
       res.status(404).json({

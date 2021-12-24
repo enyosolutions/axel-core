@@ -10,6 +10,7 @@ const d = require('debug');
 const { fileURLToPath } = require('url');
 const path = require('path');
 const serialize = require('serialize-javascript');
+const { flatMap } = require('lodash');
 // type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
 const debug = d('axel:router');
 
@@ -19,6 +20,11 @@ const debug = d('axel:router');
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
 function wrapRoute(fn) {
+  if (Array.isArray(fn)) {
+    const lastMiddleware = fn[fn.length - 1];
+    fn[fn.length - 1] = wrapRoute(lastMiddleware);
+    return fn;
+  }
   return (req, res, next) => {
     const p = fn(req, res, next);
     if (p && p.catch) {
@@ -231,8 +237,11 @@ const loadEndpointMiddleware = (endpoint) => {
       });
       return;
     }
-
+    if (!req.params) {
+      req.params = {};
+    }
     req.params.endpoint = endpoint;
+    req.endpoint = endpoint;
     next();
   };
 };

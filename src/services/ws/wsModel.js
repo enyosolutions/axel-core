@@ -1,4 +1,4 @@
-/* eslint-disable max-lines-per-function */
+/* eslint-disable max-lines-per-function,promise/no-callback-in-promise */
 const fs = require('fs');
 const serialize = require('serialize-javascript');
 const _ = require('lodash');
@@ -8,7 +8,7 @@ const {
   sequelizeFieldToSchemaField,
 } = require('axel-cli');
 const AxelAdmin = require('../AxelAdmin');
-const { catchSignal } = require('./utils');
+const { catchSignal, serializeSchema, serializeModel } = require('./utils');
 
 const requireWithoutCache = (path) => {
   const modelPath = require.resolve(path);
@@ -20,6 +20,28 @@ const requireWithoutCache = (path) => {
   require.cache[modelPath] = cachedModel;
   return model;
 };
+
+
+const getMergedModel = modelName => Promise.all([
+  axel.models.axelModelConfig.em.findAll({
+    where: {
+      identity: modelName
+    },
+    logging: false
+  }),
+  axel.models.axelModelFieldConfig.em
+    .findAll({
+      where: {
+        parentIdentity: modelName,
+      },
+      logging: false
+    })
+])
+  .then(AxelAdmin.loadDbModelsInMemory)
+  .then(mappedSavedConfig => AxelAdmin.mergeDbModelsWithInMemory(mappedSavedConfig, { prepareNestedModels: false, identity: modelName }))
+  .then(models => models.find(m => m.identity === modelName));
+
+
 module.exports = (socket) => {
   socket.on('/axel-manager/models', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
@@ -120,14 +142,15 @@ module.exports = (socket) => {
         if (!req.body || !req.body.model) {
           return cb('Missing model name');
         }
+        const modelName = `${req.body.model}`;
 
         if (!fields || !fields.length) {
           return cb('missing_fields');
         }
         try {
-          const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(req.body.model)}.js`;
+          const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(modelName)}.js`;
           const model = requireWithoutCache(modelPath);
-          const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(req.body.model)}.js`;
+          const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(modelName)}.js`;
           const schema = requireWithoutCache(schemaPath);
           fields.forEach((field) => {
             const sequelizeField = cliFieldToSequelizeField(field);
@@ -142,15 +165,9 @@ module.exports = (socket) => {
 
           catchSignal('SIGUSR2', 5);
 
-          fs.writeFileSync(modelPath, `module.exports = ${serialize(model, { space: 2, unsafe: false })}`, {
-            encoding: 'utf8',
-          });
+          serializeModel(modelName, model);
+          serializeSchema(modelName, schema);
 
-          fs.writeFileSync(
-            schemaPath,
-            `module.exports = ${unescape(serialize(schema, { space: 2, unsafe: false }))}`,
-            { encoding: 'utf8' }
-          );
           if (sync) {
             axel.models[model.identity].em.sync({ alter: true }, { logging: true });
           }
@@ -182,8 +199,8 @@ module.exports = (socket) => {
           return cb(`error_while_accessing_model${JSON.stringify(id)}`);
         }
         console.log('[AXELMANAGER] syncing sql model', id, { force, alter });
-        em.sync({ force, alter })
-          .then((result) => {
+        em.sync({ force, alter }, { logging: true })
+          .then(() => {
             cb(null, { body: 'OK' });
           })
           .catch((err) => {
@@ -191,7 +208,6 @@ module.exports = (socket) => {
             cb(err.message || 'See terminal for more details');
           });
         break;
-      //  cb(null, { body: axel.models });
     }
   });
 
@@ -209,7 +225,6 @@ module.exports = (socket) => {
           .then(() => {
             cb();
             process.kill(process.pid, 'SIGUSR2');
-
           })
           .catch(cb);
     }
@@ -226,6 +241,63 @@ module.exports = (socket) => {
           cb(null, { body: models });
         })
           .catch(err => cb(err.message));
+        break;
+      default:
+        break;
+    }
+  });
+
+  /** Get models definition */
+  socket.on('/axel-manager/admin-models/save', (req = { method: 'PUT', query: {}, body: {} }, cb) => {
+    if (typeof req === 'function') {
+      cb = req;
+    }
+    if (!req.body) {
+      return cb('missing_param_body');
+    }
+    if (!req.body.modelName) {
+      return cb('missing_param_model_name');
+    }
+    switch (req.method) {
+      case 'PUT':
+        getMergedModel(req.body.modelName).then((model) => {
+          if (!model) {
+            return cb('model_not_found');
+          }
+          const {
+            identity,
+            primaryKeyField,
+            primaryKey,
+            displayField,
+            schema,
+          } = model;
+          catchSignal('SIGUSR2', 5);
+          const modelToSave = {
+            identity,
+            primaryKeyField,
+            primaryKey,
+            displayField,
+            schema,
+            admin: {
+              ...model
+            }
+          };
+
+
+          [
+            'identity',
+            'schema',
+            'primaryKeyField',
+            'primaryKey',
+            'displayField',
+            'admin',
+          ].forEach(f => delete modelToSave.admin[f]);
+
+          serializeSchema(req.body.modelName, modelToSave);
+          cb(null, { body: model });
+        })
+          .catch(err => cb(err.message));
+        break;
       default:
         break;
     }

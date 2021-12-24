@@ -1,101 +1,100 @@
 // const mongo =  require('mongodb');
-const crypto = require('crypto')
-const stringify = require('json-stringify-safe')
-const Sequelize = require('sequelize')
-const _ = require('lodash')
-const { ExtendedError } = require('./ExtendedError')
+const crypto = require('crypto');
+const stringify = require('json-stringify-safe');
+const Sequelize = require('sequelize');
+const _ = require('lodash');
+const { ExtendedError } = require('./ExtendedError');
 
 // declare const Sequelize;
 
 const ErrorUtils = {
-  stringToError (code = 500, message) {
-    const err = new ExtendedError({ code, message })
-    return err
+  stringToError(code = 500, message) {
+    const err = new ExtendedError({ code, message });
+    return err;
   },
 
-  sendError (code = 500, message, response) {
-    const err = ErrorUtils.stringToError(code, message, response)
+  sendError(code = 500, message, response) {
+    const err = ErrorUtils.stringToError(code, message, response);
     if (response) {
-      ErrorUtils.errorCallback(err, response)
+      ErrorUtils.errorCallback(err, response);
     }
-    return err
+    return err;
   },
 
-  safeError (err) {
+  safeError(err) {
     try {
-      err = JSON.parse(stringify(err))
-      return err
+      err = JSON.parse(stringify(err));
+      return err;
     } catch (e) {
       err = {
         name: err.name,
         message: err.message,
         code: err ? err.code : undefined
-      }
-      return err
+      };
+      return err;
     }
   },
 
-  errorCallback (err, response) {
+  errorCallback(err, response) {
     if (!err) {
-      axel.logger.error(err)
-      throw new Error('error_handler_called_without_error_arg')
+      axel.logger.error(err);
+      throw new Error('error_handler_called_without_error_arg');
     }
     if (err.name === 'SequelizeValidationError') {
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
-        err.errors = err.errors.map(e => e.message)
+        err.errors = err.errors.map(e => e.message);
       }
-      err.message = 'validation_error'
+      err.message = 'validation_error';
     }
 
     if (err.name === 'SequelizeDatabaseError') {
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
-        err.errors = err.errors.map(e => e.sqlMessage)
+        err.errors = err.errors.map(e => e.sqlMessage);
       } else {
         // @ts-ignore
-        err.errors = [err.sqlMessage || err.message]
+        err.errors = [err.sqlMessage || err.message];
       }
-      err.message = 'database_error'
+      err.message = 'database_error';
     }
 
     if (err.message === 'Validation error') {
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
-        err.errors = err.errors.map(e => `${e.path}_${e.validatorKey}`)
+        err.errors = err.errors.map(e => `${e.path}_${e.validatorKey}`);
       }
-      err.message = err.errors && err.errors[0]
-        ? (_.isString(err.errors[0])
-            ? err.errors[0]
-            : err.errors[0].message)
-        : 'validation_error'
+      if (err.errors && err.errors[0]) {
+        err.message = _.isString(err.errors[0])
+          ? err.errors[0]
+          : err.errors[0].message;
+      } else {
+        err.message = 'validation_error';
+      }
     }
-    let errors
+    let errors;
     if (err.errors && Array.isArray(err.errors)) {
       if (axel.config.env === 'production') {
-        errors =
-          // @ts-ignore
-          err.errors.map(e => (_.isString(e) ? e : e.message))
+        errors = err.errors.map(e => (_.isString(e) ? e : e.message));
       } else {
-        // @ts-ignore
-        errors = err.errors.map(ErrorUtils.safeError)
+        errors = err.errors.map(ErrorUtils.safeError);
       }
     }
 
     if (typeof err === 'string') {
-      err = new Error(err)
+      err = new Error(err);
     }
     if (response && !response.headersSent) {
       return response.status(err.code && parseInt(err.code) < 504 ? parseInt(err.code) : 400).json({
         message: err.message || 'global_error',
         errors
-      })
+      });
     }
     return {
       code: err.code || 422,
       message: err.message || 'global_error',
       errors
-    }
+    };
     /*
     if (Raven.getContext()) {
       Raven.mergeContext({
@@ -112,6 +111,6 @@ const ErrorUtils = {
     */
   }
 
-}
+};
 
-module.exports = ErrorUtils
+module.exports = ErrorUtils;

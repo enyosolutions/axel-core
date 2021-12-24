@@ -105,7 +105,7 @@
           >
           <hr />
           <div
-            v-for="model in $store.state.models"
+            v-for="model in viewableModels"
             class="collapse-item"
             :key="model.identity"
           >
@@ -124,6 +124,17 @@
               ><i class="fa fa-list"></i
             ></router-link>
             -->
+          </div>
+          <hr />
+          <div class="collapse-item">
+            <router-link :to="`/app/configurator/axelModelConfig`"
+              ><i class="fa fa-edit"></i>Models config
+            </router-link>
+          </div>
+          <div class="collapse-item">
+            <router-link :to="`/app/configurator/axelModelFieldConfig`"
+              ><i class="fa fa-edit"></i>Field config
+            </router-link>
           </div>
         </div>
       </div>
@@ -239,6 +250,12 @@ export default {
         )
       );
     },
+
+    viewableModels() {
+      return this.$store.state.models.filter(
+        (m) => !m.identity.startsWith('axel')
+      );
+    },
   },
   methods: {
     toggleSidebar() {
@@ -279,7 +296,6 @@ export default {
             body: { organisationId: this.organisation && this.organisation.id },
           })
           .then((notifs) => {
-            console.log('notifs', notifs);
             this.notifications = notifs;
           });
       }

@@ -1,16 +1,12 @@
 const _ = require('lodash');
-const { Request, Response, Application, NextFunction } = require('express');
-const swagger = require('../../config/swagger');
-
-const fs = require('fs');
-const url = require('url');
-const path = require('path');
-const chalk = require('chalk');
-const yaml = require('js-yaml');
-const express = require('express');
-const descriptor = {};
 
 class SwaggerService {
+  constructor() {
+    this.idParameterDef = {
+      name: 'id', required: true, in: 'path', type: 'string'
+    };
+  }
+
   /**
    *
    *
@@ -19,19 +15,19 @@ class SwaggerService {
    * @returns {void}
    * @memberof SwaggerService
    */
-  generateModels(swaggerDef): void {
+  generateModels(swaggerDef) {
     const { primaryKey } = axel.config.framework;
     swaggerDef.definitions = swaggerDef.definitions || {};
-    _.each(axel.models, (model, key) => {
+    _.each(axel.models, (model) => {
       const modelKey = _.capitalize(_.camelCase(model.identity));
       // create definition
       const modelDefinition = model.schema || {
         type: 'object',
-        properties: this.modelParser(model._attributes),
+        properties: this.modelParser(model._attributes), // eslint-disable-line no-underscore-dangle
       };
 
       // create swagger definition of the item as new
-      swaggerDef.definitions['New' + modelKey] = {
+      swaggerDef.definitions[`New${modelKey}`] = {
         ...modelDefinition,
         properties: {
           ...modelDefinition.properties,
@@ -55,7 +51,7 @@ class SwaggerService {
       };
 
       // create the api response for list items (GET)
-      swaggerDef.definitions[modelKey + '_ListResponse'] = {
+      swaggerDef.definitions[`${modelKey}_ListResponse`] = {
         type: 'object',
         properties: {
           page: { type: 'integer' },
@@ -71,7 +67,7 @@ class SwaggerService {
       };
 
       // create the api response for a single item (POST, PUT, GET :id)
-      swaggerDef.definitions[modelKey + '_ItemResponse'] = {
+      swaggerDef.definitions[`${modelKey}_ItemResponse`] = {
         type: 'object',
         properties: {
           body: {
@@ -83,8 +79,6 @@ class SwaggerService {
 
       this.generatePath(swaggerDef, model);
     });
-
-    return;
   }
 
   /**
@@ -97,7 +91,7 @@ class SwaggerService {
   modelParser(attributes) {
     const attrs = {};
 
-    _.each(attributes, function(val, key) {
+    _.each(attributes, (val, key) => {
       attrs[key] = {
         type: _.capitalize(val.type),
       };
@@ -106,13 +100,12 @@ class SwaggerService {
     return attrs;
   }
 
-  idParameterDef = { name: 'id', required: true, in: 'path', type: 'string' };
 
-  generatePath(swaggerDef, model): void {
+  generatePath(swaggerDef, model) {
     if (model.apiUrl && !swaggerDef.paths[model.apiUrl]) {
       const url = model.apiUrl.replace(swaggerDef.basePath, '');
       const modelKey = _.capitalize(_.camelCase(model.identity));
-      const tags: string[] = [_.startCase(model.identity)];
+      const tags = [_.startCase(model.identity)];
       swaggerDef.paths[url] = {
         post: {
           summary: `Create a new ${model.identity} item`,
@@ -267,7 +260,6 @@ class SwaggerService {
 
     fn();
   }
-
 
 
   // Generate Swagger documents

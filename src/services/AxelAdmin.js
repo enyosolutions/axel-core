@@ -33,7 +33,7 @@ class AxelAdmin {
    * @returns {Promise<any>}
    * @memberof AxelAdmin
    */
-  async init(app) {
+  async init(app) { // eslint-disable-line no-unused-vars
     if (!axel.sqldb) {
       return Promise.reject(new Error('missing_sqldb'));
     }
@@ -118,17 +118,15 @@ class AxelAdmin {
       ));
   }
 
-  insertModelsIntoDb(model) {
+  insertModelsIntoDb() {
     axel.logger.debug('[AxelAdmin] insertModelsIntoDb');
     if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
       return Promise.resolve();
     }
     const insertableModels = Object.keys(axel.models).filter(modelKey => !['axelModelFieldConfig', 'axelModelConfig'].includes(modelKey));
     return this.clearModelsInDb().then(() => {
-
       const insertions = insertableModels.map((modelKey) => {
         const model = axel.models[modelKey];
-        console.log("insert into db", modelKey)
         return axel.models.axelModelConfig.em.create({
           identity: model.identity,
           config: this.jsonSchemaToFrontModel(model)
@@ -150,16 +148,11 @@ class AxelAdmin {
     if (!model.schema || model.identity.startsWith('axel')) {
       return Promise.resolve();
     }
-    let insertableModels = [model.identity];
 
-    const insertions = insertableModels.map((modelKey) => {
-      const model = axel.models[modelKey];
-      return axel.models.axelModelConfig.em.create({
-        identity: model.identity,
-        config: this.jsonSchemaToFrontModel(model)
-      });
-    });
-    return Promise.all(insertions)
+    return axel.models.axelModelConfig.em.create({
+      identity: model.identity,
+      config: this.jsonSchemaToFrontModel(model)
+    })
       .then(() => this.updateFieldsConfig(model));
   }
 
@@ -197,7 +190,7 @@ class AxelAdmin {
       namePlural: _.get(model, 'admin.namePlural', ''),
       pageTitle: _.get(model, 'admin.pageTitle', ''),
       apiUrl: _.get(model, 'apiUrl') || this.prefixUrl(model.identity),
-      url: _.get(model, 'apiUrl') || this.prefixUrl(model.identity),
+      url: _.get(model, 'apiUrl') || this.prefixUrl(model.identity), // @fix removed check for side effects
       routerPath: _.get(model, 'admin.routerPath', ''),
       schema: model.schema, // todo fetch from the other config api
       options: _.get(model, 'admin.options', {}),
@@ -261,10 +254,11 @@ class AxelAdmin {
           savedFields = savedFields.filter(conf => !['axelModelConfig', 'axelModelFieldConfig'].includes(conf.parentIdentity));
           savedFields.forEach((field) => {
             if (field.parentIdentity === config.identity) {
+              const {
+                id, name, parentIdentity, ...rest
+              } = field.config;
               mappedSavedConfig[config.identity].schema.properties[field.name] = {
-                ...field.config,
-                id: undefined,
-                name: undefined,
+                ...rest
               };
             }
           });
@@ -274,10 +268,13 @@ class AxelAdmin {
     return mappedSavedConfig;
   }
 
-  mergeDbModelsWithInMemory(mappedSavedConfig) {
+  mergeDbModelsWithInMemory(mappedSavedConfig, options = {
+    prepareNestedModels: true, identity: undefined
+  }) {
     const models = Object.keys(axel.models)
       .filter(
         key => axel.models[key] && axel.models[key].schema
+          && (!options || !options.identity || options.identity === key)
       )
       .map((modelId) => {
         const model = axel.models[modelId];
@@ -298,9 +295,11 @@ class AxelAdmin {
         mappedSavedConfig[axel.models[modelId].identity] = merged;
         return merged;
       });
-    models.forEach((m) => {
-      m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig);
-    });
+    if (!options || options.prepareNestedModels === undefined || options.prepareNestedModels) {
+      models.forEach((m) => {
+        m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig);
+      });
+    }
     return models;
   }
 

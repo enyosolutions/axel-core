@@ -6,15 +6,15 @@
  *                 how this model works and what it represents here.
  */
 
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 const {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook
-} = require('../../services/SequelizeHooks.js')
+} = require('../../services/SequelizeHooks.js');
 
-const jsonFields = ['config']
+const jsonFields = ['config'];
 
 const AxelModelFieldConfig = {
   identity: 'axelModelFieldConfig',
@@ -81,13 +81,10 @@ const AxelModelFieldConfig = {
       models.axelModelFieldConfig.belongsTo(models.axelModelConfig, {
         targetKey: 'identity',
         foreignKey: 'parentIdentity'
-      })
+      });
     },
-    // define default join
-    // @ts-ignore
-    defaultScope: models => ({})
   }
-}
+};
 
-module.exports = AxelModelFieldConfig
-module.exports.AxelModelFieldConfig = AxelModelFieldConfig
+module.exports = AxelModelFieldConfig;
+module.exports.AxelModelFieldConfig = AxelModelFieldConfig;

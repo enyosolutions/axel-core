@@ -4,11 +4,11 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
-const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
+const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -58,8 +58,9 @@ class AxelModelConfigController {
         ));
         if (listOfValues) {
           items = items.map(item => ({
-            [primaryKey]: item[primaryKey],
-            label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`
+            identity: item.identity,
+            name: item.name,
+            label: item.name
           }));
         }
         return result.count || 0;
@@ -87,7 +88,7 @@ class AxelModelConfigController {
     if (!repository) {
       return;
     }
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
+    const pKey = typeof id === 'string' && Number.isNaN(parseInt(id)) ? 'identity' : primaryKey;
     repository
       .findOne({
         where: { [pKey]: id },
@@ -119,7 +120,9 @@ class AxelModelConfigController {
           if (listOfValues) {
             item = {
               [primaryKey]: item[primaryKey],
-              label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`
+              identity: item.identity,
+              name: item.name,
+              label: item.name
             };
           }
           return resp.status(200).json({
@@ -165,7 +168,7 @@ class AxelModelConfigController {
     if (!repository) {
       return;
     }
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
+    const pKey = typeof id === 'string' && Number.isNaN(parseInt(id)) ? 'identity' : primaryKey;
     repository
       .findOne({
         where: { [pKey]: id },
@@ -239,7 +242,7 @@ class AxelModelConfigController {
     const id = req.params.id;
 
     const repository = Utils.getEntityManager(entity, resp);
-    const pKey = typeof id === 'string' && isNaN(parseInt(id)) ? 'identity' : primaryKey;
+    const pKey = typeof id === 'string' && Number.isNaN(parseInt(id)) ? 'identity' : primaryKey;
     if (!repository) {
       return;
     }
@@ -270,6 +273,49 @@ class AxelModelConfigController {
         }
         ErrorUtils.errorCallback(err, resp);
       });
+  }
+
+
+  export(req, resp, next) {
+    const schema = axel.models[entity].schema;
+    let data = [];
+
+    const url = `${entity}_export`;
+    const options = {};
+    const query = {};
+    const repository = Utils.getEntityManager(req, resp);
+    if (!repository) {
+      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
+      return;
+    }
+    Promise.resolve()
+      .then(() => repository.findAll({
+        where: query
+      }))
+      .then((result) => {
+        data = result;
+        return ExcelService.export(data, url, options);
+      })
+      .then((result) => {
+        if (result) {
+          if (result.errno) {
+            return resp.status(500).json({
+              errors: ['export_failed'],
+              message: 'export_failed'
+            });
+          }
+
+          return resp.status(200).json({
+            status: 'OK',
+            url: result
+          });
+        }
+        return resp.status(404).json({
+          errors: ['not_found'],
+          message: 'not_found'
+        });
+      })
+      .catch(next);
   }
 }
 

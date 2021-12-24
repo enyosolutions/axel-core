@@ -1,75 +1,75 @@
 const jsonStringifyHook = (fields, defaultValue) => (item) => {
   if (!item) {
-    return
+    return;
   }
   if (typeof fields === 'string') {
-    fields = [fields]
+    fields = [fields];
   }
   for (const field of fields) {
     try {
-      item[field] = JSON.stringify(item[field])
+      item[field] = JSON.stringify(item[field]);
     } catch (e) {
-      console.error(e)
-      item[field] = defaultValue
+      console.error(e);
+      item[field] = defaultValue;
     }
   }
-  return item
-}
+  return item;
+};
 
 module.exports.bulkJsonStringifyHook = (fields, defaultValue) => (
   items
 ) => {
   if (!items) {
-    return
+    return;
   }
   if (typeof fields === 'string') {
-    fields = [fields]
+    fields = [fields];
   }
   for (const field of fields) {
     if (Array.isArray(items)) {
-      items.map(item => jsonStringifyHook(field, defaultValue)(item))
+      items.map(item => jsonStringifyHook(field, defaultValue)(item));
     }
-    jsonStringifyHook(field, defaultValue)(items)
+    jsonStringifyHook(field, defaultValue)(items);
   }
-  return items
-}
+  return items;
+};
 
 const jsonParseHook = (fields, defaultValue) => (item) => {
   if (!item) {
-    return
+    return;
   }
   if (typeof fields === 'string') {
-    fields = [fields]
+    fields = [fields];
   }
   for (const field of fields) {
     if (typeof item[field] === 'string') {
       try {
-        item[field] = JSON.parse(item[field])
+        item[field] = JSON.parse(item[field]);
       } catch (e) {
-        console.error('ERROR WHILE PARSING ', field, ', PLEASE FIX', item[field], e)
-        item[field] = defaultValue
+        console.error('ERROR WHILE PARSING ', field, ', PLEASE FIX', item[field], e);
+        item[field] = defaultValue;
       }
     }
   }
-}
+};
 
 module.exports.bulkJsonParseHook = (fields, defaultValue) => (
   items
 ) => {
   if (!items) {
-    return
+    return;
   }
   if (typeof fields === 'string') {
-    fields = [fields]
+    fields = [fields];
   }
   for (const field of fields) {
     if (Array.isArray(items)) {
-      items.forEach(item => jsonParseHook(field, defaultValue)(item))
+      items.forEach(item => jsonParseHook(field, defaultValue)(item));
     }
-    jsonParseHook(field, defaultValue)(items)
+    jsonParseHook(field, defaultValue)(items);
   }
-  return items
-}
+  return items;
+};
 
-module.exports.jsonParseHook = jsonParseHook
-module.exports.jsonStringifyHook = jsonStringifyHook
+module.exports.jsonParseHook = jsonParseHook;
+module.exports.jsonStringifyHook = jsonStringifyHook;

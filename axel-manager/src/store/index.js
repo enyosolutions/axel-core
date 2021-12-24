@@ -6,7 +6,7 @@ import config from '@/config';
 
 // import 'es6-promise/auto';
 import modules from './modules';
-import { editLayout, editFields } from '../models/actions';
+import { editLayout, editFields, writeConfigToFs } from '../models/actions';
 
 const modelDefaultOptions = {
   mode: 'remote',
@@ -106,6 +106,7 @@ export default new Vuex.Store({
               nestedDisplayMode: model.nestedDisplayMode || 'object',
             };
             model.customTitleBarActions = [
+              writeConfigToFs,
               editLayout,
               editFields,
             ]

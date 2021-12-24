@@ -99,8 +99,8 @@ module.exports = {
     'promise/avoid-new': 0,
     'promise/no-new-statics': 'warn',
     'promise/valid-params': 'warn',
-    'max-lines-per-function': ['error', { max: 75, skipComments: true, skipBlankLines: true }],
-    'max-lines': ['error', { max: 500, skipComments: true }],
+    'max-lines-per-function': ['error', { max: 100, skipComments: true, skipBlankLines: true }],
+    'max-lines': ['error', { max: 800, skipComments: true }],
     'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 0 }],
   },
 };

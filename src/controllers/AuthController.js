@@ -8,15 +8,15 @@
  * @docs        :: http://waterlock.ninja/documentation
  */
 
-const bcrypt = require('bcrypt')
-const _ = require('lodash')
+const bcrypt = require('bcrypt');
+const _ = require('lodash');
 
-const Utils = require('../services/Utils.js')
-const { ExtendedError } = require('../services/ExtendedError.js')
-const AuthService = require('../services/AuthService.js')
-const ErrorUtils = require('../services/ErrorUtils.js')
+const Utils = require('../services/Utils.js');
+const { ExtendedError } = require('../services/ExtendedError.js');
+const AuthService = require('../services/AuthService.js');
+const ErrorUtils = require('../services/ErrorUtils.js');
 
-const primaryKey = axel.config.framework.primaryKey
+const primaryKey = axel.config.framework.primaryKey;
 // const flatten =  require('flat');
 // const unfflatten =  require('flat'.unfflatten);
 
@@ -34,13 +34,13 @@ module.exports = {
    *       200:
    *         description: success
    */
-  get (req, res) {
+  get(req, res) {
     if (!req.user) {
       res.status(401).json({
         message: 'error_no_token',
         errors: ['error_no_token']
-      })
-      return
+      });
+      return;
     }
 
     axel.models.user.em
@@ -48,28 +48,28 @@ module.exports = {
       .then((user) => {
         if (user) {
           if (!user.roles || typeof user.roles === 'string') {
-            user.roles = ['USER']
+            user.roles = ['USER'];
           }
-          user.visits += 1
+          user.visits += 1;
           axel.models.user.em.update(user, {
             where: {
               id: user.id
             }
-          })
+          });
 
           return res.status(200).json({
             user
-          })
+          });
         }
         return res.status(404).json({
           message: 'no_user_found',
           errors: ['no_user_found']
-        })
+        });
       })
       .catch((err) => {
-        axel.logger.warn(err)
-        ErrorUtils.errorCallback(err, res)
-      })
+        axel.logger.warn(err);
+        ErrorUtils.errorCallback(err, res);
+      });
   },
 
   /**
@@ -95,15 +95,15 @@ module.exports = {
    *       200:
    *         description: success
    */
-  forgot (req, res) {
-    const email = req.body.email
-    let user
+  forgot(req, res) {
+    const email = req.body.email;
+    let user;
     if (!email) {
       throw new ExtendedError({
         code: 401,
         errors: ['error_email_required'],
         message: 'error_email_required'
-      })
+      });
     }
 
     axel.models.user.em
@@ -111,21 +111,21 @@ module.exports = {
         where: { email }
       })
       .then((u) => {
-        user = u
+        user = u;
         if (!user) {
           throw new ExtendedError({
             code: 400,
             errors: ['error_unknown_email'],
             message: 'error_unknown_email'
-          })
+          });
         }
 
-        let hash = bcrypt.hashSync(`${Date.now()} ${user.id}`, bcrypt.genSaltSync())
-        hash = hash.replace(/\//g, '')
-        hash = hash.replace(/\./g, '-')
-        user.resetToken = hash
+        let hash = bcrypt.hashSync(`${Date.now()} ${user.id}`, bcrypt.genSaltSync());
+        hash = hash.replace(/\//g, '');
+        hash = hash.replace(/\./g, '-');
+        user.resetToken = hash;
 
-        user.passwordResetRequestedOn = new Date()
+        user.passwordResetRequestedOn = new Date();
         return axel.models.user.em.update(
           {
             $set: {
@@ -138,26 +138,26 @@ module.exports = {
               email
             }
           }
-        )
+        );
       })
       .then((success) => {
         if (!success) {
           return res.status(403).json({
             errors: ['error_forbidden'],
             message: 'error_forbidden'
-          })
+          });
         }
         if (axel.services && axel.services.mailService) {
           axel.services.mailService.sendPasswordReset(user.email, {
             user
-          })
+          });
         }
-        return res.status(200).json({})
+        return res.status(200).json({});
       })
       .catch((err) => {
-        axel.logger.warn(err)
-        ErrorUtils.errorCallback(err, res)
-      })
+        axel.logger.warn(err);
+        ErrorUtils.errorCallback(err, res);
+      });
   },
 
   /**
@@ -192,17 +192,17 @@ module.exports = {
    *               type: 'object'
    *               $ref: '#/definitions/User'
    */
-  login (req, res) {
-    const email = req.body.email
-    const password = req.body.password
-    let token
-    const isAdminLogin = req.path.indexOf('admin_login') > -1
-    let user
+  login(req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
+    let token;
+    const isAdminLogin = req.path.indexOf('admin_login') > -1;
+    let user;
     if (!email || !password) {
       return res.status(401).json({
         errors: ['error_missing_credentials'],
         message: 'error_missing_credentials'
-      })
+      });
     }
 
     axel.models.user.em
@@ -212,56 +212,56 @@ module.exports = {
         }
       })
       .then((u) => {
-        user = u
+        user = u;
         if (!u) {
-          throw new Error('error_unknown_email')
+          throw new Error('error_unknown_email');
         }
 
-        return AuthService.comparePassword(password, user)
+        return AuthService.comparePassword(password, user);
       })
       .then((valid) => {
         if (!valid) {
-          throw new Error('error_invalid_credentials')
+          throw new Error('error_invalid_credentials');
         }
 
         if (!user.isActive || user.deactivated) {
-          throw new Error('error_deactivated_user')
+          throw new Error('error_deactivated_user');
         }
 
         if (!user.roles) {
-          user.roles = ['USER']
+          user.roles = ['USER'];
         }
 
         if (typeof user.roles === 'string') {
           try {
-            user.roles = JSON.parse(user.roles)
+            user.roles = JSON.parse(user.roles);
           } catch (e) {
-            user.roles = ['USER']
+            user.roles = ['USER'];
           }
         }
 
-        token = AuthService.generateFor(user)
+        token = AuthService.generateFor(user);
         if (!user.logins) {
-          user.visits = 0
-          user.logins = 0
+          user.visits = 0;
+          user.logins = 0;
         }
 
-        user.logins += 1
-        user.visits += 1
-        user.lastConnexionOn = new Date()
+        user.logins += 1;
+        user.visits += 1;
+        user.lastConnexionOn = new Date();
 
-        const updatedUser = _.cloneDeep(user)
+        const updatedUser = _.cloneDeep(user);
 
         return axel.models.user.em.update(updatedUser, {
           where: {
             id: updatedUser.id
           }
-        })
+        });
       })
       // eslint-disable-next-line no-undef
       .then((valid) => {
         if (!valid) {
-          throw new Error('error_deactivated_user')
+          throw new Error('error_deactivated_user');
         }
       })
       .then(() => res.status(200).json({
@@ -273,12 +273,12 @@ module.exports = {
           return res.status(401).json({
             errors: [errUpdate.message],
             message: errUpdate.message
-          })
+          });
         }
 
-        axel.logger.warn(errUpdate)
+        axel.logger.warn(errUpdate);
 
-        ErrorUtils.errorCallback(errUpdate, res)
-      })
+        ErrorUtils.errorCallback(errUpdate, res);
+      });
   }
-}
+};

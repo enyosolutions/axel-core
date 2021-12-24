@@ -1,3 +1,25 @@
+const layoutConfig = {
+  title: 'layout of the detail page',
+  type: 'array',
+  minItems: 0,
+  items: {
+    type: 'object',
+    properties: {
+      legend: { type: 'string' },
+      cols: {
+        type: 'number', minimum: 0, maximum: 12
+      },
+      fields: {
+        type: 'array',
+        minItems: 0,
+        items: { type: 'string' }
+      }
+    }
+  },
+  default: [],
+  field: { type: 'layoutEditor' }
+};
+
 module.exports = {
   identity: 'axelModelConfig',
   collectionName: 'axel-model-config',
@@ -56,26 +78,12 @@ module.exports = {
         type: 'string',
         enum: ['horizontal-tabs', 'vertical-tabs', 'list'],
         default: 'horizontal-tabs',
-        title: 'Layout of the detail page',
+        title: 'Layout for nested items in the detail page',
         description: 'How the awesomeform is layed out in regards to nested components'
       },
       detailPageLayout: {
+        ...layoutConfig,
         title: 'layout of the detail page',
-        type: 'array',
-        items: {
-          properties: {
-            legend: { type: 'string' },
-            cols: {
-              type: 'number', min: 0, max: 12
-            },
-            fields: {
-              type: 'array',
-              items: { type: 'string' }
-            }
-          }
-        },
-        default: [],
-        field: { type: 'layoutEditor' }
       },
       options: {
         type: 'object',
@@ -133,7 +141,11 @@ module.exports = {
           bulkDelete: { type: 'boolean', default: true },
           bulkEdit: { type: 'boolean', default: true },
           itemsPerRow: { type: 'boolean', default: true },
-          editLayout: { type: 'boolean', default: true }
+          editLayout: { type: 'boolean', default: true },
+          changeDisplayMode: { type: 'boolean', default: true },
+          pagination: { type: 'boolean', default: true },
+          collapse: { type: 'boolean', default: true },
+          formPagination: { type: 'boolean', default: true },
         }
       },
       customInlineActions: { type: 'array' },
@@ -146,22 +158,8 @@ module.exports = {
         default: {},
         properties: {
           layout: {
+            ...layoutConfig,
             title: 'layout of the form',
-            type: 'array',
-            items: {
-              properties: {
-                legend: { type: 'string' },
-                cols: {
-                  type: 'number', min: 0, max: 12
-                },
-                fields: {
-                  type: 'array',
-                  items: { type: 'string' }
-                }
-              }
-            },
-            default: null,
-            field: { type: 'JsonTextarea' }
           }
         }
       },
@@ -176,7 +174,7 @@ module.exports = {
         type: 'string',
         title: 'Row double click action',
         default: 'none',
-        values: ['view', 'edit', 'none', 'delete'],
+        enum: ['view', 'edit', 'none', 'delete'],
         description: 'The action to execute when the user double clicks on a row'
       },
       listOptions: {
@@ -208,7 +206,34 @@ module.exports = {
         type: 'number',
         default: 1000,
         description:
-          'Definesthe number of items to get from the api for the table. This prevents overloading the table with too much data'
+          'Defines the number of items to get from the api for the table. This prevents overloading the table with too much data'
+      },
+      nestedModels: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            extends: {
+              title: 'The model to extends',
+              type: 'string',
+              field: {
+                type: 'vSelect',
+                fieldOptions: {
+                  taggable: true,
+                  url: '/api/axel-admin/models',
+                  label: 'name',
+                  trackBy: 'identity',
+                }
+              }
+            },
+            config: {
+              type: 'string',
+              field: {
+                type: 'JsonTextarea'
+              }
+            }
+          }
+        },
       }
     },
     required: ['identity']
@@ -218,7 +243,10 @@ module.exports = {
     namePlural: 'Models configs',
     pageTitle: '',
     routerPath: 'axel-model-config',
-    displayMode: 'page',
+    primaryKey: 'identity',
+    options: {
+      initialDisplayMode: 'table',
+    },
     actions: {
       create: false,
       edit: true,
@@ -227,7 +255,7 @@ module.exports = {
       export: true,
       import: true,
     },
-    detailPageMode: 'page',
+    detailPageMode: 'sideform',
     layout: [{
       legend: 'Infos', fields: ['id', 'identity', 'pageTitle', 'icon', 'name', 'namePlural'], cols: '6', wrapperClasses: 'card mb-1'
     }, {

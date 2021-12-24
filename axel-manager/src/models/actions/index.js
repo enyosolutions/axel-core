@@ -21,3 +21,14 @@ export const editFields = {
     context.$router.push(`/app/models/axelModelFieldConfig/${context.identity}/edit`)
   },
 }
+
+export const writeConfigToFs = {
+  name: 'save-layout',
+  label: 'Save layout',
+  class: 'btn-sm',
+  title: 'Save the config in the schema file',
+  icon: 'fa fa-save',
+  action: async (args, context) => {
+    context.$socket.put('/axel-manager/admin-models/save', { body: { modelName: context.identity } }).then(console.warn).catch(console.warn);
+  },
+}

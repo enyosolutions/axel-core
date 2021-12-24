@@ -4,6 +4,7 @@ import qs from 'qs';
 
 import Dashboard from '@/pages/Dashboard.vue';
 import CrudWrapper from '@/pages/CrudWrapper.vue';
+import ModelEditor from '@/pages/ModelEditor.vue';
 import NotFound from '@/pages/NotFound.vue';
 import Body from '../components/layout/Body.vue';
 
@@ -50,6 +51,38 @@ const routes = [
         meta: {
           title: 'NotFOund | axel',
         }
+      },
+      {
+        path: 'configurator/:identity',
+        name: 'ModelEditor',
+        component: ModelEditor,
+        beforeEnter: authGuard,
+        meta: {
+          title: 'Default Dashboard | axel',
+        },
+        props: () => ({
+        }),
+        children: [
+          {
+            name: `CrudWrapper-view`,
+            path: ':id',
+            component: CrudWrapper,
+            meta: {
+            },
+            props: {
+            },
+          },
+          {
+            name: `CrudWrapper-edit`,
+            path: ':id/edit',
+            component: CrudWrapper,
+            meta: {
+            },
+            props: {
+              nestedDisplayMode: 'object',
+            },
+          },
+        ],
       },
       {
         path: 'models/:identity',

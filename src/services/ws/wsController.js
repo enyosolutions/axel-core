@@ -17,32 +17,32 @@ module.exports = (socket) => {
       cb = req;
     }
     switch (req.method) {
-      case 'GET':
-      default:
-        break;
-      case 'POST':
-        const {
-          name, type, force, fields, withSchema
-        } = req.body;
-        if (!name) {
-          return cb('missing_param_name');
-        }
-        try {
-          await generateApi({
-            name,
-            type,
-            force,
-            fields,
-            withSchema,
-          });
-          const count = withSchema ? 4 : 3;
-          // catching api signals in order for the file to generate properly
-          catchSignal('SIGUSR2', count);
-          cb(null, { body: 'OK' });
-        } catch (err) {
-          console.warn('[AXELMANAGER]', err);
-          cb({ message: err.message });
-        }
+        case 'GET':
+        default:
+          break;
+        case 'POST':
+          const {
+            name, type, force, fields, withSchema
+          } = req.body;
+          if (!name) {
+            return cb('missing_param_name');
+          }
+          try {
+            await generateApi({
+              name,
+              type,
+              force,
+              fields,
+              withSchema,
+            });
+            const count = withSchema ? 4 : 3;
+            // catching api signals in order for the file to generate properly
+            catchSignal('SIGUSR2', count);
+            cb(null, { body: 'OK' });
+          } catch (err) {
+            console.warn('[AXELMANAGER]', err);
+            cb({ message: err.message });
+          }
     }
   });
 
@@ -52,34 +52,34 @@ module.exports = (socket) => {
     }
 
     switch (req.method) {
-      case 'GET':
-      default:
-        cb(null, { body: axel.controllers });
-        break;
-      case 'POST':
-        const { name, type, force } = req.body;
-        if (!name) {
-          return cb('missing_param_name');
-        }
-        try {
-          generateController({ name, type: type || 'bare', force });
-          cb(null, {
-            body: 'ok',
-          });
-        } catch (err) {
-          if (process.env.NODE_ENV === 'development') {
-            axel.logger.warn(err);
+        case 'GET':
+        default:
+          cb(null, { body: axel.controllers });
+          break;
+        case 'POST':
+          const { name, type, force } = req.body;
+          if (!name) {
+            return cb('missing_param_name');
           }
-          if (err && err.name === 'SequelizeValidationError') {
-            cb({
-              // @ts-ignore
-              errors: err.errors && err.errors.map(e => e.message),
-              message: 'sql_validation_error',
+          try {
+            generateController({ name, type: type || 'bare', force });
+            cb(null, {
+              body: 'ok',
             });
-            return false;
+          } catch (err) {
+            if (process.env.NODE_ENV === 'development') {
+              axel.logger.warn(err);
+            }
+            if (err && err.name === 'SequelizeValidationError') {
+              cb({
+              // @ts-ignore
+                errors: err.errors && err.errors.map(e => e.message),
+                message: 'sql_validation_error',
+              });
+              return false;
+            }
+            cb(err);
           }
-          cb(err);
-        }
     }
   });
 
@@ -88,36 +88,38 @@ module.exports = (socket) => {
       cb = req;
     }
     switch (req.method) {
-      case 'GET':
-        cb(null, { body: axel.config.routes });
-        break;
-      case 'POST':
+        default:
+          break;
+        case 'GET':
+          cb(null, { body: axel.config.routes });
+          break;
+        case 'POST':
         // cb(null, { body: axel.models });
-        const { name } = req.body;
+          const { name } = req.body;
 
-        if (!name) {
-          return cb(new Error('missing_param_name'));
-        }
-
-        try {
-          generateRoute(name);
-          cb(null, {
-            body: 'ok',
-          });
-        } catch (err) {
-          if (process.env.NODE_ENV === 'development') {
-            axel.logger.warn(err);
+          if (!name) {
+            return cb(new Error('missing_param_name'));
           }
-          if (err && err.name === 'SequelizeValidationError') {
-            cb({
-              // @ts-ignore
-              errors: err.errors && err.errors.map(e => e.message),
-              message: 'sql_validation_error',
+
+          try {
+            generateRoute(name);
+            cb(null, {
+              body: 'ok',
             });
-            return false;
+          } catch (err) {
+            if (process.env.NODE_ENV === 'development') {
+              axel.logger.warn(err);
+            }
+            if (err && err.name === 'SequelizeValidationError') {
+              cb({
+              // @ts-ignore
+                errors: err.errors && err.errors.map(e => e.message),
+                message: 'sql_validation_error',
+              });
+              return false;
+            }
+            cb(err);
           }
-          cb(err);
-        }
     }
   });
 };

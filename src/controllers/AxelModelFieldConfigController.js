@@ -4,11 +4,11 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
-const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
+const axel = require('../axel.js');
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -39,6 +39,8 @@ class AxelModelFieldConfigController {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
+
+    const parentIdentity = req.query && req.query.filters && req.query.filters.parentIdentity;
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req, query, {
         modelName: entity
@@ -56,6 +58,22 @@ class AxelModelFieldConfigController {
       })
       .then((result) => {
         items = result.rows;
+        if (parentIdentity && typeof parentIdentity === 'string' && axel.models[parentIdentity] && axel.models[parentIdentity].schema) {
+          // merge existing fields with the ones in the DB
+          Object.entries(axel.models[parentIdentity].schema.properties).forEach(([field, definition]) => {
+            const savedField = items.find(item => item.name === field);
+            if (!savedField) {
+              items.push({
+                id: null,
+                parentIdentity,
+                name: field,
+                config: definition
+              });
+            } else {
+              savedField.config = { ...definition, ...savedField.config };
+            }
+          });
+        }
         if (listOfValues) {
           items = items.map(item => ({
             [primaryKey]: item[primaryKey],
@@ -198,7 +216,6 @@ class AxelModelFieldConfigController {
             message: 'data_validation_error',
             errors: result.formatedErrors
           });
-          debug('formatting error', result);
           return;
         }
       } catch (err) {
@@ -208,18 +225,6 @@ class AxelModelFieldConfigController {
 
     repository
       .findByPk(id)
-      .catch((err) => {
-        axel.logger.warn(err);
-        throw new ExtendedError({
-          code: 404,
-          errors: [
-            {
-              message: err.message || 'not_found'
-            }
-          ],
-          message: err.message || 'not_found'
-        });
-      })
       .then((result) => {
         if (result) {
           return repository.update({ config: data }, {
@@ -228,10 +233,10 @@ class AxelModelFieldConfigController {
             }
           });
         }
-        throw new ExtendedError({
-          code: 404,
-          message: 'not_found',
-          errors: ['not_found']
+        return repository.create({ ...data, config: data }, {
+          where: {
+            [primaryKey]: id
+          }
         });
       })
       .then(() => repository.findByPk(id))

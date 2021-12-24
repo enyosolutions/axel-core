@@ -58,8 +58,6 @@ export default {
       }
     },
     expressionType(change, old) {
-      console.log('change', change, old);
-
       if (change !== undefined) {
         if (change == 'expression') {
           this.value = '{{ currentItem.lastName }}';

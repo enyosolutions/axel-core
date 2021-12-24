@@ -6,14 +6,14 @@
  *                 how this model works and what it represents here.
  */
 
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
 
 const {
   jsonStringifyHook,
   bulkJsonStringifyHook,
   jsonParseHook,
   bulkJsonParseHook
-} = require('../../services/SequelizeHooks.js')
+} = require('../../services/SequelizeHooks.js');
 /*
   // event hooks => http://docs.sequelizejs.com/manual/tutorial/hooks.html
   const eventCallback = () => { // items, options
@@ -21,7 +21,7 @@ const {
   };
 */
 
-const jsonFields = ['config']
+const jsonFields = ['config'];
 const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {
@@ -80,13 +80,10 @@ const AxelModelConfig = {
       models.axelModelConfig.hasMany(models.axelModelFieldConfig, {
         foreignKey: 'parentIdentity',
         sourceKey: 'identity'
-      })
+      });
     },
-    // define default join
-    // @ts-ignore
-    defaultScope: models => ({})
   }
-}
+};
 
-module.exports = AxelModelConfig
-module.exports.AxelModelConfig = AxelModelConfig
+module.exports = AxelModelConfig;
+module.exports.AxelModelConfig = AxelModelConfig;

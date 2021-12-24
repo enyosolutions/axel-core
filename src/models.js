@@ -76,9 +76,8 @@ const loadSqlModel = (filePath, sequelize) => {
         model.entity.options.hooks = {
           ...hooks,
           ...model.entity.options.hooks
-        }
-      }
-      else {
+        };
+      } else {
         model.entity.options.hooks = hooks;
       }
     }

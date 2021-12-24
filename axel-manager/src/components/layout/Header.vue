@@ -2,7 +2,7 @@
   <div class="">
     <!-- Topbar -->
     <nav
-      class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+      class="navbar navbar-expand navbar-light bg-white topbstatic-top shadow"
     >
       <!-- Sidebar Toggle (Topbar) -->
       <button

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Page Heading -->
+    <!-- Page Heading
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
       <h1 class="h3 mb-0 text-gray-800" v-if="modelComputed">
         {{
@@ -9,6 +9,7 @@
         {{ $route.params.id }}
       </h1>
     </div>
+     -->
 
     <!-- Content Row -->
     <div v-if="modelComputed && modelComputed.identity" class="">
@@ -31,7 +32,10 @@
           @closeRequested="goToItem()"
         />
         <AwesomeCrud
-          v-if="$route.params.identity === 'axelModelFieldConfig'"
+          v-if="
+            $route.params.identity === 'axelModelFieldConfig' &&
+            $route.params.id
+          "
           v-bind="modelComputed"
           :identity="$route.params.identity"
           :primaryKey="modelComputed.primaryKey"
@@ -116,27 +120,7 @@ export default {
     },
   },
   data() {
-    return {
-      message: 'Hello Vue !',
-      controllers: [],
-      models: [],
-      routes: null,
-      blockingModal: null,
-      newApi: {
-        name: '',
-        type: null,
-        withSchema: true,
-        fields: [],
-      },
-      newApiTemplate: {
-        name: '',
-        type: null,
-        withSchema: true,
-        fields: [{}],
-      },
-      fieldTypes: ['string', 'text', 'integer', 'boolean', 'date', 'datetime'],
-      modelEditModalMode: 'api', // api | model || add-field
-    };
+    return {};
   },
   mounted() {
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};

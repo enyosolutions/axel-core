@@ -14,7 +14,10 @@ module.exports = {
         $id: 'id',
         type: 'number',
         title: 'Config id', // serves for front form fields
-        description: 'The id of this item' // serves for front form hint
+        description: 'The id of this item', // serves for front form hint
+        field: {
+          required: false
+        }
       },
       parentIdentity: {
         type: 'string',
@@ -46,7 +49,9 @@ module.exports = {
         },
         field: {
         },
-        items: [{ type: 'string' }]
+        items: {
+          type: 'string'
+        }
       },
       description: {
         type: ['null', 'string'],
@@ -69,7 +74,7 @@ module.exports = {
         title: 'relation',
         type: ['null', 'string'],
         description: 'The object that this property is related to',
-        example: 'user',
+        examples: ['user'],
         field: {
           type: 'vSelect',
           fieldOptions: {
@@ -94,7 +99,7 @@ module.exports = {
         },
         description:
           'The field of the object that this property is related to (eg relation[foreignKey]). Leave empty to use the relation.primaryKeyField',
-        example: 'id'
+        examples: ['id']
       },
       relationLabel: {
         title: 'relationLabel',
@@ -110,14 +115,14 @@ module.exports = {
             trackBy: 'name',
           }
         },
-        example: 'user'
+        examples: ['user']
       },
       relationUrl: {
         title: 'relationUrl',
         type: ['null', 'string'],
         description:
           'the url to use to fetch the foreign object',
-        example: 'user'
+        examples: ['user']
       },
       field: {
         type: 'object',
@@ -147,7 +152,9 @@ module.exports = {
               'datetime',
               'time',
               'ImagePicker',
-              'File',
+              'FilePicker',
+              'FileInput',
+              'Base64Upload',
               'JsonTextarea',
 
             ]
@@ -208,7 +215,7 @@ module.exports = {
             type: 'string',
             title: 'Css classes',
             description: 'The class that will be around the field',
-            example: 'col-md-12'
+            examples: ['col-md-12']
           },
           min: {
             type: 'number',
@@ -244,7 +251,7 @@ module.exports = {
                 title: 'Values',
                 description: `The list of values to use for the select. If the value is string
                   and starts with $store then the value is taken from the vuejs $store`,
-                example: '$store.listOfValues.users',
+                examples: ['$store.listOfValues.users'],
                 field: {
                   visible: "{{ !!currentItem.field && ['vSelect', 'select', 'EnyoSelect'].includes(currentItem.field.type) }}"
                 }
@@ -253,7 +260,7 @@ module.exports = {
                 type: 'string',
                 title: 'c url',
                 description: 'The url to use to load the data for the select (ajax) [vSelect]',
-                example: '/user',
+                examples: ['/user'],
                 field: {
                   visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
                 }
@@ -262,7 +269,7 @@ module.exports = {
                 type: 'boolean',
                 title: 'Select accept new items',
                 description: 'Select accept new items [vSelect]',
-                example: '/user',
+                examples: ['/user'],
                 field: {
                   visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
                 }
@@ -270,7 +277,7 @@ module.exports = {
               trackBy: {
                 type: 'string',
                 title: 'The field to use as the value in the select',
-                example: '_id',
+                examples: ['_id'],
                 field: {
                   visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' }}"
                 }
@@ -278,7 +285,7 @@ module.exports = {
               label: {
                 type: 'string',
                 title: 'The field to use as the Label in the select',
-                example: 'username',
+                examples: ['username'],
                 field: {
                   visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' }}"
                 }
@@ -294,14 +301,14 @@ module.exports = {
                 type: 'string',
                 title: 'Text displayed before the value',
                 description: 'example : £',
-                example: 'username'
+                examples: ['username']
               },
 
               suffix: {
                 type: 'string',
                 title: 'Text displayed before the value',
                 description: 'example : cm | €',
-                example: 'username'
+                examples: ['username']
               },
 
               validator: {
@@ -362,14 +369,14 @@ module.exports = {
             type: 'string',
             title: 'Text displayed before the value',
             description: 'example : £',
-            example: 'username'
+            examples: ['username']
           },
 
           suffix: {
             type: 'string',
             title: 'Text displayed before the value',
             description: 'example : cm | €',
-            example: 'username'
+            examples: ['username']
           }
         }
       },

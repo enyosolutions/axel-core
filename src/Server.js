@@ -9,6 +9,7 @@ const cors = require('cors');
 const debug = require('debug')('axel:server');
 const l = require('./services/logger.js');
 const errorHandler = require('./middlewares/error-handler');
+const pagination = require('./middlewares/pagination');
 
 console.time('STARTUP TIME');
 const app = express();
@@ -67,6 +68,7 @@ class Server {
         }
 
         app.use(cookieParser(process.env.SESSION_SECRET));
+        app.use(pagination);
       })
       .catch(console.warn);
   }
@@ -116,6 +118,7 @@ class Server {
           if (this.afterFn) {
             this.afterFn(app);
           }
+
           app.use(errorHandler);
           app.emit('app-ready', { axel });
         })
