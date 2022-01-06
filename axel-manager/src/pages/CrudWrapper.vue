@@ -28,8 +28,9 @@
           v-on="events"
           :item="{ identity: $route.params.id }"
           :actions="{ close: true }"
-          @cancel="goToItem()"
-          @closeRequested="goToItem()"
+          @cancel="goToItem($event)"
+          @closeRequested="goToItem($event)"
+          :standalone="false"
         />
         <AwesomeCrud
           v-if="
@@ -49,7 +50,6 @@
             initialDisplayMode: 'list',
             detailPageMode: 'sidebar',
           }"
-          :listOptions="{ perRow: 6 }"
           v-on="events"
           tableRowClickAction="edit"
           :actions="{ create: true, edit: true, view: false }"
@@ -62,10 +62,8 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import Swal2 from 'sweetalert2';
 import { AwesomeCrud } from 'vue-aw-components';
 import _ from 'lodash';
-import DisconnectedConfig from '@/components/swal/Disconnected';
 
 export default {
   name: 'CrudWrapper',
@@ -109,16 +107,7 @@ export default {
       );
     },
   },
-  watch: {
-    'socket.connected': function (newVal, oldVal) {
-      if (!newVal && oldVal !== newVal) {
-        this.blockingModal = Swal2.fire(DisconnectedConfig);
-      } else if (this.blockingModal) {
-        this.blockingModal.close();
-        this.refreshLists();
-      }
-    },
-  },
+  watch: {},
   data() {
     return {};
   },
@@ -135,14 +124,19 @@ export default {
     refreshModels() {
       return this.$store.dispatch('getModels');
     },
-    goToItem() {
-      this.$router.push('/app/models/' + this.$route.params.id);
+    goToItem(event) {
+      console.log(event);
+      if (this.$route.params.id) {
+        this.$router.push('/app/models/' + this.$route.params.id);
+      } else if (event.identity) {
+        this.$router.push('/app/models/' + event.identity);
+      }
     },
   },
 };
 </script>
 
-<style>
+<style lang="scss">
 .page-dashboard-overlay {
   position: fixed;
   top: 0;
@@ -161,5 +155,22 @@ export default {
 }
 .aw-crud .container-fluid {
   padding: 0;
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 80vw !important;
+    width: 80% !important;
+  }
+}
+
+.aw-crud-axelModelFieldConfig {
+  .aw-list-component .aw-list-item .card-body {
+    padding: 5px;
+
+    h4 {
+      font-size: 20px;
+    }
+  }
 }
 </style>

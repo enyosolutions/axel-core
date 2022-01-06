@@ -105,11 +105,12 @@ export default new Vuex.Store({
               },
               nestedDisplayMode: model.nestedDisplayMode || 'object',
             };
-            model.customTitleBarActions = [
+            model.customTopRightActions = [
               writeConfigToFs,
               editLayout,
               editFields,
             ]
+            delete model.url;
             return model;
           });
           commit('models', apiModels);

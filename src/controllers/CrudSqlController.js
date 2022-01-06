@@ -4,13 +4,17 @@
  * @description :: Server-side logic for managing all endpoints
  * @help        :: See http://axel.s.org/#!/documentation/concepts/Controllers
  */
+const { get, has } = require('lodash');
 const d = require('debug');
+const path = require('path');
+
 const Utils = require('../services/Utils.js');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js');
 const DocumentManager = require('../services/DocumentManager.js');
 const ExcelService = require('../services/ExcelService.js');
 const SchemaValidator = require('../services/SchemaValidator.js');
+const { execHook, getPrimaryKey } = require('../services/ControllerUtils');
 
 const debug = d('axel:CrudSqlController');
 
@@ -93,275 +97,196 @@ class CrudSqlController {
       .catch(next);
   }
 
-  list(req, resp, next) {
-    const endpoint = req.params.endpoint;
-    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-      ? axel.models[endpoint].em.primaryKeyField
-      : axel.config.framework.primaryKey;
+  async list(req, resp, next) {
+    const endpoint = req.endpoint || req.params.endpoint;
+    try {
+      let items = [];
+      const {
+        startPage, limit, offset, order
+      } = req.pagination;
+      let query = req.parsedQuery;
 
-    let items = [];
-    const {
-      listOfValues, startPage, limit, offset, order
-    } = Utils.injectPaginationQuery(req, {
-      primaryKey
-    });
-    let query = Utils.injectQueryParams(req);
+      const repository = Utils.getEntityManager(req, resp);
+      if (!repository) {
+        throw ExtendedError({
+          code: 400,
+          message: 'error_model_not_found_for_this_url'
+        });
+      }
+      if (req.query.search) {
+        query = Utils.injectSqlSearchParams(req, query, {
+          modelName: endpoint
+        });
+      }
 
-    const repository = Utils.getEntityManager(req, resp);
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
-    }
-    if (req.query.search) {
-      query = Utils.injectSqlSearchParams(req, query, {
-        modelName: req.params.endpoint
-      });
-    }
-    query = Utils.cleanSqlQuery(query);
-    repository
-      .findAndCountAll({
-        // where: req.query.filters,
+      query = Utils.cleanSqlQuery(query);
+      const sequelizeQuery = {
         where: query,
         order,
         limit,
         offset,
         raw: false,
         nested: true
-      })
-      .then((result) => {
-        items = result.rows.map(item => item.get());
-        if (listOfValues) {
-          items = items.map(item => ({
-            [primaryKey]: item[primaryKey],
-            label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`
-          }));
-        }
-        return result.count || 0;
-      })
+      };
+      await execHook(endpoint, 'beforeApiFind', { request: req, sequelizeQuery });
+      const { rows, count } = await repository
+        .findAndCountAll(sequelizeQuery);
 
-      .then(totalCount => resp.status(200).json({
+
+      items = rows.map(item => item.get());
+      const result = {
         body: items,
         page: startPage,
         perPage: limit,
         count: limit,
-        totalCount
-      }))
-      .catch(next);
+        totalCount: count
+      };
+      await execHook(endpoint, 'afterApiFind', result, { request: req });
+
+      resp.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  get(req, resp, next) {
+  async get(req, resp, next) {
     const id = req.params.id;
-    if (!id) {
-      return false;
-    }
-    const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
     const endpoint = req.params.endpoint;
-    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-      ? axel.models[endpoint].em.primaryKeyField
-      : axel.config.framework.primaryKey;
-    const repository = Utils.getEntityManager(req, resp);
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
-    }
-    repository
-      .findOne({
+    try {
+      const primaryKey = getPrimaryKey(endpoint);
+      const repository = Utils.getEntityManager(req, resp);
+      if (!repository) {
+        throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
+      }
+      const sequelizeQuery = {
         where: { [primaryKey]: id },
         raw: false
-      })
-      .catch((err) => {
-        axel.logger.warn(err);
+      };
+      await execHook(endpoint, 'beforeApiFindOne', { ...req, sequelizeQuery });
+      const item = await repository
+        .findOne(sequelizeQuery);
+
+      if (!item) {
         throw new ExtendedError({
           code: 404,
           errors: [
-            {
-              message: err.message || 'not_found'
-            }
+            `${endpoint}_not_found_${id}`
           ],
-          message: err.message || 'not_found'
+          message: 'item_not_found'
         });
-      })
-      .then((item) => {
-        if (item) {
-          item = item.get();
-          if (listOfValues) {
-            item = {
-              [primaryKey]: item[primaryKey],
-              label: item.title || item.name || item.label || `${item.firstname} ${item.lastname}`
-            };
-          }
-          return resp.status(200).json({
-            body: item
-          });
-        }
-        throw new ExtendedError({
-          code: 404,
-          errors: [
-            {
-              message: 'not_found'
-            }
-          ],
-          message: 'not_found'
-        });
-      })
-      .catch(next);
+      }
+
+      const result = {
+        body: item.get()
+      };
+      execHook(endpoint, 'afterApiFindOne', result, req);
+      return resp.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  post(req, resp, next) {
+  async post(req, resp, next) {
     const data = req.body;
-    const repository = Utils.getEntityManager(req, resp);
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
-    }
+    const endpoint = req.endpoint || req.params.endpoint;
     try {
-      const result = SchemaValidator.validate(data, req.params.endpoint);
-      if (!result.isValid) {
-        console.warn('[SCHEMA VALIDATION ERROR]', req.params.endpoint, result, data);
-        resp.status(400).json({
-          message: 'data_validation_error',
-          errors: result.formatedErrors
-        });
-        debug('formatting error', result);
-        return;
+      await execHook(endpoint, 'beforeApiCreate', { request: req, sequelizeQuery: data });
+      const repository = Utils.getEntityManager(req, resp);
+      if (!repository) {
+        throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
       }
-    } catch (err) {
-      throw new Error('error_wrong_json_format_for_model_definition');
-    }
+      await SchemaValidator.validateAsync(data, endpoint);
 
-    repository
-      .create(data)
-      .then(result => resp.status(200).json({
-        body: result
-      }))
-      .catch(next);
+      const result = {};
+      result.body = await repository
+        .create(data);
+      await execHook(endpoint, 'afterApiCreate', result, { request: req });
+
+      resp.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
   }
 
   /**
-   * [put description]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
-  put(req, resp, next) {
+  * [put description]
+  * [description]
+  * @method
+  * @param  {[type]} req  [description]
+  * @param  {[type]} resp [description]
+  * @return {[type]}      [description]
+  */
+  async put(req, resp, next) {
     const id = req.params.id;
     const data = req.body;
 
     const endpoint = req.params.endpoint || req.endpoint;
-    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-      ? axel.models[endpoint].em.primaryKeyField
-      : axel.config.framework.primaryKey;
-    const repository = Utils.getEntityManager(req, resp);
-
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
-    }
-    if (axel.config.framework && axel.config.framework.validateDataWithJsonSchema) {
-      try {
-        const result = SchemaValidator.validate(data, endpoint);
-        if (!result.isValid) {
-          console.warn('[SCHEMA VALIDATION ERROR]', endpoint, result, data);
-          resp.status(400).json({
-            message: 'data_validation_error',
-            errors: result.formatedErrors
-          });
-          debug('formatting error', result);
-          return;
-        }
-      } catch (err) {
-        throw new Error('error_wrong_json_format_for_model_definition');
+    try {
+      const primaryKey = getPrimaryKey(endpoint);
+      const repository = Utils.getEntityManager(req, resp);
+      if (!repository) {
+        throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
       }
-    }
 
-    repository
-      .findOne({ where: { [primaryKey]: id }, raw: false })
-      .catch((err) => {
-        axel.logger.warn(err);
+      const sequelizeQuery = { where: { [primaryKey]: id } };
+      await execHook(endpoint, 'beforeApiUpdate', { request: req, sequelizeQuery });
+      await SchemaValidator.validateAsync(data, endpoint);
+
+      const exists = await repository
+        .findOne(sequelizeQuery);
+      if (!exists) {
         throw new ExtendedError({
           code: 404,
-          errors: [
-            {
-              message: err.message || 'not_found'
-            }
-          ],
-          message: err.message || 'not_found'
+          message: 'item_not_found',
+          errors: ['item_not_found']
         });
-      })
-      .then((result) => {
-        if (result) {
-          return repository.update(data, {
-            where: {
-              [primaryKey]: id
-            }
-          });
-        }
-        throw new ExtendedError({
-          code: 404,
-          message: 'not_found',
-          errors: ['not_found']
-        });
-      })
-      .then(() => repository.findOne({ where: { [primaryKey]: id }, raw: false }))
-      .then((result) => {
-        if (result) {
-          return resp.status(200).json({
-            body: result
-          });
-        }
-        return resp.status(404).json({
-          errors: ['not_found'],
-          message: 'not_found'
-        });
-      })
-      .catch(next);
+      }
+      await repository.update(data, sequelizeQuery);
+
+      const result = {};
+      result.body = await repository.findOne(sequelizeQuery);
+      await execHook(endpoint, 'afterApiUpdate', result, { request: req });
+
+      return resp.status(200).json({
+        body: result
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
   /**
-   * [delete Item]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
-  delete(req, resp, next) {
-    const id = req.params.id;
+  * [delete Item]
+  * [description]
+  * @method
+  * @param  {[type]} req  [description]
+  * @param  {[type]} resp [description]
+  * @return {[type]}      [description]
+  */
+  async delete(req, resp, next) {
+    try {
+      const id = req.params.id;
+      const endpoint = req.params.endpoint || req.endpoint;
+      const primaryKey = getPrimaryKey(endpoint);
+      const repository = Utils.getEntityManager(req, resp);
 
-    const repository = Utils.getEntityManager(req, resp);
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
+      if (!repository) {
+        throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
+      }
+      const sequelizeQuery = { where: { [primaryKey]: id } };
+
+      await execHook(endpoint, 'beforeApiDelete', { request: req, sequelizeQuery });
+      const result = {};
+      result.body = await repository
+        .destroy(sequelizeQuery);
+      await execHook(endpoint, 'afterApiDelete', result, { request: req });
+
+      return resp.status(200).json({
+        body: result
+      });
+    } catch (err) {
+      next(err);
     }
-    const endpoint = req.params.endpoint;
-    const primaryKey = axel.models[endpoint] && axel.models[endpoint].em.primaryKeyField
-      ? axel.models[endpoint].em.primaryKeyField
-      : axel.config.framework.primaryKey;
-    repository
-      .destroy({
-        where: {
-          [primaryKey]: id
-        }
-      })
-      .catch((err) => {
-        axel.logger.warn(err);
-        throw new ExtendedError({
-          code: 400,
-          errors: [err || 'delete_error'],
-          message: err.message || 'delete_error'
-        });
-      })
-      .then((a) => {
-        if (!a) {
-          return resp.status(404).json();
-        }
-        resp.status(200).json({
-          status: 'OK'
-        });
-      })
-      .catch(next);
   }
 
   export(req, resp, next) {
@@ -374,8 +299,7 @@ class CrudSqlController {
     const query = {};
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
+      throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
     }
     Promise.resolve()
       .then(() => repository.findAll({
@@ -419,13 +343,12 @@ class CrudSqlController {
 
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
+      throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
     }
 
     let data = [];
-    const url = `${endpoint}_template`;
-    const options = {};
+    const url = `${endpoint}_import_template`;
+    const options = { targetFolder: path.resolve(process.cwd(), `public/data/${endpoint}`) };
     const query = {};
 
     Promise.resolve()
@@ -461,8 +384,7 @@ class CrudSqlController {
   import(req, resp, next) {
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
+      throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
     }
     const properData = [];
     const improperData = [];

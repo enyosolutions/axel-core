@@ -17,7 +17,9 @@ const layoutConfig = {
     }
   },
   default: [],
-  field: { type: 'layoutEditor' }
+  field: {
+    type: 'layoutEditor', cols: 12, innerClasses: 'card-body', classes: 'card'
+  }
 };
 
 module.exports = {
@@ -69,6 +71,26 @@ module.exports = {
       namePlural: {
         type: 'string'
       },
+      primaryKeyField: {
+        type: 'string'
+      },
+
+      displayField: {
+        type: 'string'
+      },
+      apiUrl: { type: 'string', default: '' },
+      segmentField: {
+        type: 'string',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/axel-model-field-config?filters%5B%5D=&filters%5BparentIdentity%5D={{ currentItem.identity }}',
+            label: 'name',
+            trackBy: 'name',
+          }
+        },
+      },
       detailPageMode: {
         type: 'string',
         default: 'sidebar',
@@ -78,7 +100,17 @@ module.exports = {
         type: 'string',
         enum: ['horizontal-tabs', 'vertical-tabs', 'list'],
         default: 'horizontal-tabs',
-        title: 'Layout for nested items in the detail page',
+        title: 'Layout for nested components',
+        description: 'How the awesomeform is layed out in regards to nested components'
+      },
+      enabledListingModes: {
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['kanban', 'table', 'list'],
+        },
+        default: ['kanban', 'table', 'list'],
+        title: 'Enabled listing modes',
         description: 'How the awesomeform is layed out in regards to nested components'
       },
       detailPageLayout: {
@@ -95,7 +127,8 @@ module.exports = {
             type: 'string',
             default: 'sidebar',
             title: '@Deprecated use schema.detailPageMode directly',
-            enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform']
+            nullable: true,
+            enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform', null]
           }, // fade | slide | full
           dataPaginationMode: {
             type: 'string',
@@ -110,29 +143,30 @@ module.exports = {
           autoRefresh: { type: 'boolean', field: { disabled: true } }, // or integer in seconds
           initialDisplayMode: { type: 'string', default: 'table' },
           modalMode: { type: 'string', default: 'slide' }, // fade | slide | full
-          columnsDisplayed: { type: 'integer', default: false }
+          columnsDisplayed: { type: 'integer', default: 8 }
         }
       },
       actions: {
         type: 'object',
         title: 'Possible actions',
+        nullable: true,
         column: {
           type: 'string',
           title: 'Possible actions'
         },
         default: {},
         properties: {
-          create: { type: 'boolean' },
-          edit: { type: 'boolean' },
-          view: { type: 'boolean' },
-          delete: { type: 'boolean' },
+          create: { type: 'boolean', default: true },
+          edit: { type: 'boolean', default: true },
+          view: { type: 'boolean', default: true },
+          delete: { type: 'boolean', default: true },
 
           noActions: { type: 'boolean', default: false },
           search: { type: 'boolean', default: true },
           filter: { type: 'boolean', default: true },
           export: { type: 'boolean', default: false },
           import: { type: 'boolean', default: false },
-          dateFilter: { type: 'boolean', default: true },
+          dateFilter: { type: 'boolean', default: false },
           refresh: { type: 'boolean', default: true },
 
           automaticRefresh: { type: 'boolean', default: false },
@@ -140,7 +174,7 @@ module.exports = {
           columnsFilters: { type: 'boolean', default: true },
           bulkDelete: { type: 'boolean', default: true },
           bulkEdit: { type: 'boolean', default: true },
-          itemsPerRow: { type: 'boolean', default: true },
+          changeItemsPerRow: { type: 'boolean', default: true },
           editLayout: { type: 'boolean', default: true },
           changeDisplayMode: { type: 'boolean', default: true },
           pagination: { type: 'boolean', default: true },
@@ -151,18 +185,6 @@ module.exports = {
       customInlineActions: { type: 'array' },
       customTopActions: { type: 'array' },
       customTabletopActions: { type: 'array' },
-      formOptions: {
-        title: 'Form Options',
-        description: 'Options for the create / edit / detail form',
-        type: 'object',
-        default: {},
-        properties: {
-          layout: {
-            ...layoutConfig,
-            title: 'layout of the form',
-          }
-        }
-      },
       tableRowClickAction: {
         type: 'string',
         title: 'Row click action',
@@ -177,29 +199,56 @@ module.exports = {
         enum: ['view', 'edit', 'none', 'delete'],
         description: 'The action to execute when the user double clicks on a row'
       },
+      formOptions: {
+        title: 'Form Options',
+        description: 'Options for the create / edit / detail form',
+        type: ['object', 'null'],
+        nullable: true,
+        default: {},
+        field: {
+          cols: 12
+        },
+        properties: {
+          layout: {
+            ...layoutConfig,
+            title: 'layout of the form',
+          }
+        }
+      },
       listOptions: {
         title: 'List Options',
         description: 'Options for list view',
         type: ['object', 'null'],
         default: {},
+
+        field: {
+          cols: 12
+        },
         properties: {
           titleField: { type: 'string' },
           subtitleField: { type: 'string' },
           descriptionField: { type: 'string' },
           perRow: { type: 'number' },
+          perPage: { type: 'number' },
         }
       },
       kanbanOptions: {
-        title: 'List Options',
+        title: 'Kanban Options',
         description: 'Options for kanban view',
         type: ['object', 'null'],
         default: {},
+        field: {
+          type: 'JsonTextarea'
+        }
       },
       tableOptions: {
-        title: 'List Options',
+        title: 'Table Options',
         description: 'Options for table view',
         type: ['object', 'null'],
         default: {},
+        field: {
+          type: 'JsonTextarea'
+        }
       },
       tableDataLimit: {
         title: 'tableDataLimit',
@@ -209,7 +258,12 @@ module.exports = {
           'Defines the number of items to get from the api for the table. This prevents overloading the table with too much data'
       },
       nestedModels: {
+
         type: 'array',
+        field: {
+          type: 'array',
+          cols: 12,
+        },
         items: {
           type: 'object',
           properties: {
@@ -218,6 +272,7 @@ module.exports = {
               type: 'string',
               field: {
                 type: 'vSelect',
+                cols: 12,
                 fieldOptions: {
                   taggable: true,
                   url: '/api/axel-admin/models',
@@ -227,8 +282,11 @@ module.exports = {
               }
             },
             config: {
-              type: 'string',
+              type: 'object',
+              additionalProperties: true,
+              default: {},
               field: {
+                cols: 12,
                 type: 'JsonTextarea'
               }
             }
@@ -255,7 +313,8 @@ module.exports = {
       export: true,
       import: true,
     },
-    detailPageMode: 'sideform',
+    detailPageMode: 'page',
+
     layout: [{
       legend: 'Infos', fields: ['id', 'identity', 'pageTitle', 'icon', 'name', 'namePlural'], cols: '6', wrapperClasses: 'card mb-1'
     }, {

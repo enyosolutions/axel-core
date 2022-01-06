@@ -304,15 +304,39 @@ export default {
     async resetModelsAdminConfig() {
       this.$awConfirm(
         'are you sure ?  this will delete all your existing modifications'
+      ).then((confirmed) => {
+        if (confirmed) {
+          this.$socket
+            .post('/axel-manager/reset-models-config', {
+              body: { ...this.newApi },
+            })
+            .then(() => {
+              this.$store.dispatch('getModels');
+              return Swal2.fire({
+                title: 'Models successfully resetted',
+                icon: 'success',
+                toast: true,
+              });
+            })
+            .catch((err) => {
+              return Swal2.fire({ title: err.message, icon: 'error' });
+            });
+        }
+      });
+    },
+
+    async saveModelsToFile() {
+      this.$awConfirm(
+        'are you sure ? this will write all your existing modifications'
       ).then(() => {
         this.$socket
-          .post('/axel-manager/reset-models-config', {
+          .put('/axel-manager/admin-models/save-all', {
             body: { ...this.newApi },
           })
           .then(() => {
             this.$store.dispatch('getModels');
             return Swal2.fire({
-              title: 'Models successfully resetted',
+              title: 'Models successfully saved',
               icon: 'success',
               toast: true,
             });

@@ -7,7 +7,7 @@ module.exports = {
   autoValidate: true,
   displayField: 'name',
   schema: {
-    $id: 'http://acme.com/schemas/axel-model-field-config.json',
+    $id: 'http://enyosolutions.com/schemas/axel-model-field-config.json',
     type: 'object',
     properties: {
       id: {
@@ -24,9 +24,8 @@ module.exports = {
         relation: 'axelModelConfig',
         field: {
           required: true,
-          readonly: true,
-          disabled: true,
-          type: 'input'
+          readonly: '{{ context.mode !== "create" }}',
+          disabled: '{{ context.mode !== "create" }}',
         }
       },
       name: {
@@ -59,10 +58,14 @@ module.exports = {
         field: {}
       },
       enum: {
-        type: ['string', 'array'],
+        type: 'array',
         title: 'Possible values',
+        items: {
+          type: 'string',
+        },
         description: 'The list of values to use for the select.',
         field: {
+          // type: 'array',
           type: 'vSelect',
           fieldOptions: {
             multiple: true,
@@ -213,9 +216,27 @@ module.exports = {
 
           styleClasses: {
             type: 'string',
-            title: 'Css classes',
+            title: 'Css classes (@deprecated use classes)',
             description: 'The class that will be around the field',
             examples: ['col-md-12']
+          },
+          classes: {
+            type: 'string',
+            title: 'Css classes of the field',
+            description: 'The class that will be around the field',
+            examples: ['col-md-12', 'card']
+          },
+          labelClasses: {
+            type: 'string',
+            title: 'Css classes for the label',
+            description: 'The class that will be around the label',
+            examples: ['text-danger']
+          },
+          innerClasses: {
+            type: 'string',
+            title: 'Css classes for the inner block',
+            description: 'The class that will be around the block (usefull for cols and row padding)',
+            examples: ['card-body']
           },
           min: {
             type: 'number',
@@ -233,6 +254,16 @@ module.exports = {
               type: 'number'
             }
           },
+          cols: {
+            type: 'number',
+            title: 'Width of the field (cols)',
+            description: 'the number of grid columns the item takes (1 - 12)',
+            enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            field: {
+              min: 1,
+              max: 12
+            }
+          },
           fieldOptions: {
             title: 'Field options',
             description: 'Options to be used on custom forms fields like multiselect, toggle etc',
@@ -246,8 +277,17 @@ module.exports = {
                   visible: "{{ !!currentItem.field && ['vSelect', 'select', 'EnyoSelect'].includes(currentItem.field.type) }}"
                 }
               },
+              taggable: {
+                type: 'boolean',
+                title: 'Select accept new items',
+                description: 'Select accept new items [vSelect]',
+                examples: ['/user'],
+                field: {
+                  visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
+                }
+              },
               enum: {
-                type: ['string', 'array'],
+                type: ['array', 'string'],
                 title: 'Values',
                 description: `The list of values to use for the select. If the value is string
                   and starts with $store then the value is taken from the vuejs $store`,
@@ -258,22 +298,14 @@ module.exports = {
               },
               url: {
                 type: 'string',
-                title: 'c url',
+                title: 'Api url',
                 description: 'The url to use to load the data for the select (ajax) [vSelect]',
                 examples: ['/user'],
                 field: {
                   visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
                 }
               },
-              taggable: {
-                type: 'boolean',
-                title: 'Select accept new items',
-                description: 'Select accept new items [vSelect]',
-                examples: ['/user'],
-                field: {
-                  visible: "{{ !!(currentItem.field && currentItem.field.type === 'vSelect') }}"
-                }
-              },
+
               trackBy: {
                 type: 'string',
                 title: 'The field to use as the value in the select',
@@ -294,25 +326,29 @@ module.exports = {
                 type: 'boolean',
                 title: 'disableRelationActions on the select',
                 field: {
-                  visible: "{{ !!currentItem.field && currentItem.field.type === 'vSelect' && !!currentItem.relation  }}"
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'vSelect') && !!currentItem.relation  }}"
                 }
               },
               prefix: {
                 type: 'string',
-                title: 'Text displayed before the value',
-                description: 'example : £',
+                title: 'Prefix',
+                description: 'Text displayed before the value. example : £',
                 examples: ['username']
               },
 
               suffix: {
                 type: 'string',
-                title: 'Text displayed before the value',
-                description: 'example : cm | €',
+                title: 'Suffix',
+                description: 'Text displayed after the value. example : cm | €',
                 examples: ['username']
               },
 
               validator: {
-                type: 'array',
+                type: ['array', 'string'],
+                title: 'Validators',
+                items: {
+                  type: 'string'
+                },
                 description:
                   'the validators used to validate fields https://vue-generators.gitbook.io/vue-generators/validation/built-in-validators'
               },
@@ -324,7 +360,7 @@ module.exports = {
                 properties: {
                   type: {
                     type: 'string',
-                    title: 'Type of field for display',
+                    title: 'Field type',
                     enum: [
                       'string',
                       'number',
@@ -348,6 +384,7 @@ module.exports = {
       },
       column: {
         type: 'object',
+        title: 'Column configuration',
         description: 'Configuration of the behavior of the property in lists',
         properties: {
           title: {
@@ -355,26 +392,28 @@ module.exports = {
             title: 'The title of the field'
           },
           type: {
+            title: 'Column type',
             description:
               'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
             type: 'string',
             enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url']
           },
           hidden: {
-            type: 'string',
+            title: 'Hide this column',
+            type: 'boolean',
             description: 'If the form field is displayed',
-            title: 'Hide this column'
+            default: false
           },
           prefix: {
-            type: 'string',
             title: 'Text displayed before the value',
+            type: 'string',
             description: 'example : £',
             examples: ['username']
           },
 
           suffix: {
-            type: 'string',
             title: 'Text displayed before the value',
+            type: 'string',
             description: 'example : cm | €',
             examples: ['username']
           }
@@ -403,10 +442,11 @@ module.exports = {
     routerPath: 'axel-model-field-config',
     name: 'Field config',
     namePlural: 'Fields configs',
-    layout: {
-      columns: [
-
-      ]
+    listOptions: {
+      titleField: 'title',
+      subtitleField: 'field.type',
+      perPage: 50,
+      perRow: 1
     },
     actions: {
       create: false,

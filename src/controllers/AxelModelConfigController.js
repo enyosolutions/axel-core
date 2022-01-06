@@ -9,6 +9,8 @@ const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as neede
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
 const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
+const SchemaValidator = require('../services/SchemaValidator.js');
+const { saveModel } = require('../services/ws/utils');
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -92,7 +94,7 @@ class AxelModelConfigController {
     repository
       .findOne({
         where: { [pKey]: id },
-        raw: false
+        raw: true
       })
       .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
@@ -102,21 +104,22 @@ class AxelModelConfigController {
           code: 400,
           errors: [
             {
-              message: err.message || 'not_found'
+              message: err.message || 'item_not_found'
             }
           ],
-          message: err.message || 'not_found'
+          message: err.message || 'item_not_found'
         });
       })
-      .then(async (item) => {
-        if (item) {
-          item = item.get();
+      .then(async (itemFound) => {
+        if (itemFound) {
+          let item = itemFound;
           if (axel.models[item.identity]) {
             item = AxelAdmin.mergeData(
               AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
               item.config
             );
           }
+
           if (listOfValues) {
             item = {
               [primaryKey]: item[primaryKey],
@@ -141,10 +144,10 @@ class AxelModelConfigController {
           code: 404,
           errors: [
             {
-              message: 'not_found'
+              message: 'item_not_found'
             }
           ],
-          message: 'not_found'
+          message: 'item_not_found'
         });
       })
       .catch((err) => {
@@ -153,13 +156,13 @@ class AxelModelConfigController {
   }
 
   /**
-   * [put description]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
+ * [put description]
+ * [description]
+ * @method
+ * @param  {[type]} req  [description]
+ * @param  {[type]} resp [description]
+ * @return {[type]}      [description]
+ */
   put(req, resp) {
     const id = req.params.id;
     const data = req.body;
@@ -179,13 +182,22 @@ class AxelModelConfigController {
           code: 404,
           errors: [
             {
-              message: err.message || 'not_found'
+              message: err.message || 'item_not_found'
             }
           ],
-          message: err.message || 'not_found'
+          message: err.message || 'item_not_found'
         });
       })
       .then((result) => {
+        const validation = SchemaValidator.validate(data, entity, { strict: true });
+        if (!validation.isValid) {
+          console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', validation, axel.models.axelModelConfig.schema);
+          throw new ExtendedError({
+            code: 400,
+            message: 'data_validation_error',
+            errors: validation.formatedErrors
+          });
+        }
         if (result) {
           return repository.update({ config: data }, {
             where: {
@@ -195,8 +207,8 @@ class AxelModelConfigController {
         }
         throw new ExtendedError({
           code: 404,
-          message: 'not_found',
-          errors: ['not_found']
+          message: 'item_not_found',
+          errors: ['item_not_found']
         });
       })
       .then(() => repository.findOne({
@@ -205,13 +217,14 @@ class AxelModelConfigController {
       }))
       .then((result) => {
         if (result) {
+          saveModel(data);
           return resp.status(200).json({
             body: result.config
           });
         }
         return resp.status(404).json({
-          errors: ['not_found'],
-          message: 'not_found'
+          errors: ['item_not_found'],
+          message: 'item_not_found'
         });
       })
       .catch((err) => {
@@ -231,13 +244,13 @@ class AxelModelConfigController {
   }
 
   /**
-   * [delete Item]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
+ * [delete Item]
+ * [description]
+ * @method
+ * @param  {[type]} req  [description]
+ * @param  {[type]} resp [description]
+ * @return {[type]}      [description]
+ */
   delete(req, resp) {
     const id = req.params.id;
 
@@ -311,8 +324,8 @@ class AxelModelConfigController {
           });
         }
         return resp.status(404).json({
-          errors: ['not_found'],
-          message: 'not_found'
+          errors: ['item_not_found'],
+          message: 'item_not_found'
         });
       })
       .catch(next);

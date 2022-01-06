@@ -5,4 +5,8 @@ module.exports = {
   showCloseButton: false,
   allowOutsideClick: false,
   allowEscapeKey: false,
+  stopKeydownPropagation: true,
+  keydownListenerCapture: true,
+  toast: true,
+  position: 'bottom-end'
 }

@@ -7,9 +7,9 @@ export function openModal(id) {
 }
 export function closeModal(id) {
   document.getElementById("backdrop").style.display = "none";
+  document.body.classList.remove("modal-open");
   document.getElementById(id).style.display = "none";
   document.getElementById(id).classList.remove("show");
-  document.body.classList.remove("modal-open");
   document.getElementById(id).removeAttribute('data-modal', id);
 }
 

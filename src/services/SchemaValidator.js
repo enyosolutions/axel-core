@@ -3,24 +3,26 @@ const _ = require('lodash');
 const debug = require('debug')('axel:schemavalidator');
 const addFormats = require('ajv-formats');
 
+const ExtendedError = ('./ExtendedError');
+
 function getGrammaticalSingular(type) {
   switch (type) {
-      case 'string':
-        return 'a string';
-      case 'number':
-        return 'a number';
-      case 'integer':
-        return 'an integer';
-      case 'object':
-        return 'an object';
-      case 'array':
-        return 'an array';
-      case 'boolean':
-        return 'a boolean';
-      case 'null':
-        return 'null';
-      default:
-        return `a ${type}`;
+    case 'string':
+      return 'a string';
+    case 'number':
+      return 'a number';
+    case 'integer':
+      return 'an integer';
+    case 'object':
+      return 'an object';
+    case 'array':
+      return 'an array';
+    case 'boolean':
+      return 'a boolean';
+    case 'null':
+      return 'null';
+    default:
+      return `a ${type}`;
   }
 }
 
@@ -29,53 +31,56 @@ function getFieldName(error) {
     error.params.missingProperty
     || error.params.additionalProperty
     || (error.dataPath && error.dataPath.replace('.', ''))
+    || (error.instancePath && error.instancePath.replace('.', ''))
+    || error.keyword
+    || ''
   );
 }
 
 function getFormatErrorMessage(error) {
   switch (error.params.format) {
-      case 'date-time':
-      case 'date':
-        return 'should be a date';
-      case 'email':
-        return 'should be a valid email address';
-      case 'ipv4':
-        return 'should be a dotted-quad IPv4 address';
-      case 'ipv6':
-        return 'should be a valid IPv6 address';
-      case 'uri':
-        return 'should be a valid uri';
-      default:
-        return JSON.stringify(error);
+    case 'date-time':
+    case 'date':
+      return 'should be a date';
+    case 'email':
+      return 'should be a valid email address';
+    case 'ipv4':
+      return 'should be a dotted-quad IPv4 address';
+    case 'ipv6':
+      return 'should be a valid IPv6 address';
+    case 'uri':
+      return 'should be a valid uri';
+    default:
+      return JSON.stringify(error);
   }
 }
 
 function getValidMessage(error) {
   switch (error.keyword) {
-      case 'required':
-        return 'is required';
-      case 'minimum':
-        return `must be greater than ${error.params.limit}`;
-      case 'maximum':
-        return `must be less than ${error.params.limit}`;
-      case 'type':
-        return `should be ${getGrammaticalSingular(error.params.type)}`;
-      case 'minLength':
-        return `must be longer than ${error.params.limit} characters`;
-      case 'maxLength':
-        return `must be shorter than ${error.params.limit} characters`;
-      case 'maxItems':
-        return `must have no more than ${error.params.limit} items`;
-      case 'minItems':
-        return `must have at least ${error.params.limit} items`;
-      case 'format':
-        return getFormatErrorMessage(error);
-      case 'pattern':
-        return 'has invalid format';
-      case 'additionalProperties':
-        return 'additional property not allowed';
-      default:
-        return error.message;
+    case 'required':
+      return 'is required';
+    case 'minimum':
+      return `must be greater than ${error.params.limit}`;
+    case 'maximum':
+      return `must be less than ${error.params.limit}`;
+    case 'type':
+      return `should be ${getGrammaticalSingular(error.params.type)}`;
+    case 'minLength':
+      return `must be longer than ${error.params.limit} characters`;
+    case 'maxLength':
+      return `must be shorter than ${error.params.limit} characters`;
+    case 'maxItems':
+      return `must have no more than ${error.params.limit} items`;
+    case 'minItems':
+      return `must have at least ${error.params.limit} items`;
+    case 'format':
+      return getFormatErrorMessage(error);
+    case 'pattern':
+      return 'has invalid format';
+    case 'additionalProperties':
+      return 'additional property not allowed';
+    default:
+      return error.message;
   }
 }
 
@@ -87,7 +92,7 @@ function addMessage(fields, error, fieldName) {
     fields[field] = [];
   }
 
-  fields[field].push(`${field} ${message}`);
+  fields[field].push(`${field || ''} ${message}`);
 }
 
 function normaliseErrorMessages(errors) {
@@ -189,9 +194,6 @@ class SchemaValidator {
     try {
       const validator =
         options && options.strict ? this.strictValidators[model] : this.validators[model];
-      if (!strict) {
-
-      }
       if (!validator) {
         {
           axel.logger.warn(
@@ -213,7 +215,7 @@ class SchemaValidator {
         return result;
       }
     } catch (e) {
-      axel.logger.warn('model issues', e, model);
+      axel.logger.warn('VALIDATOR :: model has issues', e.message, model);
     }
     if (!result.isValid) {
       // result = normalize(this.validators[model.toLowerCase()].errors);
@@ -224,6 +226,28 @@ class SchemaValidator {
       result.rawErrors = this.validators[model].errors;
     }
     return result;
+  }
+
+  validateAsync(data, modelName) {
+    if (axel.config.framework
+      && axel.config.framework.validateDataWithJsonSchema
+      && axel.models[modelName]
+      && axel.models[modelName].autoValidate
+    ) {
+      const validation = this.validate(data, modelName);
+      if (!validation.isValid) {
+        debug('[SCHEMA VALIDATION ERROR]', modelName, validation, data);
+        throw new ExtendedError({
+          code: 400,
+          message: 'data_validation_error',
+          errors: validation.formatedErrors,
+          validation,
+        });
+      }
+    }
+    else {
+      debug('Validation disabled for model', modelName);
+    }
   }
 }
 

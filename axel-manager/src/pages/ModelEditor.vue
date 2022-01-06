@@ -15,7 +15,7 @@
       <AwesomeCrud
         v-if="$route.params.identity === 'axelModelConfig'"
         :identity="$route.params.identity"
-        :primaryKey="identity"
+        primaryKey="identity"
         :useRouterMode="false"
         v-on="events"
         tableRowClickAction="edit"
@@ -58,10 +58,8 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import Swal2 from 'sweetalert2';
 import { AwesomeCrud } from 'vue-aw-components';
 import _ from 'lodash';
-import DisconnectedConfig from '@/components/swal/Disconnected';
 
 export default {
   name: 'CrudWrapper',
@@ -105,16 +103,7 @@ export default {
       );
     },
   },
-  watch: {
-    'socket.connected': function (newVal, oldVal) {
-      if (!newVal && oldVal !== newVal) {
-        this.blockingModal = Swal2.fire(DisconnectedConfig);
-      } else if (this.blockingModal) {
-        this.blockingModal.close();
-        this.refreshLists();
-      }
-    },
-  },
+  watch: {},
   data() {
     return {
       message: 'Hello Vue !',

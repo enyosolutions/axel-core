@@ -21,7 +21,6 @@
 <script>
 // import { mapState } from 'vuex';
 import Swal2 from 'sweetalert2';
-import DisconnectedConfig from '@/components/swal/Disconnected';
 
 export default {
   name: 'NotFound',
@@ -38,16 +37,7 @@ export default {
       return this.models.find((m) => m.name === this.newApi.name);
     },
   },
-  watch: {
-    'socket.connected': function (newVal, oldVal) {
-      if (!newVal && oldVal !== newVal) {
-        this.blockingModal = Swal2.fire(DisconnectedConfig);
-      } else if (this.blockingModal) {
-        this.blockingModal.close();
-        this.refreshLists();
-      }
-    },
-  },
+  watch: {},
   data() {
     return {
       message: 'Hello Vue !',

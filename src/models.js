@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 const fs = require('fs');
 const _ = require('lodash');
 const d = require('debug');
@@ -5,7 +7,9 @@ const path = require('path');
 
 const debug = d('axel:models');
 const { DataTypes } = require('sequelize');
+const axel = require('./axel.js');
 
+const hooksCache = {};
 const loadSchemaModel = (filePath) => {
   debug('Loading schema model', filePath);
   /* eslint-disable */
@@ -18,6 +22,7 @@ const loadSchemaModel = (filePath) => {
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);
   }
+  loadHook(model, filePath);
   debug('Loaded schema model => ', model.identity);
   axel.models[model.identity] = model;
   return axel.models[model.identity];
@@ -46,6 +51,17 @@ const loadSqlAttributes = (model) => {
     }
   });
 };
+const loadHook = (model, filePath) => {
+  if (model.hooks) {
+    return;
+  }
+  if (fs.existsSync(`${path.resolve(filePath.replace('/schema', '/hooks'))}`)) {
+    model.hooks = require(`${path.resolve(filePath.replace('/schema', '/hooks'))}`);
+  } else if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
+    model.hooks = require(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`);
+  }
+  hooksCache[model.identity] = model.hooks;
+};
 
 const loadSqlModel = (filePath, sequelize) => {
   if (sequelize) {
@@ -56,7 +72,10 @@ const loadSqlModel = (filePath, sequelize) => {
     try {
       /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
-      if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
+      if (hooksCache[model.identity]) {
+        hooks = hooksCache[model.identity];
+      }
+      else if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
         hooks = require(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`);
       }
 
@@ -69,17 +88,21 @@ const loadSqlModel = (filePath, sequelize) => {
     /* eslint-enable */
     const tableName = model.entity && model.entity.options && model.entity.options && model.entity.options.tableName;
     axel.logger.verbose('Loading identity', model);
+
     // loading hooks
     if (hooks && Object.keys(hooks).length) {
-      axel.logger.verbose('Loading hooks for', model);
-      if (_.has(model, 'entity.options.hooks')) {
-        model.entity.options.hooks = {
-          ...hooks,
-          ...model.entity.options.hooks
-        };
-      } else {
-        model.entity.options.hooks = hooks;
+      debug('Loading hooks for', model.identity);
+      model.hooks = hooks;
+      if (!_.has(model, 'entity.options.hooks')) {
+        model.entity.options.hooks = {};
       }
+      Object.keys(model.entity.options.hooks).forEach((hookName) => {
+        if (!hookName.includes('Api') && !model.entity.options.hooks[hookName]) {
+          // do not send api hooks to sequelize
+          model.entity.options.hooks[hookName] = model.hooks[hookName];
+        }
+      });
+      model.hooks = hooks;
     }
     debug('Loading entity', model.identity);
     if (!model.identity) {
@@ -193,17 +216,26 @@ const loadSqlModels = () => {
     } catch (err) {
       console.error(err);
     }
-    debug('bye bye');
-
-    const modelsLocation = `${process.cwd()}/src/api/models/sequelize`;
+    const modelsLocation = axel.config.sqldb.modelsLocation || `${process.cwd()}/src/api/models/sequelize`;
     debug('[ORM] sql models location', modelsLocation);
     if (!axel.models) {
       axel.models = {};
     }
-    let files = fs.readdirSync(modelsLocation);
-    files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
+    let files;
+    try {
+      files = fs.readdirSync(modelsLocation);
+      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
+    }
+    catch (err) {
+      console.error('[ORM] sequelize models location not found\n', err.message);
+      process.exit(-1);
+    }
+
     axel.logger.info('[ORM] found %s sequelize models files', files.length);
     debug('MODELS :: found %s sequelize models files', files.length);
+    if (!files.length) {
+      axel.logger.warn('[ORM] no sequelize models found in the provided location');
+    }
     const loadedModels = files.map((file) => {
       const filePath = `${modelsLocation}/${file}`;
       const model = loadSqlModel(filePath, sequelize);

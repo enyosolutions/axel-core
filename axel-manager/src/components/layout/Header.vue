@@ -420,6 +420,7 @@ export default {
     'socket.connected': function (newVal, oldVal) {
       if (!newVal && oldVal !== newVal) {
         this.blockingModal = Swal2.fire(DisconnectedConfig);
+        window.blockingModal = this.blockingModal;
       } else if (this.blockingModal) {
         this.blockingModal.close();
       }

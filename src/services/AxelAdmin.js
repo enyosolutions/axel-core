@@ -17,7 +17,7 @@ class AxelAdmin {
   mergeData(...args) {
     return _.mergeWith(_.cloneDeep(args[0]), args[1], (a, b) => {
       if (_.isArray(a) && b !== null && b !== undefined) {
-        return a;
+        return b;
       }
 
       if (b === null && a) {
@@ -141,7 +141,7 @@ class AxelAdmin {
 
 
   insertSingleModelIntoDb(model) {
-    axel.logger.debug('[AxelAdmin] insertModelsIntoDb');
+    axel.logger.debug('[AxelAdmin] insertSingleModelIntoDb');
     if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
       return Promise.resolve();
     }
@@ -184,7 +184,7 @@ class AxelAdmin {
       id: model.id,
       identity: model.identity,
       primaryKeyField: model.primaryKeyField || undefined,
-      primaryKey: model.primaryKeyField || model.primaryKey || undefined,
+      primaryKey: model.primaryKeyField || model.primaryKey || undefined, // @deprecated
       displayField: model.displayField || null,
       name: _.get(model, 'admin.name') || model.name || model.identity,
       namePlural: _.get(model, 'admin.namePlural', ''),
@@ -287,6 +287,7 @@ class AxelAdmin {
             const result = SchemaValidator.validate(merged, 'axelModelConfig', { strict: true });
             if (!result.isValid) {
               console.warn('[AXEL CORE][SCHEMA VALIDATION ERROR]', modelId, result, merged);
+              return;
             }
           } catch (err) {
             throw new Error('error_wrong_json_format_for_model_definition');
@@ -304,20 +305,21 @@ class AxelAdmin {
   }
 
   serveModels(req, res) {
-    let promise = Promise.resolve([]);
-    if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
-      promise = Promise.all([
-        axel.models.axelModelConfig.em.findAll({
-          logging: false
-        }),
-        axel.models.axelModelFieldConfig.em
-          .findAll({ logging: false })
-      ]);
-    } else {
-      console.warn('[AXEL admin] ⚠️ editable models is not enabled');
-    }
+    const promise = Promise.resolve([]);
+    // for now i don't need this feature
+    // if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
+    //   promise = Promise.all([
+    //     axel.models.axelModelConfig.em.findAll({
+    //       logging: false
+    //     }),
+    //     axel.models.axelModelFieldConfig.em
+    //       .findAll({ logging: false })
+    //   ]);
+    // } else {
+    //   console.warn('[AXEL admin] ⚠️ editable models is not enabled');
+    // }
     return promise
-      .then(this.loadDbModelsInMemory)
+      .then(this.loadDbModelsInMemory) // noop
       .then(mappedSavedConfig => this.mergeDbModelsWithInMemory(mappedSavedConfig))
       .then((models) => {
         if (res) {

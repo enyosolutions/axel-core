@@ -216,6 +216,7 @@ const loadEndpointMiddleware = (endpoint) => {
     throw new Error('endpoint_not_provided');
   }
 
+
   return function modelMiddleware(req, res, next) {
     if (!axel.config.framework.automaticApi) {
       res.status(403).json({ message: 'automatic_api_disabled' });
@@ -264,6 +265,7 @@ function injectAxelAdminConfig() {
 
     axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
     axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
+    axel.config.routes['POST /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.post';
     axel.config.routes['PUT /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.put';
     axel.config.routes['DELETE /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.delete';
   }

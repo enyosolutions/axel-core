@@ -4,11 +4,14 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
+const _ = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 const axel = require('../axel.js');
+const { saveModel } = require('../services/ws/utils');
+
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -23,6 +26,36 @@ const entity = 'axelModelFieldConfig';
 const primaryKey = axel.models[entity] && axel.models[entity].primaryKeyField
   ? axel.models[entity].primaryKeyField
   : axel.config.framework.primaryKey;
+
+const schemaKeywords = [
+  '$id',
+  '$ref',
+  'column',
+  'contains',
+  'default',
+  'description',
+  'enum',
+  'examples',
+  'field',
+  'foreignKey',
+  'format',
+  'items',
+  'maxItems',
+  'maxLength',
+  'minItems',
+  'minLength',
+  'nullable',
+  'pattern',
+  'properties',
+  'relation',
+  'relationKey',
+  'relationLabel',
+  'relationUrl',
+  'required',
+  'title',
+  'type',
+  'uniqueItems',
+];
 
 class AxelModelFieldConfigController {
   list(req, resp) {
@@ -123,10 +156,10 @@ class AxelModelFieldConfigController {
           code: 404,
           errors: [
             {
-              message: err.message || 'not_found'
+              message: err.message || 'item_not_found'
             }
           ],
-          message: err.message || 'not_found'
+          message: err.message || 'item_not_found'
         });
       })
       .then((item) => {
@@ -138,6 +171,7 @@ class AxelModelFieldConfigController {
             name: item.name,
             ...item.config
           };
+
           return resp.status(200).json({
             body: item
           });
@@ -146,10 +180,10 @@ class AxelModelFieldConfigController {
           code: 404,
           errors: [
             {
-              message: 'not_found'
+              message: 'item_not_found'
             }
           ],
-          message: 'not_found'
+          message: 'item_not_found'
         });
       })
       .catch((err) => {
@@ -166,16 +200,27 @@ class AxelModelFieldConfigController {
       return;
     }
 
+    const body = _.pick(data, schemaKeywords);
+
     repository
-      .create(data)
-      .then(result => resp.status(200).json({
-        body: {
-          id: result.id,
-          parentIdentity: result.parentIdentity,
-          name: result.name,
-          ...result.config
-        }
-      }))
+      .create({
+        parentIdentity: data.parentIdentity,
+        name: data.name,
+        config: body
+      })
+      .then((result) => {
+        axel.models[result.parentIdentity].schema.properties[result.name] = result.config;
+        saveModel(axel.models[result.parentIdentity]);
+
+        resp.status(200).json({
+          body: {
+            id: result.id,
+            parentIdentity: result.parentIdentity,
+            name: result.name,
+            ...result.config
+          }
+        });
+      })
       .catch((err) => {
         axel.logger.warn(err);
         if (err && err.name === 'SequelizeValidationError') {
@@ -191,13 +236,13 @@ class AxelModelFieldConfigController {
   }
 
   /**
-   * [put description]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
+     * [put description]
+     * [description]
+     * @method
+     * @param  {[type]} req  [description]
+     * @param  {[type]} resp [description]
+     * @return {[type]}      [description]
+     */
   put(req, resp) {
     const id = req.params.id;
     const data = req.body;
@@ -207,33 +252,34 @@ class AxelModelFieldConfigController {
       resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
       return;
     }
-    if (axel.config.framework && axel.config.framework.validateDataWithJsonSchema) {
-      try {
-        const result = SchemaValidator.validate(data, entity);
-        if (!result.isValid) {
-          console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', entity, result, data);
-          resp.status(400).json({
-            message: 'data_validation_error',
-            errors: result.formatedErrors
-          });
-          return;
-        }
-      } catch (err) {
-        throw new Error('error_wrong_json_format_for_model_definition');
+    try {
+      const result = SchemaValidator.validate(data, entity);
+      if (!result.isValid) {
+        console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', entity, result, data);
+        resp.status(400).json({
+          message: 'data_validation_error',
+          errors: result.formatedErrors
+        });
+        return;
       }
+    } catch (err) {
+      console.warn('[SCHEMA VALIDATION ERROR]', err);
+      throw new Error('error_wrong_json_format_for_model');
     }
-
+    const body = _.pick(data, schemaKeywords);
     repository
       .findByPk(id)
       .then((result) => {
         if (result) {
-          return repository.update({ config: data }, {
+          return repository.update({
+            config: body
+          }, {
             where: {
               [primaryKey]: id
             }
           });
         }
-        return repository.create({ ...data, config: data }, {
+        return repository.create({ ...data, config: body }, {
           where: {
             [primaryKey]: id
           }
@@ -242,6 +288,8 @@ class AxelModelFieldConfigController {
       .then(() => repository.findByPk(id))
       .then((result) => {
         if (result) {
+          axel.models[result.parentIdentity].schema.properties[result.name] = result.config;
+          saveModel(axel.models[result.parentIdentity]);
           return resp.status(200).json({
             body: {
               id: result.id,
@@ -252,8 +300,8 @@ class AxelModelFieldConfigController {
           });
         }
         return resp.status(404).json({
-          errors: ['not_found'],
-          message: 'not_found'
+          errors: ['item_not_found'],
+          message: 'item_not_found'
         });
       })
       .catch((err) => {
@@ -271,13 +319,13 @@ class AxelModelFieldConfigController {
   }
 
   /**
-   * [delete Item]
-   * [description]
-   * @method
-   * @param  {[type]} req  [description]
-   * @param  {[type]} resp [description]
-   * @return {[type]}      [description]
-   */
+     * [delete Item]
+     * [description]
+     * @method
+     * @param  {[type]} req  [description]
+     * @param  {[type]} resp [description]
+     * @return {[type]}      [description]
+     */
   delete(req, resp) {
     const id = req.params.id;
 

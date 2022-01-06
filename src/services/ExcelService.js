@@ -1,5 +1,6 @@
 const XLSX = require('xlsx');
 const _ = require('lodash');
+const mkdirp = require('mkdirp');
 const path = require('path');
 
 const ExcelService = {
@@ -46,29 +47,29 @@ const ExcelService = {
     const worksheet = workbook.Sheets[workbook.SheetNames[options.sheet || 0]];
     let json;
     switch (options.parser) {
-        case 'json':
-        default:
+      case 'json':
+      default:
         /* eslint-disable no-case-declarations */
-          json = XLSX.utils.sheet_to_json(worksheet, {
-            header: options.header
-          });
-          return this.formatJson(json, options);
-        case 'html':
-          return XLSX.utils.sheet_to_html(worksheet, {
-            header: options.header
-          });
-        case 'csv':
-          return XLSX.utils.sheet_to_csv(worksheet, {
-            header: options.header
-          });
-        case 'txt':
-          return XLSX.utils.sheet_to_txt(worksheet, {
-            header: options.header
-          });
+        json = XLSX.utils.sheet_to_json(worksheet, {
+          header: options.header
+        });
+        return this.formatJson(json, options);
+      case 'html':
+        return XLSX.utils.sheet_to_html(worksheet, {
+          header: options.header
+        });
+      case 'csv':
+        return XLSX.utils.sheet_to_csv(worksheet, {
+          header: options.header
+        });
+      case 'txt':
+        return XLSX.utils.sheet_to_txt(worksheet, {
+          header: options.header
+        });
     }
   },
 
-  export(data, url, options = {}) {
+  export(data, fileName, options = { targetFolder: undefined }) {
     const defaultOptions = {
       sheet: 0, // default to first sheet
       header: true, // if the excel has a header
@@ -80,20 +81,29 @@ const ExcelService = {
       parser: 'json' // html | json | csv | txt
     };
     options = _.merge(defaultOptions, options);
+    let folder;
+    if (options.targetFolder) {
+      folder = path.resolve(options.targetFolder);
+    } else {
+      folder = path.resolve(process.cwd(), 'public/data');
+    }
+    mkdirp(folder);
+    let filePath = path.resolve(folder, `${fileName}.xlsx`);
 
-    url = path.resolve('assets/data', `${url}.xlsx`);
     try {
       data = this.formatJson(data, options);
       const ws = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, ws, 'Sheet1');
-      XLSX.writeFile(workbook, url);
+      XLSX.writeFile(workbook, filePath);
     } catch (e) {
       console.warn('export error', e);
       return e;
     }
-    url = axel.config.appUrl + url.substr(url.indexOf('assets') + 6);
-    return url;
+    if (filePath.includes('public/data')) {
+      filePath = `${axel.config.appUrl || ''}${filePath.substring(filePath.indexOf('public') + 6)}`;
+    }
+    return filePath;
   }
 };
 

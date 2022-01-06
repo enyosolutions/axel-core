@@ -16,7 +16,7 @@ const Utils = require('../services/Utils.js');
 let s3;
 
 const getStorage = (pathSuffix, filePrefix) => {
-  const destPath = path.join(process.cwd(), 'assets/data', pathSuffix);
+  const destPath = path.join(process.cwd(), pathSuffix || 'assets/data');
   fs.mkdirSync(destPath, { recursive: true });
 
   return multer.diskStorage({
@@ -27,7 +27,7 @@ const getStorage = (pathSuffix, filePrefix) => {
       const fileName = file.originalname;
       const fileNameParts = fileName.split('.');
 
-      cb(null, `${filePrefix}-${Utils.slugify(fileNameParts[0])}.${fileNameParts.pop()}`);
+      cb(null, `${filePrefix ? `${filePrefix}-` : ''}${Utils.slugify(fileNameParts[0])}.${fileNameParts.pop()}`);
     }
   });
 };
@@ -44,7 +44,7 @@ const DocumentManager = {
     const promise = new Promise((resolve, reject) => {
       // don't allow the total upload size to exceed ~10MB
       // @ts-ignore
-      const storage = getStorage(options.path, options.filePrefix);
+      const storage = getStorage(options.path || '', options.filePrefix || 'file');
 
       multer({
         storage,
@@ -55,13 +55,10 @@ const DocumentManager = {
         if (err) {
           return reject(err);
         }
-        const fileName = req.file.originalname;
-        const fileNameParts = fileName.split('.');
-
+        const filePath = req.file.path.replace(process.cwd(), '').replace('/public', '');
+        req.file.publicUrl = `${axel.config.cdnUrl || axel.config.appUrl}${filePath}`;
         resolve(
-          `${axel.config.cdnUrl || axel.config.appUrl}/data/${options.path}/${options.filePrefix}-${Utils.slugify(
-            fileNameParts[0]
-          )}.${fileNameParts.pop()}`
+          `${axel.config.cdnUrl || axel.config.appUrl}${filePath}`
         );
       });
 
@@ -169,7 +166,7 @@ const DocumentManager = {
   deleteFile(imageUrl, resp,
     options = {}) {
     options = _.merge({
-      targetFolder: '/data/workshop/', publicPath: '/public/'
+      targetFolder: '/data/', publicPath: '/public/'
     }, options);
     return new Promise((resolve, reject) => {
       if (!imageUrl) {
@@ -267,13 +264,16 @@ const DocumentManager = {
 
   delete(doc) {
     return new Promise((resolve, reject) => {
-      if (doc.indexOf('assets') !== -1) {
-        doc = doc.substr(doc.indexOf('assets') + 6);
-      }
+      // if (doc.indexOf('assets') !== -1) {
+      //   doc = doc.substr(doc.indexOf('/assets') + 7);
+      // }
+      // if (doc.indexOf('/public') !== -1) {
+      //   doc = doc.substr(doc.indexOf('/public') + 7);
+      // }
       if (doc.indexOf(axel.config.appUrl) !== -1) {
         doc = doc.replace(axel.config.appUrl, '');
       }
-      fs.unlink(`${process.cwd()}/assets/${doc}`, (err) => {
+      fs.unlink(`${process.cwd()}/${doc}`, (err) => {
         if (err) {
           if (err.code && err.code === 'ENOENT') {
             resolve(true);

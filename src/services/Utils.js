@@ -8,6 +8,7 @@ const _ = require('lodash');
 
 const { ExtendedError } = require('./ExtendedError.js');
 const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
+const axel = require('../axel.js');
 
 // declare const Sequelize;
 
@@ -90,14 +91,14 @@ const Utils = {
   sqlFormatForSearchMode(str, mode) {
     mode = mode || axel.config.framework.defaultApiSearchMode;
     switch (mode) {
-        default:
-        case 'exact':
-          return { [Op.eq]: str };
-        case 'full':
-        case 'wildcard':
-          return { [Op.like]: `%${str}%` };
-        case 'start':
-          return { [Op.like]: `${str}%` };
+      default:
+      case 'exact':
+        return { [Op.eq]: str };
+      case 'full':
+      case 'wildcard':
+        return { [Op.like]: `%${str}%` };
+      case 'start':
+        return { [Op.like]: `${str}%` };
     }
   },
 
@@ -218,49 +219,49 @@ const Utils = {
 
   getQueryForFilter(filter, value, searchMode = 'start') {
     switch (filter) {
-        case '$isNull':
-          return { [Op.is]: null };
-        case '$isNotNull':
-          return { [Op.not]: null };
-        case '$isDefined':
-          return {
-            [Op.not]: null,
-            [Op.ne]: ''
-          };
-        case '$isNotDefined':
-          return {
-            [Op.or]: [
-              { [Op.is]: null },
-              { [Op.eq]: '' }
-            ]
-          };
-        case '$startsWith':
-          return { [Op[filter.replace('$', '')]]: `${value}%` };
-        case '$endsWith':
-          return { [Op[filter.replace('$', '')]]: `%${value}` };
-        case '$substring':
-          return { [Op[filter.replace('$', '')]]: `%${value}%` };
-        case '$eq':
-        case '$ne':
-        case '$gt':
-        case '$gte':
-        case '$lt':
-        case '$lte':
-        case '$like':
-        case '$notLike':
-        case '$in':
-        case '$notIn':
-          return { [Op[filter.replace('$', '')]]: value };
-        case '$between':
-        case '$notBetween':
-          return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
-        case '$custom':
-          return value;
-        default:
-          if (searchMode === 'exact') {
-            return this.sqlFormatForSearchMode(value, searchMode);
-          }
+      case '$isNull':
+        return { [Op.is]: null };
+      case '$isNotNull':
+        return { [Op.not]: null };
+      case '$isDefined':
+        return {
+          [Op.not]: null,
+          [Op.ne]: ''
+        };
+      case '$isNotDefined':
+        return {
+          [Op.or]: [
+            { [Op.is]: null },
+            { [Op.eq]: '' }
+          ]
+        };
+      case '$startsWith':
+        return { [Op[filter.replace('$', '')]]: `${value}%` };
+      case '$endsWith':
+        return { [Op[filter.replace('$', '')]]: `%${value}` };
+      case '$substring':
+        return { [Op[filter.replace('$', '')]]: `%${value}%` };
+      case '$eq':
+      case '$ne':
+      case '$gt':
+      case '$gte':
+      case '$lt':
+      case '$lte':
+      case '$like':
+      case '$notLike':
+      case '$in':
+      case '$notIn':
+        return { [Op[filter.replace('$', '')]]: value };
+      case '$between':
+      case '$notBetween':
+        return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
+      case '$custom':
+        return value;
+      default:
+        if (searchMode === 'exact') {
           return this.sqlFormatForSearchMode(value, searchMode);
+        }
+        return this.sqlFormatForSearchMode(value, searchMode);
     }
   },
 
@@ -373,15 +374,12 @@ const Utils = {
     req,
     options = {
       sort: null,
-      primaryKey: '',
       model: null
     }
   ) {
     const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
-    const primaryKey = (options && options.primaryKey)
-      || (options && options.model && options.model.primaryKeyField)
-      || axel.config.framework.primaryKey;
+    const endpoint = req.endpoint || req.params.endpoint;
     let limit;
     if (isListOfValues) {
       limit = axel.config.framework.defaultLovPagination;
@@ -393,7 +391,7 @@ const Utils = {
     limit = _.toNumber(limit);
     const offset = startPage * limit;
     const sortOptions = req.query.sort || options.sort;
-    const order = _.toPairs(sortOptions || { [options.primaryKey || primaryKey]: 'DESC' });
+    const order = sortOptions ? _.toPairs(sortOptions) : [];
     let attributes = req.query.fields;
     if (req.query.excludeFields) {
       attributes = { exclude: ['some_field'] };

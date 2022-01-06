@@ -8,7 +8,7 @@ function developmentErrorHandler(err, req, res, next) {
   }
 
   return res.status(code || 422).json({
-    message,
+    message: `[errorMiddleware] ${message}`,
     code,
     stack: process.env.NODE_ENV === 'development' ? err.stack : '',
     errors,
