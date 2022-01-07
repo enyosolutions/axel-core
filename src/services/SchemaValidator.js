@@ -110,14 +110,14 @@ function normaliseErrorMessages(errors) {
 class SchemaValidator {
   constructor() {
     this.ajv = new Ajv({
-      useDefaults: true,
+      useDefaults: 'empty',
       coerceTypes: true,
       allErrors: true,
       removeAdditional: false,
       allowUnionTypes: true,
     });
     this.ajvStrict = new Ajv({
-      useDefaults: true,
+      useDefaults: 'empty',
       coerceTypes: true,
       allErrors: true,
       removeAdditional: true,

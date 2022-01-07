@@ -98,7 +98,8 @@ module.exports = {
       }, // fade | slide | full
       nestedLayoutMode: {
         type: 'string',
-        enum: ['horizontal-tabs', 'vertical-tabs', 'list'],
+        enum: ['horizontal-tabs', 'vertical-tabs', 'list', null],
+        nullable: true,
         default: 'horizontal-tabs',
         title: 'Layout for nested components',
         description: 'How the awesomeform is layed out in regards to nested components'
@@ -128,12 +129,15 @@ module.exports = {
             default: 'sidebar',
             title: '@Deprecated use schema.detailPageMode directly',
             nullable: true,
-            enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform', null]
+            field: {
+              readonly: true
+            }
           }, // fade | slide | full
           dataPaginationMode: {
             type: 'string',
             default: 'local',
             enum: ['remote', 'local'],
+            nullable: true
           },
           apiUrl: { type: 'string', default: '' },
           createPath: { type: 'string', default: '' },
@@ -189,6 +193,7 @@ module.exports = {
         type: 'string',
         title: 'Row click action',
         default: 'view',
+        nullable: true,
         enum: ['view', 'edit', 'none', 'delete'],
         description: 'The action to execute when the user clicks on a row'
       },
@@ -196,6 +201,7 @@ module.exports = {
         type: 'string',
         title: 'Row double click action',
         default: 'none',
+        nullable: true,
         enum: ['view', 'edit', 'none', 'delete'],
         description: 'The action to execute when the user double clicks on a row'
       },
