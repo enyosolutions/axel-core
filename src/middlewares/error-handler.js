@@ -2,7 +2,7 @@ const ErrorUtils = require('../services/ErrorUtils');
 
 function developmentErrorHandler(err, req, res, next) {
   const { code, message, errors } = ErrorUtils.errorCallback(err);
-  console.warn('[axel][errorMiddleware]', code, message, JSON.stringify(errors));
+  console.warn('[axel][errorMiddleware]', req.path, code, message, JSON.stringify(errors));
   if (res.headersSent) {
     return next(err);
   }

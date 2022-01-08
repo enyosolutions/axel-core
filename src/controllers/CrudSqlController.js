@@ -10,7 +10,7 @@ const path = require('path');
 
 const Utils = require('../services/Utils.js');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
-const { ExtendedError } = require('../services/ExtendedError.js');
+const ExtendedError = require('../services/ExtendedError.js');
 const DocumentManager = require('../services/DocumentManager.js');
 const ExcelService = require('../services/ExcelService.js');
 const SchemaValidator = require('../services/SchemaValidator.js');
@@ -108,7 +108,7 @@ class CrudSqlController {
 
       const repository = Utils.getEntityManager(req, resp);
       if (!repository) {
-        throw ExtendedError({
+        throw new ExtendedError({
           code: 400,
           message: 'error_model_not_found_for_this_url'
         });

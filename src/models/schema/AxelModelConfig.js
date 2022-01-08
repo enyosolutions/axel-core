@@ -94,11 +94,11 @@ module.exports = {
       detailPageMode: {
         type: 'string',
         default: 'sidebar',
-        enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform']
+        enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform', 'bottomform']
       }, // fade | slide | full
       nestedLayoutMode: {
         type: 'string',
-        enum: ['horizontal-tabs', 'vertical-tabs', 'list', null],
+        enum: ['horizontal-tabs', 'vertical-tabs', 'list', 'left-sidebar', 'right-sidebar', null],
         nullable: true,
         default: 'horizontal-tabs',
         title: 'Layout for nested components',

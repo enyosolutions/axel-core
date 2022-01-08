@@ -3,7 +3,7 @@ const _ = require('lodash');
 const debug = require('debug')('axel:schemavalidator');
 const addFormats = require('ajv-formats');
 
-const ExtendedError = ('./ExtendedError');
+const ExtendedError = require('./ExtendedError');
 
 function getGrammaticalSingular(type) {
   switch (type) {

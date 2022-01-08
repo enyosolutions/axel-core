@@ -73,6 +73,20 @@ module.exports = {
           }
         }
       },
+      default: {
+        type: ['string', 'number', 'boolean', 'null', 'array', 'object'],
+        title: 'Default value',
+        nullable: true,
+        description: 'The object that this property is related to',
+        examples: ['user'],
+        additionalProperties: true,
+      },
+      nullable: {
+        type: ['boolean'],
+        title: 'Can we send null as a value ?',
+        description: '',
+        default: false
+      },
       relation: {
         title: 'relation',
         type: ['null', 'string'],
