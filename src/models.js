@@ -156,8 +156,7 @@ const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
     axel.logger.info('[ORM] loading schema models');
-    const modelsLocation = `${process.cwd()}/src/api/models/schema`;
-
+    const modelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
     if (!axel.models) {
       axel.models = {};
     }
@@ -166,7 +165,7 @@ const loadSchemaModels = () => {
         axel.logger.warn(err);
         return reject(err);
       }
-      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
+      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
       axel.logger.info('[ORM] found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
       const promises = files.map((file) => {
@@ -216,7 +215,7 @@ const loadSqlModels = () => {
     } catch (err) {
       console.error(err);
     }
-    const modelsLocation = axel.config.sqldb.modelsLocation || `${process.cwd()}/src/api/models/sequelize`;
+    const modelsLocation = _.get(axel, 'config.framework.modelsLocation', `${process.cwd()}/src/api/models/sequelize`);
     debug('[ORM] sql models location', modelsLocation);
     if (!axel.models) {
       axel.models = {};
@@ -224,7 +223,7 @@ const loadSqlModels = () => {
     let files;
     try {
       files = fs.readdirSync(modelsLocation);
-      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs'));
+      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
     }
     catch (err) {
       console.error('[ORM] sequelize models location not found\n', err.message);

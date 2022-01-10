@@ -48,7 +48,7 @@ export default {
   },
   watch: {
     // eslint-disable-next-line
-    value(change, old) {
+    value(change) {
       if (change !== undefined) {
         if (typeof change === 'string') {
           this.expressionType = 'expression';

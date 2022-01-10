@@ -152,9 +152,12 @@ module.exports = (socket) => {
         }
         try {
 
-          const modelPath = `${axel.config.sqldb.modelsLocation || `${process.cwd()}/src/api/models/sequelize`}/${_.upperFirst(modelName)}.js`;
+          const modelPath = `${_.get(axel, 'config.framework.modelsLocation')
+            || `${process.cwd()}/src/api/models/sequelize`}/${_.upperFirst(modelName)}.js`;
           const model = requireWithoutCache(modelPath);
-          const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(modelName)}.js`;
+
+          const schemaPath = `${_.get(axel, 'config.framework.schemasLocation')
+            || `${process.cwd()}/src/api/models/schema`}/${_.upperFirst(modelName)}.js`;
           const schema = requireWithoutCache(schemaPath);
           fields.forEach((field) => {
             const sequelizeField = cliFieldToSequelizeField(field);

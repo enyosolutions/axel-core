@@ -947,7 +947,6 @@ If you really need to edit this file, this we suggest you rename it to something
               reject('No socket connection.');
           } else {
               that.socket.emit(event, {...options, method}, (err, data) => {
-                console.log(err, data)
                   if (err) {
                       console.error(err);
                       reject(err);

@@ -125,7 +125,6 @@ export default {
       return this.$store.dispatch('getModels');
     },
     goToItem(event) {
-      console.log(event);
       if (this.$route.params.id) {
         this.$router.push('/app/models/' + this.$route.params.id);
       } else if (event.identity) {
