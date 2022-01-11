@@ -1,0 +1,6 @@
+{
+  "execMap": {},
+  "ignore": ["test/**/*.js", "test/**/*.spec.js", ".git", "node_modules", "tmp"],
+  "watch": ["src"],
+  "ext": "js,json,yaml,yml"
+}

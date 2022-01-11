@@ -1,0 +1,126 @@
+{
+  "name": "project",
+  "description": "Express with sensible configuration",
+  "author": "",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "data:load": "cross-env AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true node scripts/loadData.ts",
+    "db:migrate": "sequelize db:migrate",
+    "db:sync": "axel db:sync --alter",
+    "debug": "nodemon --exec 'node --inspect ./index.js | pino-pretty'",
+    "dev": "nodemon index.js",
+    "jest": "cross-env AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true jest -c jest.config.js",
+    "lint": "eslint -c .eslintrc.js src/api src/config",
+    "lint:fix": "eslint -c .eslintrc.js src/api src/config  --fix ",
+    "lint:watch": "nodemon --exec 'npm run lint:fix'",
+    "serve": "node index.js",
+    "start": "node index.js",
+    "test": "cross-env AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true jest -c jest.config.js   && :",
+    "test:clean": "cross-env DATABASE_NAME=--name--_test AXEL_DISABLE_EMAILS=true NO_SEQUELIZE_LOGS=true axel db:sync --alter --force --silent  && :",
+    "test:debug": "npm run jest -- --debug"
+  },
+  "dependencies": {
+    "ajv": "^6.12.2",
+    "async": "^3.2.0",
+    "axel-cli": "^0.5.4",
+    "axel-core": "^0.12.0",
+    "axios": "^0.18.0",
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "ejs": "",
+    "express": "^4.17.1",
+    "express-request-id": "^1.4.1",
+    "flat": "^4.1.0",
+    "googleapis": "^67.0.0",
+    "helmet": "^3.21.2",
+    "i18n": "^0.13.2",
+    "js-base64": "^3.6.0",
+    "js-yaml": "^3.13.1",
+    "json-stringify-safe": "^5.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.15",
+    "mailparser": "^3.0.1",
+    "mime": "^2.4.6",
+    "minimist": "^1.2.5",
+    "moment": "^2.24.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "node-cache": "^5.1.0",
+    "node-cron": "^2.0.3",
+    "nodemailer": "^6.4.6",
+    "nodemailer-mailgun-transport": "^2.0.1",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "pino": "^6.7.0",
+    "request": "^2.88.2",
+    "sequelize": "^6.3.5",
+    "socket.io": "^2.3.0",
+    "striptags": "^3.1.1",
+    "swagger-jsdoc": "^4.0.0",
+    "xlsx": "^0.14.0"
+  },
+  "devDependencies": {
+    "babel-jest": "^26.6.1",
+    "chai": "^4.2.0",
+    "chalk": "^4.1.0",
+    "cross-env": "^7.0.2",
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^6.6.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "faker": "^4.1.0",
+    "glob": "^7.1.6",
+    "husky": "^1.3.1",
+    "jest": "^26.0.1",
+    "jsdom": "^14.0.0",
+    "json-schema-faker": "^0.5.0-rcv.24",
+    "json-schema-faker-types": "^0.1.4",
+    "jsonlint": "^1.6.3",
+    "lint-staged": "^7.2.0",
+    "mysql2": "^2.1.0",
+    "nodemon": "^2.0.7",
+    "npm-run-all": "^4.1.3",
+    "pino-pretty": "^4.3.0",
+    "prettier": "^1.19.1",
+    "prettier-package-json": "^1.6.0",
+    "replace": "^1.1.1",
+    "sequelize-cli": "^6.2.0",
+    "serialize-javascript": "^5.0.1",
+    "supertest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "post-commit": "git update-index --again"
+    }
+  },
+  "lint-staged": {
+    "package.json": [
+      "prettier-package-json --write"
+    ],
+    "*.js": [
+      "yarn lint:fix",
+      "git add"
+    ]
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "front/*",
+      "docs/*",
+      "test/*",
+      "tests/*"
+    ],
+    "delay": "750"
+  }
+}

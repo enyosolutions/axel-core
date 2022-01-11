@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>ServiceDesk Service Swagger</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3.19.0/swagger-ui.css">
+
+
+</head>
+<body>
+<style>
+
+.swagger-ui .topbar {
+    background-color: <%= axel.config.framework && axel.config.framework.primaryColor || 'teal' %>;
+}
+
+.swagger-ui .topbar .download-url-wrapper .download-url-button {
+background: <%= axel.config.framework && axel.config.framework.secondaryColor || 'lightblue' %>;
+}
+
+.swagger-ui .topbar .download-url-wrapper input[type=text] {
+    border-color: <%= axel.config.framework && axel.config.framework.secondaryColor || 'lightblue' %>;
+}
+</style>
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist@3.25.3/swagger-ui-standalone-preset.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@3.25.3/swagger-ui-bundle.js"></script>
+
+<script>
+    window.onload = function() {
+        // Build a system
+        const ui = SwaggerUIBundle({
+            url: "/api/swagger.json",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+        })
+        window.ui = ui
+    }
+
+</script>
+</body>
+</html>

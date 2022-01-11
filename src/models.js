@@ -22,7 +22,7 @@ const loadSchemaModel = (filePath) => {
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);
   }
-  loadHook(model, filePath);
+  loadHook(model);
   debug('Loaded schema model => ', model.identity);
   axel.models[model.identity] = model;
   return axel.models[model.identity];
@@ -51,16 +51,19 @@ const loadSqlAttributes = (model) => {
     }
   });
 };
-const loadHook = (model, filePath) => {
+const loadHook = (model) => {
   if (model.hooks) {
     return;
   }
-  if (fs.existsSync(`${path.resolve(filePath.replace('/schema', '/hooks'))}`)) {
-    model.hooks = require(`${path.resolve(filePath.replace('/schema', '/hooks'))}`);
-  } else if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
-    model.hooks = require(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`);
+  const filePath = path.resolve(_.get(axel, 'config.framework.hooksLocation') || `${process.cwd()}/src/api/models/hooks`, `${model.identity}.js`);
+  if (fs.existsSync(filePath)) {
+    model.hooks = require(filePath);
+  }
+  else {
+    model.hooks = {};
   }
   hooksCache[model.identity] = model.hooks;
+  return hooksCache[model.identity];
 };
 
 const loadSqlModel = (filePath, sequelize) => {
@@ -72,12 +75,7 @@ const loadSqlModel = (filePath, sequelize) => {
     try {
       /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
-      if (hooksCache[model.identity]) {
-        hooks = hooksCache[model.identity];
-      }
-      else if (fs.existsSync(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`)) {
-        hooks = require(`${path.resolve(filePath.replace('/sequelize', '/hooks'))}`);
-      }
+      hooks = loadHook(model);
 
     } catch (err) {
       console.warn('[ORM][WARN] ', filePath, err);

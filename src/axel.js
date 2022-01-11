@@ -3,7 +3,6 @@
 */
 
 const ejs = require('ejs');
-const { readdirSync } = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const d = require('debug');
@@ -14,7 +13,7 @@ const debug = d('axel:config');
 
 function loadConfig() {
   const dir = `${process.cwd()}/src/config/`;
-  const files = readdirSync(path.resolve(dir));
+  const files = fs.readdirSync(path.resolve(dir));
   const fileToMerge = files
     .filter(
       file => (
@@ -38,11 +37,16 @@ function loadConfig() {
     debug('merge', e);
     config = _.merge(config, data || data);
   });
+  debug(config)
   return config;
 }
 
+if (global.axel) {
+  throw new Error('axel is already defined globally');
+}
 const axel = {
   port: 3333,
+  app: null, /** express app object */
   config: loadConfig(),
   models: {},
   controllers: {},
@@ -51,8 +55,9 @@ const axel = {
   policies: {},
   logger: l,
   log: l,
+  plugins: {},
   rootPath: path.resolve(process.cwd()),
-  init: async () => {
+  init() {
     debug('Init started');
     if (axel.initCompleted && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
@@ -60,12 +65,12 @@ const axel = {
     if (axel.initPromise) {
       return axel.initPromise;
     }
-    axel.initPromise = Promise.resolve().then((config) => {
+    axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
       if (config) {
         axel.config = config;
       }
 
-      debug('Init completed');
+      debug('Init completed', config);
       axel.initCompleted = true;
       return config;
     });
@@ -74,6 +79,13 @@ const axel = {
   // ejs.renderFile(
   renderView: (relPath, data, callback) => new Promise((resolve, reject) => {
     try {
+      if (!axel.app) {
+        reject(new Error('axel.app is not defined'));
+        if (callback) {
+          callback(new Error('axel.app is not defined'));
+        }
+        return;
+      }
       axel.app.render(relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`, {
         ...data,
         // eslint-disable-next-line
@@ -83,14 +95,21 @@ const axel = {
       }, (err, html) => {
         if (err) {
           reject(err);
-          callback(err);
+          if (callback) {
+            callback(err);
+          }
           return;
         }
         resolve(html);
-        callback(null, html);
+        if (callback) {
+          callback(null, html);
+        }
+
       });
     } catch (err) {
-      callback(err);
+      if (callback) {
+        callback(err);
+      }
       reject(err);
     }
   })

@@ -17,7 +17,8 @@ const exit = process.exit;
 const root = path.normalize(process.cwd());
 
 class Server {
-  constructor() {
+  constructor(axel) {
+    this.axel = axel || global.axel;
     this.modelsFn = null;
     this.router = null;
     this.beforeFn = null;

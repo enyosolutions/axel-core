@@ -50,16 +50,11 @@ module.exports = {
   // forceCoverageMatch: [],
 
   // A path to a module which exports an async function that is triggered once before all test suites
-  // globalSetup: './test/setup.js',
-
-  // A path to a module which exports an async function that is triggered once after all test suites
-  // globalTeardown: './test/tearDown.js',
-
-
   globalSetup: './test/setup.js',
 
   // A path to a module which exports an async function that is triggered once after all test suites
   globalTeardown: './test/tearDown.js',
+
   // A set of global variables that need to be available in all test environments
   // globals: {},
 
@@ -96,6 +91,7 @@ module.exports = {
 
   // A preset that is used as a base for Jest's configuration
   // preset: 'ts-jest',
+
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -146,9 +142,9 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    '**/__tests__/**/*.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[tj]s?(x)',
-    '**/?(*.)+(spec|test).js'
+    'src/**/__tests__/**/*.[jt]s?(x)',
+    'src/**/?(*.)+(spec|test).[tj]s?(x)',
+    'src/**/?(*.)+(spec|test).js'
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
@@ -175,10 +171,9 @@ module.exports = {
   // transform: undefined,
   transform: {
     '\\.[jt]sx?$': 'babel-jest',
-    '^.+\\.mjs$': 'babel-jest',
-    '^.+\\.js$': 'babel-jest'
+    '^.+\\.mjs$': 'babel-jest'
     // '^.+\\.ts?$': 'ts-jest',
-  }
+  },
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
   //   "/node_modules/"
@@ -195,4 +190,4 @@ module.exports = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
-}
+};
