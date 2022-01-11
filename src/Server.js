@@ -7,6 +7,7 @@ const os = require('os');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const debug = require('debug')('axel:server');
+const axel = require('./axel.js');
 const l = require('./services/logger.js');
 const errorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
@@ -17,8 +18,7 @@ const exit = process.exit;
 const root = path.normalize(process.cwd());
 
 class Server {
-  constructor(axel) {
-    this.axel = axel || global.axel;
+  constructor() {
     this.modelsFn = null;
     this.router = null;
     this.beforeFn = null;
