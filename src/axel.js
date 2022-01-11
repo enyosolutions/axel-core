@@ -37,7 +37,7 @@ function loadConfig() {
     debug('merge', e);
     config = _.merge(config, data || data);
   });
-  debug(config)
+  debug(config);
   return config;
 }
 
@@ -79,6 +79,13 @@ const axel = {
   // ejs.renderFile(
   renderView: (relPath, data, callback) => new Promise((resolve, reject) => {
     try {
+      if (!relPath) {
+        reject(new Error('template file is required'));
+        if (callback) {
+          callback(new Error('template file is required'));
+        }
+        return;
+      }
       if (!axel.app) {
         reject(new Error('axel.app is not defined'));
         if (callback) {
@@ -104,7 +111,6 @@ const axel = {
         if (callback) {
           callback(null, html);
         }
-
       });
     } catch (err) {
       if (callback) {

@@ -1,5 +1,4 @@
-/* eslint-disable global-require */
-/* eslint-disable import/no-dynamic-require */
+/* eslint-disable global-require, import/no-dynamic-require */
 const fs = require('fs');
 const _ = require('lodash');
 const d = require('debug');
@@ -10,6 +9,21 @@ const { DataTypes } = require('sequelize');
 const axel = require('./axel.js');
 
 const hooksCache = {};
+
+const loadHook = (model) => {
+  if (model.hooks) {
+    return;
+  }
+  const filePath = path.resolve(_.get(axel, 'config.framework.hooksLocation') || `${process.cwd()}/src/api/models/hooks`, `${model.identity}.js`);
+  if (fs.existsSync(filePath)) {
+    model.hooks = require(filePath);
+  } else {
+    model.hooks = {};
+  }
+  hooksCache[model.identity] = model.hooks;
+  return hooksCache[model.identity];
+};
+
 const loadSchemaModel = (filePath) => {
   debug('Loading schema model', filePath);
   /* eslint-disable */
@@ -51,20 +65,7 @@ const loadSqlAttributes = (model) => {
     }
   });
 };
-const loadHook = (model) => {
-  if (model.hooks) {
-    return;
-  }
-  const filePath = path.resolve(_.get(axel, 'config.framework.hooksLocation') || `${process.cwd()}/src/api/models/hooks`, `${model.identity}.js`);
-  if (fs.existsSync(filePath)) {
-    model.hooks = require(filePath);
-  }
-  else {
-    model.hooks = {};
-  }
-  hooksCache[model.identity] = model.hooks;
-  return hooksCache[model.identity];
-};
+
 
 const loadSqlModel = (filePath, sequelize) => {
   if (sequelize) {
@@ -222,8 +223,7 @@ const loadSqlModels = () => {
     try {
       files = fs.readdirSync(modelsLocation);
       files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
-    }
-    catch (err) {
+    } catch (err) {
       console.error('[ORM] sequelize models location not found\n', err.message);
       process.exit(-1);
     }

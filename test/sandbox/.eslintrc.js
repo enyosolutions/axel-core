@@ -1,13 +1,15 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
+    jest: true
   },
   extends: [
     'eslint:recommended',
     'plugin:node/recommended',
     'airbnb-base',
-    //    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+    //    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier.
+    // This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
   ],
   plugins: ['promise'],
   globals: {

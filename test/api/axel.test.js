@@ -1,11 +1,12 @@
+/* eslint-disable */
 // const model = require('../../src/api/models/schema/user');
-
 
 
 // @ts-ignore
 // const testConfig = require(`${axel.rootPath}/tmp/testConfig.json`);
 const path = require('path');
 const process = require('process');
+const runtime = require('regenerator-runtime/runtime');
 
 process.cwd = () => path.resolve(__dirname, '../sandbox');
 
@@ -27,27 +28,27 @@ describe('axel.js :: ', () => {
 });
 
 
-describe("global.Axel", () => {
-
-  it("should breaks on pre existing global.axel", () => {
+describe('global.Axel', () => {
+  it('should breaks on pre existing global.axel', () => {
     try {
-      const sandboxApp = require('../sandbox');
+      global.axel = 'pre existing';
+      const axel = require('../../src/axel');
     } catch (error) {
       expect(error).toBeDefined();
       expect(error.message).toBe('axel.app is not defined');
     }
-  })
-})
+  });
+});
 
 
-describe("axel.renderView", () => {
-  test("renderview", async () => {
+describe('axel.renderView', () => {
+  test('renderview', async () => {
     try {
       const axel = require('../../src/axel');
-      await axel.renderView('home', {})
+      await axel.renderView('', {});
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toBe('axel.app is not defined');
+      expect(error.message).toBe('template file is required');
     }
-  })
-})
+  });
+});
