@@ -19,20 +19,33 @@ const debug = d('axel:router');
  */
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
-function wrapRoute(fn) {
+function wrapRoute(fn, targetConfig) {
+  console.log('wrapRoute', fn, targetConfig);
   if (Array.isArray(fn)) {
     const lastMiddleware = fn[fn.length - 1];
     fn[fn.length - 1] = wrapRoute(lastMiddleware);
     return fn;
   }
   return (req, res, next) => {
+    req.routeConfig = targetConfig;
     const p = fn(req, res, next);
-    if (p && p.catch) {
-      // eslint-disable-next-line
-      p.catch(next);
+    if (p && p.then && p.catch) {
+      p.then((result) => {
+        if (!res.headersSent) {
+          if (!res.get('Content-Type') || res.get('Content-Type') === 'application/json') {
+            res.json(result);
+          } else {
+            res.send(result);
+          }
+        }
+        return result;
+      })
+        .catch(next);
     }
+    return p;
   };
 }
+
 
 // Load policies from the policy files
 function loadControllerPolicies(target, policies) {
@@ -150,18 +163,16 @@ function connectRoute(app, source, _target) {
     return Promise.resolve();
   }
   if (target && target.use && typeof target.use === 'function') {
-    app.use(source, routePolicies, wrapRoute(target.use));
+    app.use(source, routePolicies, wrapRoute(target.use, target));
     return Promise.resolve(app);
   }
   if (target.view) {
     app[verb](
       route,
       routePolicies,
-      wrapRoute((req, res) => {
-        res.render(target.view, {
-          axel,
-        });
-      })
+      wrapRoute((req, res) => res.render(target.view, {
+        axel,
+      }), target)
     );
     return Promise.resolve();
   }
@@ -182,7 +193,7 @@ function connectRoute(app, source, _target) {
       axel.controllers[target.controller] = c;
       if (c[target.action]) {
         try {
-          app[verb](route, routePolicies, c[target.action]);
+          app[verb](route, routePolicies, wrapRoute(c[target.action], target));
         } catch (e) {
           console.error('[ROUTING]', target.controller, target.action, e.message);
         }

@@ -37,7 +37,6 @@ function loadConfig() {
     debug('merge', e);
     config = _.merge(config, data || data);
   });
-  debug(config);
   return config;
 }
 
@@ -70,7 +69,7 @@ const axel = {
         axel.config = config;
       }
 
-      debug('Init completed', config);
+      debug('Config Init completed');
       axel.initCompleted = true;
       return config;
     });
