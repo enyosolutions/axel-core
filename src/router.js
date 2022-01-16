@@ -175,7 +175,6 @@ function connectRoute(app, source, _target) {
   policies = loadControllerPolicies(target, policies);
   policies = loadDefaultSecurityPolicIES(target, policies);
   policies = loadRoutePolicies(target, policies);
-  console.log('policies =>', policies);
 
   const routePolicies = transformStringPolicies(target, policies);
 
