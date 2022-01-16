@@ -8,19 +8,22 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const debug = require('debug')('axel:server');
 const axel = require('./axel.js');
+const defaultRouter = require('./router.js').router;
+const defaultModelsLoader = require('./models.js').modelsLoader;
+
 const l = require('./services/logger.js');
 const errorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
 
-console.time('STARTUP TIME');
+console.time('[axel] STARTUP TIME');
 const app = express();
 const exit = process.exit;
 const root = path.normalize(process.cwd());
 
 class Server {
   constructor() {
-    this.modelsFn = null;
-    this.router = null;
+    this.modelsFn = defaultModelsLoader;
+    this.router = defaultRouter;
     this.beforeFn = null;
     this.afterFn = null;
     this.app = app;
@@ -122,6 +125,7 @@ class Server {
 
           app.use(errorHandler);
           app.emit('app-ready', { axel });
+          return app;
         })
         .catch((e) => {
           l.error(e);
@@ -150,7 +154,7 @@ class Server {
       l.info(`NODE_ENV: ${process.env.NODE_ENV}`);
       l.info('__________________________________');
       l.info('__________________________________');
-      console.timeEnd('STARTUP TIME');
+      console.timeEnd('[axel] STARTUP TIME');
       app.emit('server-ready', { axel });
     };
     try {
