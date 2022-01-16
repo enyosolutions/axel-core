@@ -19,15 +19,29 @@ const debug = d('axel:router');
  */
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
-function wrapRoute(fn, targetConfig) {
-  console.log('wrapRoute', fn, targetConfig);
+/**
+ *  @param {function} middleware function to be wrapped
+ *  @param {object} route config from route.js
+ *
+ *
+*/
+function injectTargetRouteMiddleware(targetConfig) {
+  return (req, res, next) => {
+    if (targetConfig && !req.routeConfig) {
+      req.routeConfig = targetConfig;
+    }
+    next();
+  };
+}
+
+
+function wrapRoute(fn) {
   if (Array.isArray(fn)) {
     const lastMiddleware = fn[fn.length - 1];
     fn[fn.length - 1] = wrapRoute(lastMiddleware);
     return fn;
   }
   return (req, res, next) => {
-    req.routeConfig = targetConfig;
     const p = fn(req, res, next);
     if (p && p.then && p.catch) {
       p.then((result) => {
@@ -45,7 +59,6 @@ function wrapRoute(fn, targetConfig) {
     return p;
   };
 }
-
 
 // Load policies from the policy files
 function loadControllerPolicies(target, policies) {
@@ -94,27 +107,27 @@ function loadRoutePolicies(target, policies = []) {
 
 
   if (target.policies && !Array.isArray(target.policies)) {
-    console.log('target, policies', target);
     throw new Error(`Policy should be an array (${JSON.stringify(target)})`);
   }
   policies = policies.concat(target.policies || []);
   policies = _.uniq(policies).filter(p => p && (typeof p === 'function' || typeof p === 'string'));
   // turn  string named policies into functions
-  const routePolicies = [];
-  policies.forEach((p) => {
-    if (typeof p === 'function') {
-      routePolicies.push(p);
-    } else if (axel.policies[p]) {
-      routePolicies.push(axel.policies[p]);
-    } else {
-      throw new Error(`[ROUTER] unknown policy [${p}] => Make sure it exists in your policy folder`);
-      //   axel.logger.warn('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
-    }
-  });
-  return routePolicies;
+  return policies;
 }
 
-function loadDefaultSecurityPolicy(target, policies) {
+function transformStringPolicies(target, policies = []) {
+  return policies.map((p) => {
+    if (typeof p === 'function') {
+      return p;
+    } if (axel.policies[p]) {
+      return axel.policies[p];
+    }
+    throw new Error(`[ROUTER] unknown policy [${p}] => Make sure it exists in your policy folder`);
+    //   axel.logger.warn('[ROUTER] unknown policy [', p, '] => Make sure it exists in your policy folder');
+  });
+}
+
+function loadDefaultSecurityPolicIES(target, policies) {
   if (!target) {
     debug('Policy', policies);
     throw new Error('error_missing_policy_target');
@@ -127,8 +140,12 @@ function loadDefaultSecurityPolicy(target, policies) {
       if (!axel.policies[axel.config.security.securityPolicy]) {
         throw new Error(`Error policy [${axel.config.security.securityPolicy}] does not exists in the policy folder`);
       }
-      policies.push(axel.policies[axel.config.security.securityPolicy]);
+      policies.push(axel.config.security.securityPolicy);
     }
+  }
+  // LOADING THE * policy in policies folder
+  if (axel.config.policies['*'] && (_.isString(axel.config.policies['*']) || _.isFunction(axel.config.policies['*']))) {
+    policies.push(axel.config.policies['*']);
   }
   return policies;
 }
@@ -156,19 +173,24 @@ function connectRoute(app, source, _target) {
     route = sourceArray[0];
   }
   policies = loadControllerPolicies(target, policies);
-  policies = loadDefaultSecurityPolicy(target, policies);
-  const routePolicies = loadRoutePolicies(target, policies);
+  policies = loadDefaultSecurityPolicIES(target, policies);
+  policies = loadRoutePolicies(target, policies);
+  console.log('policies =>', policies);
+
+  const routePolicies = transformStringPolicies(target, policies);
+
   if (typeof target === 'function') {
-    app[verb](source, wrapRoute(target));
+    app[verb](source, injectTargetRouteMiddleware({}), wrapRoute(target));
     return Promise.resolve();
   }
   if (target && target.use && typeof target.use === 'function') {
-    app.use(source, routePolicies, wrapRoute(target.use, target));
+    app.use(source, injectTargetRouteMiddleware(target), routePolicies, wrapRoute(target.use));
     return Promise.resolve(app);
   }
   if (target.view) {
     app[verb](
       route,
+      injectTargetRouteMiddleware(target),
       routePolicies,
       wrapRoute((req, res) => res.render(target.view, {
         axel,
@@ -193,7 +215,7 @@ function connectRoute(app, source, _target) {
       axel.controllers[target.controller] = c;
       if (c[target.action]) {
         try {
-          app[verb](route, routePolicies, wrapRoute(c[target.action], target));
+          app[verb](route, injectTargetRouteMiddleware(target), routePolicies, wrapRoute(c[target.action], target));
         } catch (e) {
           console.error('[ROUTING]', target.controller, target.action, e.message);
         }

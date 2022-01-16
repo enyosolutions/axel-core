@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const d = require('debug');
+const axel = require('../axel');
 
 const debug = d('axel:AuthService');
 
@@ -9,7 +10,6 @@ const debug = d('axel:AuthService');
 const {
   VerifyCallback, VerifyErrors, sign, verify: jverify
 } = jwt;
-
 
 const primaryKey = (axel.config.framework && axel.config.framework.primaryKey) || 'id';
 const saltRounds = 10;

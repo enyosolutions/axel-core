@@ -30,7 +30,7 @@ function loadConfig() {
       return -1;
     });
 
-  let config;
+  let config = {};
   fileToMerge.forEach((e) => {
     // eslint-disable-next-line
     const data = require(`${path.resolve(dir, e)}`);
@@ -123,7 +123,7 @@ const axel = {
 global.axel = axel;
 
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = axel.config.node_env || 'production';
+  process.env.NODE_ENV = (axel.config && axel.config.node_env) || 'production';
 }
 axel.init();
 
