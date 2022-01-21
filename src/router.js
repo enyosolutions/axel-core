@@ -45,7 +45,7 @@ function wrapRoute(fn) {
     const p = fn(req, res, next);
     if (p && p.then && p.catch) {
       p.then((result) => {
-        if (!res.headersSent && result) {
+        if (!res.headersSent && result !== undefined) {
           res.set('x-axel-auto-response', 1);
           if (!res.get('Content-Type') || res.get('Content-Type') === 'application/json') {
             res.json(result);

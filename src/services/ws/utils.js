@@ -97,13 +97,15 @@ module.exports.saveModel = (frontModel) => {
     'em',
     'entity',
     'tableName',
-    'repository'
+    'repository',
+    'hooks',
   ].forEach(f => delete modelToSave.admin[f]);
   [
     'em',
     'entity',
     'repository',
     'tableName',
+    'hooks',
     'id',
   ].forEach(f => delete modelToSave[f]);
   serializeSchema(modelName, modelToSave);
