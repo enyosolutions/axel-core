@@ -45,7 +45,8 @@ function wrapRoute(fn) {
     const p = fn(req, res, next);
     if (p && p.then && p.catch) {
       p.then((result) => {
-        if (!res.headersSent) {
+        if (!res.headersSent && result) {
+          res.set('x-axel-auto-response', 1);
           if (!res.get('Content-Type') || res.get('Content-Type') === 'application/json') {
             res.json(result);
           } else {
@@ -144,9 +145,16 @@ function loadDefaultSecurityPolicIES(target, policies) {
     }
   }
   // LOADING THE * policy in policies folder
-  if (axel.config.policies['*'] && (_.isString(axel.config.policies['*']) || _.isFunction(axel.config.policies['*']))) {
-    policies.push(axel.config.policies['*']);
+  if (axel.config.policies['*']) {
+    if (Array.isArray(axel.config.policies['*'])) {
+      policies = policies.concat(axel.config.policies['*']);
+    } else if (_.isString(axel.config.policies['*'])
+      || _.isFunction(axel.config.policies['*'])
+    ) {
+      policies.push(axel.config.policies['*']);
+    }
   }
+
   return policies;
 }
 
@@ -172,8 +180,8 @@ function connectRoute(app, source, _target) {
   } else {
     route = sourceArray[0];
   }
-  policies = loadControllerPolicies(target, policies);
   policies = loadDefaultSecurityPolicIES(target, policies);
+  policies = loadControllerPolicies(target, policies);
   policies = loadRoutePolicies(target, policies);
 
   const routePolicies = transformStringPolicies(target, policies);
