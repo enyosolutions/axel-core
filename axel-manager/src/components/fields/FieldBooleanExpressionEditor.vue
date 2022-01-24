@@ -57,7 +57,7 @@ export default {
         }
       }
     },
-    expressionType(change, old) {
+    expressionType(change) {
       if (change !== undefined) {
         if (change == 'expression') {
           this.value = '{{ currentItem.lastName }}';

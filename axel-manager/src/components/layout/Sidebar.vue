@@ -27,7 +27,7 @@
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
       <a class="nav-link" href="/">
-        <i class="fas fa-fw fa-tachometer-alt"></i>
+        <i class="fa fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a
       >
     </li>
@@ -40,31 +40,16 @@
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-      <a
-        class="nav-link"
-        :class="{ collapsed: !openedSubmenus['api'] }"
-        data-toggle="collapse"
-        aria-expanded="true"
-        aria-controls="collapseTwo"
-        @click="toggleSubmenu('api')"
+      <router-link class="nav-link" to="/app/dashboard">
+        <i class="fa fa-fw fa-cog"></i>
+        Manage db models and api</router-link
       >
-        <i class="fas fa-fw fa-cog"></i>
-        <span>APIs</span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link pointer" @click.prevent="restart()">
+        <i class="fa fa-fw fa-refresh"></i>
+        <span>Restart api</span>
       </a>
-      <div
-        id="collapseTwo"
-        class="collapse"
-        :class="{ show: openedSubmenus['api'] }"
-        aria-labelledby="headingTwo"
-        data-parent="#accordionSidebar"
-      >
-        <div class="bg-white py-2 collapse-inner show rounded">
-          <h6 class="collapse-header">Actions</h6>
-          <router-link class="collapse-item" to="/app/dashboard"
-            >Edit db models and api</router-link
-          >
-        </div>
-      </div>
     </li>
 
     <!-- Divider -->
@@ -85,7 +70,7 @@
           getModels();
         "
       >
-        <i class="fas fa-fw fa-cog"></i>
+        <i class="fa fa-fw fa-cog"></i>
         <span>Admin Models</span>
       </a>
       <div
@@ -149,7 +134,7 @@
     <!-- Nav Item - Tables -->
     <li class="nav-item">
       <a class="nav-link" href="/documentation">
-        <i class="fas fa-fw fa-table"></i>
+        <i class="fa fa-fw fa-table"></i>
         <span>Documentation</span></a
       >
     </li>
@@ -157,7 +142,7 @@
     <!-- Nav Item - Tables -->
     <li class="nav-item">
       <a class="nav-link" href="/console">
-        <i class="fas fa-fw fa-table"></i>
+        <i class="fa fa-fw fa-table"></i>
         <span>Api console</span></a
       >
     </li>
@@ -165,14 +150,14 @@
     <!-- Nav Item - Tables -->
     <li class="nav-item">
       <a class="nav-link" href="/api/swagger.json">
-        <i class="fas fa-fw fa-table"></i>
+        <i class="fa fa-fw fa-table"></i>
         <span>Swagger json</span></a
       >
     </li>
 
     <li class="nav-item">
       <a class="nav-link" href="/api/swagger.yml">
-        <i class="fas fa-fw fa-table"></i>
+        <i class="fa fa-fw fa-table"></i>
         <span>Swagger yml</span></a
       >
     </li>
@@ -352,6 +337,9 @@ export default {
     },
     toggleSubmenu(menu) {
       this.openedSubmenus[menu] = !this.openedSubmenus[menu];
+    },
+    restart() {
+      this.$socket.post('/axel-manager/restart-app', {});
     },
   },
   watch: {

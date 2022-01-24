@@ -2,6 +2,8 @@ const debug = require('debug')('axel:manager');
 const fs = require('fs');
 const serialize = require('serialize-javascript');
 const _ = require('lodash');
+const { schemaModelsFolder, sequelizeModelsFolder } = require('../../config');
+const axel = require('../../axel');
 
 module.exports.catchSignal = (signal, times = 1) => new Promise((resolve, reject) => {
   process.once(signal, () => {
@@ -25,7 +27,7 @@ module.exports.catchSignal = (signal, times = 1) => new Promise((resolve, reject
 
 
 const serializeSchema = (name, schema) => {
-  const schemaPath = `${process.cwd()}/src/api/models/schema/${_.upperFirst(name)}.js`;
+  const schemaPath = `${schemaModelsFolder}/${_.upperFirst(name)}.js`;
 
   fs.writeFileSync(
     schemaPath,
@@ -38,7 +40,7 @@ const serializeSchema = (name, schema) => {
 
 
 module.exports.serializeModel = (name, schema) => {
-  const modelPath = `${process.cwd()}/src/api/models/sequelize/${_.upperFirst(name)}.js`;
+  const modelPath = `${sequelizeModelsFolder}/${_.upperFirst(name)}.js`;
 
   fs.writeFileSync(
     modelPath,
@@ -52,15 +54,13 @@ module.exports.saveModel = (frontModel) => {
     throw new Error('model_not_found');
   }
   if (!frontModel.identity) {
-    console.log('frontModel', frontModel);
-
     throw new Error('model_identity_not_found');
   }
   if (!axel.models[frontModel.identity]) {
     throw new Error(`model_identity_not_found_${frontModel.identity}`);
   }
   const modelName = frontModel.identity;
-  console.log('saving', modelName);
+  axel.logger.log('[wsModels] Saving', modelName);
   debug('Saving', modelName);
   const inMemoryModel = _.cloneDeep({
     ...axel.models[modelName], em: undefined, repository: undefined, entity: undefined, hooks: undefined

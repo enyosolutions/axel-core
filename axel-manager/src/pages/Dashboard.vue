@@ -11,7 +11,7 @@
           resetApiForm();
           modelEditModalMode = 'api';
         "
-        ><i class="fas fa-plus fa-sm text-white-50"></i> New Api</a
+        ><i class="fa fa-plus fa-sm text-white-50"></i> New Api</a
       >
     </div>
 

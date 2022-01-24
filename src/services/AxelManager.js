@@ -52,12 +52,6 @@ class AxelManager {
           case 'GET':
             break;
           case 'POST':
-          // cb(null, { body: axel.models });
-            const { name } = req.body;
-
-            if (!name) {
-              return cb(new Error('missing_param_name'));
-            }
 
             try {
               process.kill(process.pid, 'SIGUSR2');

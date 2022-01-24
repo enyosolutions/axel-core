@@ -263,6 +263,7 @@ module.exports = {
         if (!valid) {
           throw new Error('error_deactivated_user');
         }
+        return null;
       })
       .then(() => res.status(200).json({
         user,

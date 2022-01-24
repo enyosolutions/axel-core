@@ -42,36 +42,36 @@ const MailService = {
 
     // create Nodemailer SES transporter
     switch (axel.config.mail.transport) {
-        case 'aws':
-          const sesTransport = require('nodemailer-ses-transport');
-          transporter = nodemailer.createTransport(
-            sesTransport({
-              accessKeyId: axel.config.awsSES.auth.user,
-              secretAccessKey: axel.config.awsSES.auth.pass,
-              region: axel.config.awsSES.auth.region
-            })
-          );
-          break;
-        case 'sendgrid':
-          const sgTransport = require('nodemailer-sendgrid-transport');
-          transporter = nodemailer.createTransport(sgTransport(axel.config.sendgrid));
-          break;
-        case 'gmail':
-          transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 25,
-            secure: true,
-            auth: {
-              type: 'OAuth2'
+      case 'aws':
+        const sesTransport = require('nodemailer-ses-transport');
+        transporter = nodemailer.createTransport(
+          sesTransport({
+            accessKeyId: axel.config.awsSES.auth.user,
+            secretAccessKey: axel.config.awsSES.auth.pass,
+            region: axel.config.awsSES.auth.region
+          })
+        );
+        break;
+      case 'sendgrid':
+        const sgTransport = require('nodemailer-sendgrid-transport');
+        transporter = nodemailer.createTransport(sgTransport(axel.config.sendgrid));
+        break;
+      case 'gmail':
+        transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 25,
+          secure: true,
+          auth: {
+            type: 'OAuth2'
             // user: options.from || axel.config.mail.from,
             // accessToken: EmailFetcher.auth.accessToken
-            }
-          });
-          break;
-        case 'smtp':
-        default:
-          transporter = nodemailer.createTransport(axel.config.mail.options);
-          break;
+          }
+        });
+        break;
+      case 'smtp':
+      default:
+        transporter = nodemailer.createTransport(axel.config.mail.options);
+        break;
     }
     return transporter;
   },
@@ -91,7 +91,6 @@ const MailService = {
       try {
         transporter.sendMail(mailOptions, (err, info) => {
           if (err) {
-            console.trace('[err] Email sending error => ', err, info);
             // axel.logger.warn('error while sending Email');
             axel.logger.warn('error while sending Email', err);
             axel.logger.warn('***');

@@ -1,4 +1,3 @@
-// const model = require('../../src/api/models/schema/user');
 const ExtendedError = require('../../src/services/ExtendedError');
 
 

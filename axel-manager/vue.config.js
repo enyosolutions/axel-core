@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 
-const API_URL = 'http://localhost:1335';
+const API_URL = 'http://localhost:3001';
 // vue.config.js
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',

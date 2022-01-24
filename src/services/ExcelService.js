@@ -47,25 +47,25 @@ const ExcelService = {
     const worksheet = workbook.Sheets[workbook.SheetNames[options.sheet || 0]];
     let json;
     switch (options.parser) {
-      case 'json':
-      default:
+        case 'json':
+        default:
         /* eslint-disable no-case-declarations */
-        json = XLSX.utils.sheet_to_json(worksheet, {
-          header: options.header
-        });
-        return this.formatJson(json, options);
-      case 'html':
-        return XLSX.utils.sheet_to_html(worksheet, {
-          header: options.header
-        });
-      case 'csv':
-        return XLSX.utils.sheet_to_csv(worksheet, {
-          header: options.header
-        });
-      case 'txt':
-        return XLSX.utils.sheet_to_txt(worksheet, {
-          header: options.header
-        });
+          json = XLSX.utils.sheet_to_json(worksheet, {
+            header: options.header
+          });
+          return this.formatJson(json, options);
+        case 'html':
+          return XLSX.utils.sheet_to_html(worksheet, {
+            header: options.header
+          });
+        case 'csv':
+          return XLSX.utils.sheet_to_csv(worksheet, {
+            header: options.header
+          });
+        case 'txt':
+          return XLSX.utils.sheet_to_txt(worksheet, {
+            header: options.header
+          });
     }
   },
 

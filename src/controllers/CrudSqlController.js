@@ -141,7 +141,7 @@ class CrudSqlController {
         count: limit,
         totalCount: count
       };
-      await execHook(endpoint, 'afterApiFind', result, { request: req });
+      await execHook(endpoint, 'afterApiFind', result, { request: req, response: resp });
 
       resp.status(200).json(result);
     } catch (err) {
@@ -162,7 +162,7 @@ class CrudSqlController {
         where: { [primaryKey]: id },
         raw: false
       };
-      await execHook(endpoint, 'beforeApiFindOne', { ...req, sequelizeQuery });
+      await execHook(endpoint, 'beforeApiFindOne', { request: req, sequelizeQuery });
       const item = await repository
         .findOne(sequelizeQuery);
 
@@ -179,7 +179,7 @@ class CrudSqlController {
       const result = {
         body: item.get()
       };
-      execHook(endpoint, 'afterApiFindOne', result, req);
+      execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
       return resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -200,7 +200,7 @@ class CrudSqlController {
       const result = {};
       result.body = await repository
         .create(data);
-      await execHook(endpoint, 'afterApiCreate', result, { request: req });
+      await execHook(endpoint, 'afterApiCreate', result, { request: req, response: resp });
 
       resp.status(200).json(result);
     } catch (err) {
@@ -245,7 +245,7 @@ class CrudSqlController {
 
       const result = {};
       result.body = await repository.findOne(sequelizeQuery);
-      await execHook(endpoint, 'afterApiUpdate', result, { request: req });
+      await execHook(endpoint, 'afterApiUpdate', result, { request: req, response: resp });
 
       return resp.status(200).json({
         body: result
@@ -279,7 +279,7 @@ class CrudSqlController {
       const result = {};
       result.body = await repository
         .destroy(sequelizeQuery);
-      await execHook(endpoint, 'afterApiDelete', result, { request: req });
+      await execHook(endpoint, 'afterApiDelete', result, { request: req, response: resp });
 
       return resp.status(200).json({
         body: result

@@ -34,7 +34,7 @@
           />
           <div class="input-group-append">
             <button class="btn btn-primary" type="button">
-              <i class="fas fa-search fa-sm"></i>
+              <i class="fa fa-search fa-sm"></i>
             </button>
           </div>
         </div>
@@ -53,7 +53,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="fas fa-search fa-fw"></i>
+            <i class="fa fa-search fa-fw"></i>
           </a>
           <!-- Dropdown - Messages -->
           <div
@@ -71,7 +71,7 @@
                 />
                 <div class="input-group-append">
                   <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search fa-sm"></i>
+                    <i class="fa fa-search fa-sm"></i>
                   </button>
                 </div>
               </div>
@@ -88,7 +88,7 @@
             id="alertsDropdown"
             role="button"
           >
-            <i class="fas fa-bell fa-fw"></i>
+            <i class="fa fa-bell fa-fw"></i>
             <span class="" v-if="!isConnected">Server is not connected</span>
             <span class="" v-if="isConnected">Server is connected</span>
             <!-- Counter - Alerts -->
@@ -106,7 +106,7 @@
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <i class="fas fa-envelope fa-fw"></i>
+            <i class="fa fa-envelope fa-fw"></i>
             <!-- Counter - Messages -->
             <span class="badge badge-danger badge-counter">7</span>
           </a>
@@ -217,15 +217,15 @@
                   aria-labelledby="userDropdown"
                 >
                   <a class="dropdown-item" href="#">
-                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                    <i class="fa fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                     Profile
                   </a>
                   <a class="dropdown-item" href="#">
-                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                    <i class="fa fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                     Settings
                   </a>
                   <a class="dropdown-item" href="#">
-                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                    <i class="fa fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Activity Log
                   </a>
                   <div class="dropdown-divider"></div>
@@ -236,7 +236,7 @@
                     data-target="#logoutModal"
                   >
                     <i
-                      class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"
+                      class="fa fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"
                     ></i>
                     Logout
                   </a>

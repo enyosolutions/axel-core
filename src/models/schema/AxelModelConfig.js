@@ -184,6 +184,9 @@ module.exports = {
           pagination: { type: 'boolean', default: true },
           collapse: { type: 'boolean', default: true },
           formPagination: { type: 'boolean', default: true },
+          addKanbanList: {
+            title: 'Add new list in kanban', description: 'show the button to create a new list in the awesome kanban', type: 'boolean', default: true
+          },
         }
       },
       customInlineActions: { type: 'array' },
@@ -264,7 +267,6 @@ module.exports = {
           'Defines the number of items to get from the api for the table. This prevents overloading the table with too much data'
       },
       nestedModels: {
-
         type: 'array',
         field: {
           type: 'array',
