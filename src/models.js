@@ -14,7 +14,8 @@ const loadHook = (model) => {
   if (model.hooks) {
     return;
   }
-  const filePath = path.resolve(_.get(axel, 'config.framework.hooksLocation') || `${process.cwd()}/src/api/models/hooks`, `${model.identity}.js`);
+  debug('Loading hooks for', model.identity);
+  const filePath = path.resolve(_.get(axel, 'config.framework.hooksLocation') || `${process.cwd()}/src/api/models/hooks`, `${_.upperFirst(model.identity)}.js`);
   if (fs.existsSync(filePath)) {
     model.hooks = require(filePath);
   } else {
