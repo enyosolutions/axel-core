@@ -390,6 +390,19 @@ module.exports = {
                     description:
                       'The type that links to the display',
                   },
+                  prefix: {
+                    type: 'string',
+                    title: 'Prefix',
+                    description: 'Text displayed before the value. example : £',
+                    examples: ['username']
+                  },
+
+                  suffix: {
+                    type: 'string',
+                    title: 'Suffix',
+                    description: 'Text displayed after the value. example : cm | €',
+                    examples: ['username']
+                  },
                 }
               }
             }

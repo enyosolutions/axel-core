@@ -162,6 +162,7 @@ class CrudSqlController {
         where: { [primaryKey]: id },
         raw: false
       };
+      console.log('execHook', 'beforeApiFindOne');
       await execHook(endpoint, 'beforeApiFindOne', { request: req, sequelizeQuery });
       const item = await repository
         .findOne(sequelizeQuery);
@@ -190,7 +191,7 @@ class CrudSqlController {
     const data = req.body;
     const endpoint = req.endpoint || req.params.endpoint;
     try {
-      await execHook(endpoint, 'beforeApiCreate', { request: req, sequelizeQuery: data });
+      await execHook(endpoint, 'beforeApiCreate', { request: req, sequelizeQuery: {} });
       const repository = Utils.getEntityManager(req, resp);
       if (!repository) {
         throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
