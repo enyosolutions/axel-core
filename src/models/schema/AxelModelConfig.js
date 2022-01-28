@@ -229,7 +229,7 @@ module.exports = {
         description: 'Options for list view',
         type: ['object', 'null'],
         default: {},
-
+        additionalProperties: true,
         field: {
           cols: 12
         },
@@ -246,14 +246,24 @@ module.exports = {
         description: 'Options for kanban view',
         type: ['object', 'null'],
         default: {},
+        additionalProperties: true,
         field: {
           type: 'JsonTextarea'
+        },
+        properties: {
+          displayColumnsInCards: {
+            type: 'boolean',
+          },
+          displayOrphansList: {
+            type: 'boolean',
+          },
         }
       },
       tableOptions: {
         title: 'Table Options',
         description: 'Options for table view',
         type: ['object', 'null'],
+        additionalProperties: true,
         default: {},
         field: {
           type: 'JsonTextarea'
