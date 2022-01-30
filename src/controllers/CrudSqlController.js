@@ -242,15 +242,16 @@ class CrudSqlController {
           errors: ['item_not_found']
         });
       }
+      sequelizeQuery.individualHooks = true;
+      sequelizeQuery.raw = false;
       await repository.update(data, sequelizeQuery);
 
       const result = {};
       result.body = await repository.findOne(sequelizeQuery);
+      result.body = result.body.get();
       await execHook(endpoint, 'afterApiUpdate', result, { request: req, response: resp });
 
-      return resp.status(200).json({
-        body: result
-      });
+      return resp.status(200).json(result);
     } catch (err) {
       next(err);
     }
@@ -278,13 +279,13 @@ class CrudSqlController {
 
       await execHook(endpoint, 'beforeApiDelete', { request: req, sequelizeQuery });
       const result = {};
+      sequelizeQuery.individualHooks = true;
+      sequelizeQuery.raw = false;
       result.body = await repository
         .destroy(sequelizeQuery);
       await execHook(endpoint, 'afterApiDelete', result, { request: req, response: resp });
 
-      return resp.status(200).json({
-        body: result
-      });
+      return resp.status(200).json(result);
     } catch (err) {
       next(err);
     }

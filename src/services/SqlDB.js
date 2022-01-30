@@ -14,7 +14,7 @@ async function loadSequelize() {
       options: datastore.options,
       retry: datastore.retry,
       query: datastore.query ? datastore.query : {
-        raw: true
+        raw: false
       },
       pool: {
         max: 10,

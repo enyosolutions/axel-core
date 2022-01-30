@@ -33,18 +33,21 @@ const serializeSchema = (name, schema) => {
     schemaPath,
     `
     /* eslint max-len: "warn" */
-    module.exports = ${serialize({ ...schema, em: undefined, entity: undefined }, { space: 2, unsafe: true })}`,
+    module.exports = ${serialize({
+      ...schema, em: undefined, entity: undefined, hooks: undefined
+    }, { space: 2, unsafe: true })}`,
     { encoding: 'utf8' }
   );
 };
 
 
-module.exports.serializeModel = (name, schema) => {
+module.exports.serializeModel = (name, model) => {
   const modelPath = `${sequelizeModelsFolder}/${_.upperFirst(name)}.js`;
-
   fs.writeFileSync(
     modelPath,
-    `module.exports = ${serialize({ ...schema, em: undefined, entity: undefined }, { space: 2, unsafe: true })}`,
+    `module.exports = ${serialize(_.merge(model, {
+      em: undefined, entity: undefined, hooks: undefined
+    }), { space: 2, unsafe: true })}`,
     { encoding: 'utf8' }
   );
 };
