@@ -205,7 +205,7 @@ class AxelModelFieldConfigController {
     repository
       .create({
         parentIdentity: data.parentIdentity,
-        name: data.name,
+        name: `additionalField__${data.name}`,
         config: body
       })
       .then((result) => {

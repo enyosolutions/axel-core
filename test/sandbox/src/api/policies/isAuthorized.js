@@ -57,7 +57,7 @@ module.exports = function isAuthorized(req, res, next) {
     if (error) {
       axel.logger.verbose('[ISAUTHORIZED]', error.message || error);
       return res.status(401).json({
-        errors: ['error_invalid_token'],
+        errors: [error.message || error],
         message: 'error_invalid_token',
       });
     }

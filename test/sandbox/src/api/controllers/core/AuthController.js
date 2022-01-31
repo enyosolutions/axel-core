@@ -335,7 +335,7 @@ module.exports = {
           }
         }
 
-        token = AuthService.generateFor(_.pick(user, ['id']));
+        token = AuthService.generateToken(_.pick(user, ['id']));
         user.lastConnexionOn = new Date();
 
         const updatedUser = _.cloneDeep(user);
@@ -441,7 +441,7 @@ module.exports = {
           }
 
           // If user created successfuly we return user and token as response
-          token = AuthService.generateFor(_.pick(user, ['id']));
+          token = AuthService.generateToken(_.pick(user, ['id']));
 
           user.lastConnexionOn = new Date();
 
@@ -539,7 +539,7 @@ module.exports = {
           }
 
           // If user created successfuly we return user and token as response
-          token = AuthService.generateFor(user);
+          token = AuthService.generateToken(user);
 
           if (user.activationToken) {
             delete user.activationToken;

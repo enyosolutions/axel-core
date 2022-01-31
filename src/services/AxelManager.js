@@ -48,21 +48,21 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          default:
-          case 'GET':
-            break;
-          case 'POST':
+        default:
+        case 'GET':
+          break;
+        case 'POST':
 
-            try {
-              process.kill(process.pid, 'SIGUSR2');
-              cb(null, {
-                body: 'ok',
-              });
-            } catch (err) {
-              process.kill(process.pid, 'SIGTERM');
-              cb(err);
-            }
-            break;
+          try {
+            process.kill(process.pid, 'SIGUSR2');
+            cb(null, {
+              body: 'ok',
+            });
+          } catch (err) {
+            process.kill(process.pid, 'SIGTERM');
+            cb(err);
+          }
+          break;
       }
     });
 
@@ -73,16 +73,15 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          case 'POST':
-            try {
-              const auth = AuthService.generateToken({ id: 1, firstName: 'ADMIN', roles: ['ADMIN'] }, null, '6h');
-              cb(null, { body: auth });
-            } catch (err) {
-              cb(err.message);
-            }
-            break;
-          default:
-            break;
+        case 'POST':
+          try {
+            AuthService.verify(req.body.token, (err, result) => cb(err, { body: result }));
+          } catch (err) {
+            cb(err.message);
+          }
+          break;
+        default:
+          break;
       }
     });
     /** Get models definition */
@@ -91,15 +90,15 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          case 'GET':
-            try {
-              cb(null, { body: axel.config });
-            } catch (err) {
-              cb(err.message);
-            }
-            break;
-          default:
-            break;
+        case 'GET':
+          try {
+            cb(null, { body: axel.config });
+          } catch (err) {
+            cb(err.message);
+          }
+          break;
+        default:
+          break;
       }
     });
   }

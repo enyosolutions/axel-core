@@ -240,7 +240,7 @@ module.exports = {
           }
         }
 
-        token = AuthService.generateFor(user);
+        token = AuthService.generateToken(user);
         if (!user.logins) {
           user.visits = 0;
           user.logins = 0;

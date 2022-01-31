@@ -9,6 +9,7 @@ module.exports = {
   schema: {
     $id: 'http://enyosolutions.com/schemas/axel-model-field-config.json',
     type: 'object',
+    required: ['parentIdentity', 'name'],
     properties: {
       id: {
         $id: 'id',
@@ -160,11 +161,11 @@ module.exports = {
               'number',
               'list-of-value',
               'list-of-data',
-              'EnyoSelect',
+              'vSelect',
               'dateTime',
               'DateRange',
               'textArea',
-              'vSelect',
+              'JsonTextarea',
               'date',
               'datetime',
               'time',
@@ -172,10 +173,16 @@ module.exports = {
               'FilePicker',
               'FileInput',
               'Base64Upload',
-              'JsonTextarea',
+              'array',
+              'EnyoSelect',
 
-            ]
+            ],
+            field: {
+              type: 'vSelect',
+              fieldOptions: { taggable: true }
+            }
           },
+
           inputType: {
             type: 'string',
             title:
@@ -409,6 +416,7 @@ module.exports = {
           }
         }
       },
+
       column: {
         type: 'object',
         title: 'Column configuration',
@@ -423,7 +431,13 @@ module.exports = {
             description:
               'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
             type: 'string',
-            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url']
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url'],
+            field: {
+              type: 'vSelect',
+              fieldOptions: {
+                taggable: true
+              }
+            },
           },
           hidden: {
             title: 'Hide this column',
@@ -463,7 +477,6 @@ module.exports = {
         }
       }
     },
-    required: ['parentIdentity', 'name']
   },
   admin: {
     routerPath: 'axel-model-field-config',

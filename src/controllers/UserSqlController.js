@@ -129,7 +129,7 @@ module.exports = {
           }
 
           // If user created successfuly we return user and token as response
-          token = AuthService.generateFor(newUser);
+          token = AuthService.generateToken(newUser);
 
           if (axel.config.framework.user.emailConfirmationRequired) {
             newUser.activationToken = Utils.md5(`${Date.now() + Math.random() * 1000}`);
