@@ -38,11 +38,12 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     currentLocale: localStorage.getItem(`${config.appKey}_locale`) || config.defaultLocale,
-    token: null,
+    token: localStorage.getItem(`${config.appKey}_token`),
     models: [],
     primaryColor: localStorage.getItem(`${config.appKey}_primaryColor`),
     secondaryColor: localStorage.getItem(`${config.appKey}_secondaryColor`),
-    appConfig: {}
+    appConfig: {},
+    currentUser: {}
   },
   mutations: {
     models(state, appModels) {
@@ -50,6 +51,16 @@ export default new Vuex.Store({
     },
     auth(state, auth) {
       state.token = auth;
+      localStorage.setItem(`${config.appKey}_token`, auth);
+    },
+    token(state, auth) {
+      state.token = auth;
+      this._vm.$http.defaults.headers.common.Authorization = `Bearer ${auth}`;
+      this._vm.$http.defaults.headers.Authorization = `Bearer ${auth}`;
+      localStorage.setItem(`${config.appKey}_token`, auth);
+    },
+    currentUser(state, currentUser) {
+      state.currentUser = currentUser;
     },
     currentLocale(state, locale) {
       state.locale = locale;
@@ -73,12 +84,12 @@ export default new Vuex.Store({
     changeLocale(context, locale) {
       context.commit('currentLocale', locale);
     },
-    getAuth({ commit }) {
-      const promise = this._vm.$socket.post('/axel-manager/auth');
+    getAuth({ commit, state }) {
+      const promise = this._vm.$socket.post('/axel-manager/auth', { token: state.token });
       return promise
         .then(res => {
           commit('auth', res.body);
-          if (this._vm && this._vm.$http) {
+          if (this._vm && this._vm.$http && res.body) {
             this._vm.$http.defaults.headers.common.Authorization = `Bearer ${res.body}`;
             this._vm.$http.defaults.headers.Authorization = `Bearer ${res.body}`;
           }
@@ -86,6 +97,36 @@ export default new Vuex.Store({
         .catch(err => {
           console.error('getModels', err);
         });
+    },
+
+    refreshUser({ commit, dispatch }) {
+      const q = this._vm.$http.get('/api/auth/user');
+      return q.then(res => {
+        // eslint-disable-next-line
+        const { user, appRoles } = res.data;
+        commit('roles', appRoles);
+        commit('currentUser', user);
+        return user;
+      }).catch(err => {
+        console.warn('[USER STORE] user refresh error', err);
+        this._vm.$awEventBus.$emit('api-network-error');
+
+        if (this._vm.$awNotify) {
+          this._vm.$awNotify({
+            title: err.response ? err.response.data : err,
+            type: 'warning',
+          });
+        }
+        if (err.response) {
+          switch (err.response.status) {
+            case 404:
+            case 401:
+              dispatch('logout');
+              break;
+          }
+        }
+        throw err
+      });
     },
     getModels({ commit }) {
       const promise = this._vm.$socket.get('/axel-manager/admin-models');
@@ -139,7 +180,14 @@ export default new Vuex.Store({
     refreshListOfValues(context) {
       const { dispatch } = context;
       dispatch('getModels');
-      dispatch('member/getItems');
+      return true;
+    },
+    logout(context) {
+      const { commit } = context;
+      commit('token', null)
+      commit('auth', null)
+      commit('currentUser', null)
+      console.log('logout redirect requested')
       return true;
     },
   },

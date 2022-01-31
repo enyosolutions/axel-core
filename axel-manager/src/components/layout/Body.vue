@@ -28,7 +28,7 @@
         <footer class="sticky-footer bg-white">
           <div class="container my-auto">
             <div class="copyright text-center my-auto">
-              <span>Copyright &copy; axel 2020 with SB ADMIN 2</span>
+              <span>Copyright &copy; axel 2022 with SB ADMIN 2</span>
             </div>
           </div>
         </footer>
@@ -79,6 +79,18 @@ export default {
   },
   mounted() {
     this.$store.dispatch('getAuth');
+    this.$store.dispatch('refreshUser').catch((err) => {
+      console.log('[refresh error]', err.response.status);
+
+      if (err.response) {
+        switch (err.response.status) {
+          case 404:
+          case 401:
+            this.$router.push('/login');
+            break;
+        }
+      }
+    });
     this.$store.dispatch('getModels');
     this.$store.dispatch('getConfig');
   },

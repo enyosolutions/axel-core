@@ -1,6 +1,6 @@
 export default {
-  appName: 'Crm Ticketing',
-  appKey: 'crm_ticketing',
+  appName: 'Axel admin dashboard',
+  appKey: 'axel-admin',
   appLogo: '',
   display: {
     primaryColor: '#0077b6',
@@ -13,10 +13,10 @@ export default {
   defaultLocale: 'fr',
   /* eslint-disable */
   apiUrl: process.env.VUE_APP_API_URL || '/',
-  googleAuthClient: process.env.VUE_APP_GOOGLE_AUTH_CLIENT || '735540248134-ggfesuvs015qf6f1fqs79aufslflp29s.apps.googleusercontent.com',
+  googleAuthClient: process.env.VUE_APP_GOOGLE_AUTH_CLIENT,
   buildDate: process.env.BUILDDATE || 'now',
   version: '',
-  defaultTitle: 'Cimple',
+  defaultTitle: 'Axel admin dashboard',
 
   primaryKey: 'id', // || '_id'
   features: {

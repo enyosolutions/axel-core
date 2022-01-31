@@ -2,20 +2,21 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import qs from 'qs';
 
+import store from '@/store/';
 import Dashboard from '@/pages/Dashboard.vue';
 import CrudWrapper from '@/pages/CrudWrapper.vue';
 import ModelEditor from '@/pages/ModelEditor.vue';
 import NotFound from '@/pages/NotFound.vue';
+import Login from '@/pages/Login.vue';
+import Register from '@/pages/Register.vue';
 import Body from '../components/layout/Body.vue';
 
 const authGuard = (to, from, next) => {
-  /*
-    if (store.state.user.token) {
-      return next();
-    }
-    console.warn('Authgard:: Blocked : ', to.path, store.state.user);
-    next('/login');
-    */
+  if (store.state.token) {
+    return next();
+  }
+  console.warn('Authgard:: Blocked : ', to.path, store.state.user);
+  next('/login');
   next();
 };
 
@@ -30,6 +31,8 @@ Vue.use(Router);
 
 const routes = [
   { path: '', redirect: { name: 'Dashboard' } },
+  { path: '/login', component: Login },
+  { path: '/register', component: Register },
   {
     path: '/app',
     component: Body,

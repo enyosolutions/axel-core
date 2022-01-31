@@ -95,7 +95,7 @@
             :key="model.identity"
           >
             <router-link :to="`/app/models/${model.identity}`">{{
-              model.title || model.name
+              startCase(model.identity)
             }}</router-link>
             <!--
             <router-link
@@ -181,6 +181,7 @@ import { mapState } from 'vuex';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Swal2 from 'sweetalert2';
+import { startCase } from 'lodash';
 
 import config from '@/config';
 
@@ -243,6 +244,7 @@ export default {
     },
   },
   methods: {
+    startCase,
     toggleSidebar() {
       if (
         document.querySelector('body').classList.contains('sidebar-toggled')
