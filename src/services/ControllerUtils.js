@@ -3,7 +3,12 @@ const { has, get } = require('lodash');
 module.exports.execHook = async (modelName, hookName, ...rest) => {
   if (has(axel, `models.${modelName}.hooks.${hookName}`)) {
     const func = get(axel, `models.${modelName}.hooks.${hookName}`);
-    return func(...rest);
+    const output = func(...rest);
+    if (output && output.then) {
+      await output;
+      return null;
+    }
+    return Promise.resolve(null);
   }
 };
 module.exports.getPrimaryKey = (endpoint) => {

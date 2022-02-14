@@ -100,7 +100,7 @@ const loadSqlModel = (filePath, sequelize) => {
       if (!_.has(model, 'entity.options.hooks')) {
         model.entity.options.hooks = {};
       }
-      Object.keys(model.entity.options.hooks).forEach((hookName) => {
+      Object.keys(hooks).forEach((hookName) => {
         if (!hookName.includes('Api') && !model.entity.options.hooks[hookName]) {
           // do not send api hooks to sequelize
           model.entity.options.hooks[hookName] = model.hooks[hookName];
@@ -447,7 +447,7 @@ function injectUnifiedFunctions(model) {
 async function modelsLoader(app) {
   await loadSchemaModels();
   await loadSqlModels();
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'development') {
     await findModelsDifferences();
   }
   await unifyEntityManagers();

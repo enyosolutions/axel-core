@@ -162,7 +162,6 @@ class CrudSqlController {
         where: { [primaryKey]: id },
         raw: false
       };
-      console.log('execHook', 'beforeApiFindOne');
       await execHook(endpoint, 'beforeApiFindOne', { request: req, sequelizeQuery });
       const item = await repository
         .findOne(sequelizeQuery);

@@ -51,13 +51,11 @@ export default new Vuex.Store({
     },
     auth(state, auth) {
       state.token = auth;
-      localStorage.setItem(`${config.appKey}_token`, auth);
     },
     token(state, auth) {
       state.token = auth;
       this._vm.$http.defaults.headers.common.Authorization = `Bearer ${auth}`;
       this._vm.$http.defaults.headers.Authorization = `Bearer ${auth}`;
-      localStorage.setItem(`${config.appKey}_token`, auth);
     },
     currentUser(state, currentUser) {
       state.currentUser = currentUser;
