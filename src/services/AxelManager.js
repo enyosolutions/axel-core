@@ -24,8 +24,18 @@ class AxelManager {
   init(app) {
     try {
       debug('Copying manager to the front project', `${process.cwd()}/views/axel-manager.html`);
-      //   fs.copyFileSync(resolve(__dirname, '../views/axel-manager.ejs'), `${process.cwd()}/views/axel-manager.ejs`);
-      fs.copyFileSync(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'), `${process.cwd()}/public/axel-manager.html`);
+      app.get('/',
+        (req, res) => {
+          try {
+            res.sendFile(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'));
+          } catch (e) {
+            console.error(e.message);
+            res.status(500).json({
+              errors: ['not_found'],
+              message: 'not_found',
+            });
+          }
+        });
     } catch (err) {
       console.warn('[AXELMANAGER][WARNING]', err.message);
     }

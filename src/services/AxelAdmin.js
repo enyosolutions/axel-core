@@ -212,7 +212,7 @@ class AxelAdmin {
           'missing definition', nestedModelDefinition.extends);
         return;
       }
-      return this.mergeData(_.cloneDeep(sourceModel), _.cloneDeep(nestedModelDefinition.config));
+      return this.mergeData(_.cloneDeep({ ...sourceModel, nestedModels: undefined }), _.cloneDeep(nestedModelDefinition.config));
     }
     return nestedModelDefinition;
   }

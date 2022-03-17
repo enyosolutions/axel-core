@@ -114,6 +114,16 @@ module.exports = {
         title: 'Enabled listing modes',
         description: 'How the awesomeform is layed out in regards to nested components'
       },
+      postCreateDisplayMode: {
+        title: 'Display mode after creating an item',
+        type: 'string',
+        enum: ['list', 'view', 'edit'],
+      },
+      postEditDisplayMode: {
+        title: 'Display mode after editing an item',
+        type: 'string',
+        enum: ['list', 'view', 'edit']
+      },
       detailPageLayout: {
         ...layoutConfig,
         title: 'layout of the detail page',

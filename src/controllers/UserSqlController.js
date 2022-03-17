@@ -100,7 +100,7 @@ module.exports = {
             errors: ['error_conflict_email']
           });
         }
-
+        user = user.get();
         if (!newUser.roles) {
           newUser.roles = JSON.stringify(['USER']);
         }
@@ -269,7 +269,7 @@ module.exports = {
             errors: ['invalid_token']
           });
         }
-        user = u;
+        user = u.get();
         if (
           !user.passwordResetRequestedOn
           || moment(user.passwordResetRequestedOn)
@@ -405,7 +405,7 @@ module.exports = {
             errors: ['not_found']
           });
         }
-
+        doc = doc.get();
         if (doc.roles && typeof doc.roles === 'string') {
           try {
             doc.roles = JSON.parse(doc.roles);
@@ -467,7 +467,7 @@ module.exports = {
     let user;
     const newUser = req.body;
     let data;
-    const id = req.param('userId');
+    const id = req.params.userId;
     if (axel.mongodb) {
       if (!Utils.checkIsMongoId(id, res)) {
         return false;
@@ -543,7 +543,7 @@ module.exports = {
         if (data) {
           return axel.models.user.em.update(data, {
             where: {
-              [primaryKey]: data[primaryKey]
+              [primaryKey]: id
             }
           });
         }
@@ -562,6 +562,7 @@ module.exports = {
       .then(() => axel.models.user.em.findByPk(parseInt(id)))
       .then((userModel) => {
         delete userModel.encryptedPassword;
+        userModel = userModel.get();
         res.json({
           user: userModel
         });
