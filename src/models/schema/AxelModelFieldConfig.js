@@ -36,15 +36,19 @@ module.exports = {
         }
       },
       title: {
+        title: 'The title of the field',
+        description: ' used in listing, and form labelling',
         type: 'string',
         field: {
           required: true
         }
       },
       type: {
+        title: 'The type of the field',
+        description: 'expect a json schema type',
         type: ['string', 'array'],
         default: 'string',
-        enum: ['string', 'number', 'array', 'object', 'integer', 'boolean'],
+        enum: ['string', 'number', 'array', 'object', 'integer', 'boolean', 'date', 'null', 'any'],
         column: {
         },
         field: {
@@ -59,8 +63,8 @@ module.exports = {
         field: {}
       },
       enum: {
+        title: 'Possible values for the field',
         type: 'array',
-        title: 'Possible values',
         items: {
           type: 'string',
         },
@@ -410,6 +414,17 @@ module.exports = {
                     description: 'Text displayed after the value. example : cm | €',
                     examples: ['username']
                   },
+                  format: {
+                    title: 'Format',
+                    description: 'The format to use for custom rendering this field (for objects, dates and text)',
+                    examples: ['example :  {{ currentItem.firstname + " " + currentItem.lastname }} | "DD / MM / YYYY"'],
+                  },
+                  component: {
+                    title: 'The component to use to display this field (for objects, dates and text)',
+                    type: ['string', 'object'],
+                    description: 'example : "MapDisplay" | "GalleryComponent"',
+                    examples: ['MapDisplay', 'GalleryComponent']
+                  }
                 }
               }
             }
@@ -457,6 +472,17 @@ module.exports = {
             type: 'string',
             description: 'example : cm | €',
             examples: ['username']
+          },
+          format: {
+            title: 'Format',
+            description: 'The format to use for custom rendering this field (for objects, dates and text)',
+            examples: ['example :  {{ currentItem.firstname + " " + currentItem.lastname }} | "DD / MM / YYYY"'],
+          },
+          component: {
+            title: 'The component to use to display this field (for objects, dates and text)',
+            type: ['string', 'object'],
+            description: 'example : "MapDisplay" | "GalleryComponent"',
+            examples: ['MapDisplay', 'GalleryComponent']
           }
         }
       },
