@@ -286,7 +286,7 @@ class AxelAdmin {
           try {
             const result = SchemaValidator.validate(merged, 'axelModelConfig', { strict: true });
             if (!result.isValid) {
-              console.warn('[AXEL CORE][SCHEMA VALIDATION ERROR]', modelId, result, merged);
+              console.warn('[AXEL CORE][SCHEMA VALIDATION ERROR] loaded model', modelId, result, merged);
               return;
             }
           } catch (err) {

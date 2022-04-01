@@ -239,7 +239,7 @@ class SchemaValidator {
     ) {
       const validation = this.validate(data, modelName);
       if (!validation.isValid) {
-        debug('[SCHEMA VALIDATION ERROR]', modelName, validation, data);
+        debug('[SCHEMA VALIDATION ERROR]', modelName, validation, 'data to validate =>', data);
         throw new ExtendedError({
           code: 400,
           message: 'data_validation_error',

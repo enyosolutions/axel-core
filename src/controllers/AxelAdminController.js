@@ -21,10 +21,10 @@ class AxelAdminController {
    * @param model id
    */
   getModel(req, resp) {
-    if (!req.body.modelId) {
+    if (!req.params.modelId) {
       return resp.json({ message: 'missing_model_identifier' });
     }
-    if (!axel.models[req.body.modelId] || !axel.models[req.body.modelId].schema) {
+    if (!axel.models[req.params.modelId] || !axel.models[req.params.modelId].schema) {
       return resp.json({
         message: 'unknown_model_identifier'
       });
