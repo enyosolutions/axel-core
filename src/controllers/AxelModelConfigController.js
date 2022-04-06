@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
+const { identity } = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
@@ -48,6 +49,7 @@ class AxelModelConfigController {
       .findAndCountAll({
         // where: req.query.filters,
         where: query,
+        raw: true,
         order,
         limit,
         offset
@@ -80,6 +82,7 @@ class AxelModelConfigController {
   }
 
   get(req, resp) {
+    console.log('REQUEST', req.url);
     const id = req.params.id;
     if (!id) {
       return false;
@@ -98,7 +101,7 @@ class AxelModelConfigController {
       })
       .catch((err) => {
         if (process.env.NODE_ENV === 'development') {
-          axel.logger.warn(err);
+          console.warn(err);
         }
         throw new ExtendedError({
           code: 400,
@@ -111,14 +114,24 @@ class AxelModelConfigController {
         });
       })
       .then(async (itemFound) => {
+        let item = itemFound;
+        const models = {};
+        Object.keys(axel.models).forEach((modelName) => {
+          models[modelName] = AxelAdmin.jsonSchemaToFrontModel(axel.models[modelName]);
+        });
+
         if (itemFound) {
-          let item = itemFound;
+          item = itemFound;
           if (axel.models[item.identity]) {
             item = AxelAdmin.mergeData(
               AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
               item.config
             );
+            if (item.nestedModels) {
+              item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+            }
           }
+
 
           if (listOfValues) {
             item = {
@@ -131,12 +144,19 @@ class AxelModelConfigController {
           return resp.status(200).json({
             body: item
           });
-        } if (pKey === 'identity' && axel.models[pKey]) {
-          await axel.models[pKey].em.create(axel.models[pKey]);
+        }
+        if (pKey === 'identity' && axel.models[id]) {
+          await axel.models.axelModelConfig.em.create({
+            identity: id, name: id, config: {}
+          });
+          item = AxelAdmin.jsonSchemaToFrontModel(axel.models[id]);
+          if (item.nestedModels) {
+            item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+          }
           return resp.status(200).json({
             body: {
-              ...axel.models[pKey],
-              apiUrl: axel.models[pKey].apiUrl
+              ...item,
+              apiUrl: axel.models[id].apiUrl
             }
           });
         }
@@ -151,6 +171,8 @@ class AxelModelConfigController {
         });
       })
       .catch((err) => {
+        console.log('err', err);
+
         ErrorUtils.errorCallback(err, resp);
       });
   }

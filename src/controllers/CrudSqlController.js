@@ -8,6 +8,7 @@ const { get, has } = require('lodash');
 const d = require('debug');
 const path = require('path');
 
+const { response } = require('express');
 const Utils = require('../services/Utils.js');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const ExtendedError = require('../services/ExtendedError.js');
@@ -142,7 +143,7 @@ class CrudSqlController {
         totalCount: count
       };
       await execHook(endpoint, 'afterApiFind', result, { request: req, response: resp });
-
+      resp.set('X-Axel-core-endpoint', 'list');
       resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -180,6 +181,7 @@ class CrudSqlController {
         body: item.get()
       };
       execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
+      resp.set('X-Axel-core-endpoint', 'get');
       return resp.status(200).json(result);
     } catch (err) {
       next(err);

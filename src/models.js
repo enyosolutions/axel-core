@@ -20,10 +20,21 @@ const loadHook = (model) => {
     || `${process.cwd()}/src/api/models/hooks`,
     `${_.upperFirst(model.identity)}.js`
   );
+  const filePathLc = path.resolve(
+    _.get(axel, 'config.framework.hooksLocation')
+    || `${process.cwd()}/src/api/models/hooks`,
+    `${model.identity}.js`
+  );
+
   if (fs.existsSync(filePath)) {
     model.hooks = require(filePath);
+    debug('Loaded hooks from', filePath);
+  } else if (fs.existsSync(filePathLc)) {
+    model.hooks = require(filePathLc);
+    debug('Loaded hooks from', filePathLc);
   } else {
     model.hooks = {};
+    debug('no hooks found in ', filePath, filePathLc);
   }
   hooksCache[model.identity] = model.hooks;
   return hooksCache[model.identity];

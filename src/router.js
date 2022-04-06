@@ -295,7 +295,8 @@ function injectAxelAdminConfig() {
   }
 
   axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
-  axel.config.routes['GET /api/axel-admin/models/:modelId'] = '@axel/controllers/AxelAdminController.getModel';
+  // axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelAdminController.getModel';
+  axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelModelConfigController.get';
 
   if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
     axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';

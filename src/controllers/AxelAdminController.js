@@ -21,17 +21,17 @@ class AxelAdminController {
    * @param model id
    */
   getModel(req, resp) {
-    if (!req.params.modelId) {
+    if (!req.params.id) {
       return resp.json({ message: 'missing_model_identifier' });
     }
-    if (!axel.models[req.params.modelId] || !axel.models[req.params.modelId].schema) {
+    if (!axel.models[req.params.id] || !axel.models[req.params.id].schema) {
       return resp.json({
         message: 'unknown_model_identifier'
       });
     }
     try {
       resp.json({
-        body: AxelAdmin.mergeModel(req.params.modelId, false)
+        body: AxelAdmin.mergeModel(req.params.id, false)
       });
     } catch (err) {
       console.warn(err);
