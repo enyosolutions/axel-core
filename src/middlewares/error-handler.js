@@ -1,3 +1,4 @@
+const debug = require('debug')('axel:errors');
 const ErrorUtils = require('../services/ErrorUtils');
 
 function developmentErrorHandler(err, req, res, next) {
@@ -17,6 +18,7 @@ function developmentErrorHandler(err, req, res, next) {
 
 function productionErrorHandler(err, req, res, next) {
   const { message, errors, code } = ErrorUtils.errorCallback(err);
+  debug('[axel][errorMiddleware]', req.path, code, message, err.stack, JSON.stringify(errors));
   if (res.headersSent) {
     return next(err);
   }
