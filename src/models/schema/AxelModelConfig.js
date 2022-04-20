@@ -54,10 +54,17 @@ module.exports = {
           readonly: true
         }
       },
-
       pageTitle: {
         type: 'string',
         title: 'Custom title for this page'
+      },
+      title: {
+        type: 'string',
+        title: 'Custom title for this page'
+      },
+      tabTitle: {
+        type: 'string',
+        title: 'Custom title for this model when displayed in a tab'
       },
       icon: {
         type: 'string'

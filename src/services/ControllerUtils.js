@@ -1,7 +1,9 @@
 const { has, get } = require('lodash');
+const debug = require('debug')('axel:api:hooks');
 
 module.exports.execHook = async (modelName, hookName, ...rest) => {
   if (has(axel, `models.${modelName}.hooks.${hookName}`)) {
+    debug('executing hook', `models.${modelName}.hooks.${hookName}`);
     const func = get(axel, `models.${modelName}.hooks.${hookName}`);
     const output = func(...rest);
     if (output && output.then) {
