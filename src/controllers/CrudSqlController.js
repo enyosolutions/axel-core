@@ -134,7 +134,7 @@ class CrudSqlController {
         .findAndCountAll(sequelizeQuery);
 
 
-      items = rows.map(item => item.get());
+      items = rows.map(item => (item.get ? item.get() : item));
       const result = {
         body: items,
         page: startPage,
@@ -178,7 +178,7 @@ class CrudSqlController {
       }
 
       const result = {
-        body: item.get()
+        body: item.get ? item.get() : item
       };
       execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
       resp.set('X-Axel-core-endpoint', 'get');
@@ -233,6 +233,7 @@ class CrudSqlController {
       const sequelizeQuery = { where: { [primaryKey]: id } };
       await execHook(endpoint, 'beforeApiUpdate', { request: req, sequelizeQuery });
       await SchemaValidator.validateAsync(data, endpoint);
+      console.log('sequelizeQuery', sequelizeQuery);
 
       const exists = await repository
         .findOne(sequelizeQuery);
@@ -249,7 +250,9 @@ class CrudSqlController {
 
       const result = {};
       result.body = await repository.findOne(sequelizeQuery);
-      result.body = result.body.get();
+      if (result.body && result.body.get) {
+        result.body = result.body.get();
+      }
       await execHook(endpoint, 'afterApiUpdate', result, { request: req, response: resp });
 
       return resp.status(200).json(result);

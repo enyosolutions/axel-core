@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const _ = require('lodash');
 const { dirname } = require('path');
 const { fileURLToPath } = require('url');
@@ -6,7 +7,6 @@ const axel = require('../axel.js');
 
 const SchemaValidator = require('./SchemaValidator.js');
 const { loadSqlModel, loadSchemaModel } = require('../models.js');
-
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -304,6 +304,69 @@ class AxelAdmin {
     return models;
   }
 
+
+  translateModels(models, locale,) {
+    if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.multilang && axel.i18n && locale) {
+      const options = {
+        fields: ['title', 'description']
+      };
+      return models
+        .map((model) => {
+          if (model.identity.startsWith('axelModel')) {
+            return model;
+          }
+          return {
+            ...model,
+            name: this.translateField('name', model.identity, locale, model.name),
+            namePlural: this.translateField('namePlural', model.identity, locale, model.namePlural),
+            title: this.translateField('title', model.identity, locale, model.title),
+            tabTitle: this.translateField('tabTitle', model.identity, locale, model.tabTitle),
+            pageTitle: this.translateField('pageTitle', model.identity, locale, model.pageTitle),
+            schema: {
+              ...model.schema,
+              properties: {
+                ...model.schema.properties,
+                ...this.translateProperties(model.schema.properties, model.identity, locale, options)
+              }
+            }
+          };
+        });
+    }
+    return models;
+  }
+
+  translateProperties(properties, modelId, locale, options) {
+    Object.keys(properties).forEach((key) => {
+      const property = properties[key];
+      if (options && options.fields) {
+        options.fields.forEach((field) => {
+          if (property[field]) {
+            if (Array.isArray(property[field])) {
+              property[field] = property[field].map((fieldValue, index) => this.translateField(`prop.${key}.${field}.${fieldValue}`, modelId, locale, property[field][index]));
+            } else {
+              property[field] = this.translateField(`prop.${key}.${field}`, modelId, locale, property[field]);
+            }
+          }
+        });
+        if (property.properties) {
+          property.properties = this.translateProperties(property.properties, modelId, locale, options);
+        }
+      }
+    });
+    return properties;
+  }
+
+  translateField(field, modelId, locale, fallback) {
+    const key = `${axel.config.framework.axelAdmin.translationPrefix}.${modelId}.${field
+      }`;
+    _.set(global.translationFallbacks, key, fallback);
+    const tranlation = axel.i18n.__({
+      phrase: key,
+      locale
+    });
+    return tranlation || fallback;
+  }
+
   serveModels(req, res) {
     const promise = Promise.resolve([]);
     // for now i don't need this feature
@@ -321,12 +384,15 @@ class AxelAdmin {
     return promise
       .then(this.loadDbModelsInMemory) // noop
       .then(mappedSavedConfig => this.mergeDbModelsWithInMemory(mappedSavedConfig))
+      .then(models => this.translateModels(models, req.locale))
       .then((models) => {
+        // console.log('translateModels', JSON.stringify(global.translationFallbacks));
         if (res) {
           return res.json({
             body: models
           });
         }
+
         return models;
       })
       .catch((err) => {
