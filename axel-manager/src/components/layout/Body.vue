@@ -78,16 +78,17 @@ export default {
     //   this.$store.dispatch('layout/set');
   },
   mounted() {
-    this.$store.dispatch('getAuth');
+    // this.$store.dispatch('getAuth');
     this.$store.dispatch('refreshUser').catch((err) => {
-      console.log('[refresh error]', err.response.status);
-
+      console.warn('[refresh error]', err.response.status);
       if (err.response) {
         switch (err.response.status) {
-          case 404:
-          case 401:
-            this.$router.push('/login');
-            break;
+        case 404:
+        case 401:
+          this.$router.push('/login');
+          break;
+        default:
+          break;
         }
       }
     });
@@ -96,7 +97,6 @@ export default {
   },
   watch: {
     $route() {
-      return;
       /*
       this.menuItems.forEach((items) => {
         if (items.path === this.$route.path) {
@@ -122,8 +122,8 @@ export default {
       */
     },
     sidebar_toggle_var() {
-      this.resized =
-        this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
+      this.resized
+        = this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
     },
   },
   methods: {
@@ -134,7 +134,7 @@ export default {
       this.mobileheader_toggle_var = value;
     },
     handleResize() {
-      this.$store.dispatch('menu/resizetoggle');
+      // this.$store.dispatch('menu/resizetoggle');
     },
   },
 };

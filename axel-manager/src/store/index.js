@@ -32,7 +32,6 @@ const modelDefaultActions = {
   columns: true,
 };
 
-
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -43,7 +42,8 @@ export default new Vuex.Store({
     primaryColor: localStorage.getItem(`${config.appKey}_primaryColor`),
     secondaryColor: localStorage.getItem(`${config.appKey}_secondaryColor`),
     appConfig: {},
-    currentUser: {}
+    currentUser: {},
+    roles: [],
   },
   mutations: {
     models(state, appModels) {
@@ -56,9 +56,13 @@ export default new Vuex.Store({
       state.token = auth;
       this._vm.$http.defaults.headers.common.Authorization = `Bearer ${auth}`;
       this._vm.$http.defaults.headers.Authorization = `Bearer ${auth}`;
+      localStorage.setItem(`${config.appKey}_token`, auth);
     },
     currentUser(state, currentUser) {
       state.currentUser = currentUser;
+    },
+    roles(state, roles) {
+      state.roles = roles;
     },
     currentLocale(state, locale) {
       state.locale = locale;
@@ -86,14 +90,10 @@ export default new Vuex.Store({
       const promise = this._vm.$socket.post('/axel-manager/auth', { token: state.token });
       return promise
         .then(res => {
-          commit('auth', res.body);
-          if (this._vm && this._vm.$http && res.body) {
-            this._vm.$http.defaults.headers.common.Authorization = `Bearer ${res.body}`;
-            this._vm.$http.defaults.headers.Authorization = `Bearer ${res.body}`;
-          }
+          console.log('user getAuth');
         })
         .catch(err => {
-          console.error('getModels', err);
+          console.error('getAuth', err);
         });
     },
 
@@ -117,13 +117,15 @@ export default new Vuex.Store({
         }
         if (err.response) {
           switch (err.response.status) {
-            case 404:
-            case 401:
-              dispatch('logout');
-              break;
+          case 404:
+          case 401:
+            dispatch('logout');
+            break;
+          default:
+            break;
           }
         }
-        throw err
+        throw err;
       });
     },
     getModels({ commit }) {
@@ -148,7 +150,7 @@ export default new Vuex.Store({
               writeConfigToFs,
               editLayout,
               editFields,
-            ]
+            ];
             delete model.url;
             return model;
           });
@@ -170,10 +172,9 @@ export default new Vuex.Store({
           });
         })
         .catch(err => {
-          console.error('getModels', err);
+          console.error('getConfig', err);
         });
     },
-
 
     refreshListOfValues(context) {
       const { dispatch } = context;
@@ -182,10 +183,9 @@ export default new Vuex.Store({
     },
     logout(context) {
       const { commit } = context;
-      commit('token', null)
-      commit('auth', null)
-      commit('currentUser', null)
-      console.log('logout redirect requested')
+      commit('token', null);
+      commit('auth', null);
+      commit('currentUser', null);
       return true;
     },
   },

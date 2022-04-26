@@ -1,14 +1,15 @@
-/* eslint-disable no-underscore-dangle */
-import * as io from 'socket.io-client/dist/socket.io';
+/* eslint-disable no-underscore-dangle, no-console */
+import * as io from 'socket.io-client/dist/socket.io.dev';
 import config from '../config';
 
 export default {
 
   install(Vue) {
-    console.log('socket connecting...');
-    const socket = io(config.apiUrl !== '/' ? config.apiUrl.replace('http', 'ws') : null,
+    console.log('socket connecting...', '/axel-admin-ws');
+    const socket = io(
+      config.apiUrl !== '/' ? `${config.apiUrl.replace('http', 'ws')}` : '',
       {
-        //   path: '/realtime',
+        path: '/axel-admin-ws',
         transports: ['websocket', 'polling'],
         transportOptions: {
           polling: {
@@ -20,7 +21,8 @@ export default {
         extraHeaders: {
           Authorization: `Bearer ${localStorage.getItem(`${config.appKey}_token`)}`,
         }
-      });
+      }
+    );
 
     window.socket = socket;
     Vue.prototype.$socket = socket;
@@ -57,10 +59,6 @@ export default {
     socket.on('disconnect', (a) => {
       console.log('[SOCKET] reconnecting...', a);
       setTimeout(() => socket.connect(), 2000);
-    });
-
-    socket.on('ping', (second) => {
-      console.log('ping', second);
     });
 
     setTimeout(() => {

@@ -292,15 +292,15 @@ export default {
       return this.socket && this.socket.connected;
     },
     userRoles() {
-      return this.$store.state.user.user.roles &&
-        Array.isArray(this.$store.state.user.user.roles)
+      return this.$store.state.user.user.roles
+        && Array.isArray(this.$store.state.user.user.roles)
         ? this.$store.state.user.user.roles.join('x')
         : '';
     },
     searchResultIsEmpty() {
       return (
-        !this.menuItems.length &&
-        !Object.values(this.apiSearchResults).reduce(
+        !this.menuItems.length
+        && !Object.values(this.apiSearchResults).reduce(
           (prev, next) => next.count + prev,
           0
         )
@@ -347,8 +347,7 @@ export default {
           })
           .then((data) => {
             this.apiSearchResults[type] = data;
-          })
-      );
+          }));
     },
     changeLocale(locale) {
       this.setLang(locale);
@@ -368,8 +367,8 @@ export default {
     },
     toggle_fullscreen() {
       if (
-        (document.fullScreenElement && document.fullScreenElement !== null) ||
-        (!document.mozFullScreen && !document.webkitIsFullScreen)
+        (document.fullScreenElement && document.fullScreenElement !== null)
+        || (!document.mozFullScreen && !document.webkitIsFullScreen)
       ) {
         if (document.documentElement.requestFullScreen) {
           document.documentElement.requestFullScreen();
@@ -404,7 +403,6 @@ export default {
             body: { organisationId: this.organisation && this.organisation.id },
           })
           .then((notifs) => {
-            console.log('notifs', notifs);
             this.notifications = notifs;
           });
       }

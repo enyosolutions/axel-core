@@ -215,7 +215,7 @@ export default {
     },
     onAdd(event) {
       console.log('args', event);
-      const source = this.internalValue[parseInt(event.from.dataset.id)];
+      const source = this.internalValue[parseInt(event.from.dataset.id, 10)];
       console.log('source', source, event.from.dataset.id);
 
       this.removeField(source.fields, event.oldIndex);
@@ -223,7 +223,7 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .vs__dropdown-toggle {
   border: none;
 }

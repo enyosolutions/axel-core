@@ -114,18 +114,17 @@ export default {
     toCamelCase(string) {
       string = string
         .toLowerCase()
-        .replace(/(?:(^.)|([-_\s]+.))/g, function (match) {
-          return match.charAt(match.length - 1).toUpperCase();
-        });
+        .replace(/(?:(^.)|([-_\s]+.))/g, (match) => match.charAt(match.length - 1).toUpperCase());
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
     login() {
-      return this.$http
-        .post('/api/auth/login', { email: this.email, password: this.password })
-        .then(this.postLogin);
+      return this.$http.post('/api/auth/login', {
+        email: this.email,
+        password: this.password,
+      });
     },
     submitForm() {
-      //this.$store.dispatch('logout');
+      // this.$store.dispatch('logout');
       this.isRequestInProgress = true;
       this.login()
         .then(this.postLogin)

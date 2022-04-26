@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 
-const API_URL = 'http://localhost:3001';
+const API_URL = process.env.API_URL || 'http://localhost:1335';
 // vue.config.js
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
@@ -35,7 +35,7 @@ module.exports = {
   },
   devServer: {
     proxy: {
-      '^/(api|data|socket)': {
+      '^/(api|data|socket|axel-admin-ws)': {
         target: API_URL,
         ws: true,
         changeOrigin: true

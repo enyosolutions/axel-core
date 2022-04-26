@@ -19,6 +19,7 @@ module.exports = {
   },
   // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
   // e.g. "@typescript-eslint/explicit-function-return-type": "off",
+  ignorePatterns: ['test/sandbox/**/*.js'],
   rules: {
     'no-param-reassign': 0,
     'no-useless-escape': 0,

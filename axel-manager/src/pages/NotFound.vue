@@ -20,7 +20,6 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import Swal2 from 'sweetalert2';
 
 export default {
   name: 'NotFound',

@@ -342,7 +342,9 @@ class AxelAdmin {
         options.fields.forEach((field) => {
           if (property[field]) {
             if (Array.isArray(property[field])) {
-              property[field] = property[field].map((fieldValue, index) => this.translateField(`prop.${key}.${field}.${fieldValue}`, modelId, locale, property[field][index]));
+              property[field] = property[field].map(
+                (fieldValue, index) => this.translateField(`prop.${key}.${field}.${fieldValue}`, modelId, locale, property[field][index])
+              );
             } else {
               property[field] = this.translateField(`prop.${key}.${field}`, modelId, locale, property[field]);
             }
@@ -358,7 +360,7 @@ class AxelAdmin {
 
   translateField(field, modelId, locale, fallback) {
     const key = `${axel.config.framework.axelAdmin.translationPrefix}.${modelId}.${field
-      }`;
+    }`;
     _.set(global.translationFallbacks, key, fallback);
     const tranlation = axel.i18n.__({
       phrase: key,
@@ -367,24 +369,12 @@ class AxelAdmin {
     return tranlation || fallback;
   }
 
-  serveModels(req, res) {
+  serveModels(req = null, res = null) {
     const promise = Promise.resolve([]);
-    // for now i don't need this feature
-    // if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
-    //   promise = Promise.all([
-    //     axel.models.axelModelConfig.em.findAll({
-    //       logging: false
-    //     }),
-    //     axel.models.axelModelFieldConfig.em
-    //       .findAll({ logging: false })
-    //   ]);
-    // } else {
-    //   console.warn('[AXEL admin] ⚠️ editable models is not enabled');
-    // }
     return promise
       .then(this.loadDbModelsInMemory) // noop
       .then(mappedSavedConfig => this.mergeDbModelsWithInMemory(mappedSavedConfig))
-      .then(models => this.translateModels(models, req.locale))
+      .then(models => this.translateModels(models, req && req.locale))
       .then((models) => {
         // console.log('translateModels', JSON.stringify(global.translationFallbacks));
         if (res) {

@@ -229,8 +229,8 @@ export default {
     ...mapState(['appConfig']),
     searchResultIsEmpty() {
       return (
-        !this.menuItems.length &&
-        !Object.values(this.apiSearchResults).reduce(
+        !this.menuItems.length
+        && !Object.values(this.apiSearchResults).reduce(
           (prev, next) => next.count + prev,
           0
         )
@@ -267,8 +267,7 @@ export default {
           })
           .then((data) => {
             this.apiSearchResults[type] = data;
-          })
-      );
+          }));
     },
     logout() {},
 
@@ -305,9 +304,7 @@ export default {
                 toast: true,
               });
             })
-            .catch((err) => {
-              return Swal2.fire({ title: err.message, icon: 'error' });
-            });
+            .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
         }
       });
     },
@@ -328,9 +325,7 @@ export default {
               toast: true,
             });
           })
-          .catch((err) => {
-            return Swal2.fire({ title: err.message, icon: 'error' });
-          });
+          .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
       });
     },
 

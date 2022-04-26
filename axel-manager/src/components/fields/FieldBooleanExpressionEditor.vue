@@ -59,7 +59,7 @@ export default {
     },
     expressionType(change) {
       if (change !== undefined) {
-        if (change == 'expression') {
+        if (change === 'expression') {
           this.value = '{{ currentItem.lastName }}';
         } else {
           this.value = !!change;

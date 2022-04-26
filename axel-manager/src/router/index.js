@@ -67,7 +67,7 @@ const routes = [
         }),
         children: [
           {
-            name: `CrudWrapper-view`,
+            name: 'CrudWrapper-view',
             path: ':id',
             component: CrudWrapper,
             meta: {
@@ -76,7 +76,7 @@ const routes = [
             },
           },
           {
-            name: `CrudWrapper-edit`,
+            name: 'CrudWrapper-edit',
             path: ':id/edit',
             component: CrudWrapper,
             meta: {
@@ -99,7 +99,7 @@ const routes = [
         }),
         children: [
           {
-            name: `CrudWrapper-view`,
+            name: 'CrudWrapper-view',
             path: ':id',
             component: CrudWrapper,
             meta: {
@@ -108,7 +108,7 @@ const routes = [
             },
           },
           {
-            name: `CrudWrapper-edit`,
+            name: 'CrudWrapper-edit',
             path: ':id/edit',
             component: CrudWrapper,
             meta: {
@@ -131,7 +131,7 @@ const routes = [
 const router = new Router({
   routes,
   base: '/axel-manager',
-  //mode: 'history',
+  // mode: 'history',
   linkActiveClass: 'active',
   parseQuery(query) {
     return qs.parse(query);

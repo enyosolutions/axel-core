@@ -14,6 +14,8 @@ const defaultModelsLoader = require('./models.js').modelsLoader;
 const l = require('./services/logger.js');
 const errorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
+const AxelManager = require('./services/AxelManager.js');
+// const AxelAdmin = require('./services/AxelAdmin.js');
 
 console.time('[axel] STARTUP TIME');
 const app = express();
@@ -24,8 +26,8 @@ class Server {
   constructor() {
     this.modelsFn = defaultModelsLoader;
     this.router = defaultRouter;
-    this.beforeFn = null;
-    this.afterFn = null;
+    this.beforeFn = [];
+    this.afterFn = [];
     this.app = app;
     this.initCompleted = false;
     this.middlewares = {};
@@ -67,8 +69,20 @@ class Server {
             limit: process.env.REQUEST_LIMIT || '100mb',
           })
         );
-        if (axel.config && axel.config.security && axel.config.security.cors) {
+        if (_.get(axel, 'config.security.cors')) {
           app.use(cors(axel.config.security.cors));
+        }
+        const adminConfig = _.get(axel, 'config.plugins.admin');
+        // eslint-disable-next-line promise/always-return
+        if (adminConfig) {
+          this.after((theApp) => {
+            if (adminConfig && adminConfig.enabled) {
+              debug('starting admin panel init');
+              AxelManager.init(theApp);
+            } else {
+              debug('admin panel is disabled');
+            }
+          });
         }
 
         app.use(cookieParser(process.env.SESSION_SECRET));
@@ -94,21 +108,31 @@ class Server {
   }
 
   before(callback) {
-    this.beforeFn = callback;
-    debug('beforeFn fn defined');
+    this.beforeFn.push(callback);
+    debug('beforeFn fn added');
     return this;
   }
 
   after(callback) {
-    this.afterFn = callback;
+    this.afterFn.push(callback);
     return this;
+  }
+
+  async executeCallbackFunctions(functionsArray, myApp) {
+    for (let index = 0; index < functionsArray.length; index++) {
+      const func = functionsArray[index];
+      if (typeof func === 'function') {
+        // eslint-disable-next-line no-await-in-loop
+        await func(myApp);
+      }
+    }
   }
 
   async start() {
     axel.init();
 
-    if (this.beforeFn) {
-      await this.beforeFn(app);
+    if (this.beforeFn.length) {
+      await this.executeCallbackFunctions(this.beforeFn, app);
     }
 
     return (
@@ -119,8 +143,8 @@ class Server {
           if (!process.env.NODE_ENV) {
             process.env.NODE_ENV = 'development';
           }
-          if (this.afterFn) {
-            this.afterFn(app);
+          if (this.afterFn.length) {
+            this.executeCallbackFunctions(this.afterFn, app);
           }
 
           app.use(errorHandler);

@@ -8,9 +8,9 @@ export const editLayout = {
     // eslint-disable-next-line
     item, action, location, props, id,
   }, context) => {
-    context.$router.push(`/app/models/axelModelConfig/${context.identity}/edit`)
+    context.$router.push(`/app/models/axelModelConfig/${context.identity}/edit`);
   },
-}
+};
 export const editFields = {
   name: 'edit-layout',
   label: 'Edit the fields',
@@ -18,9 +18,9 @@ export const editFields = {
   title: 'Edit the fields of this model',
   icon: 'fa fa-list',
   action: async (args, context) => {
-    context.$router.push(`/app/models/axelModelFieldConfig/${context.identity}/edit`)
+    context.$router.push(`/app/models/axelModelFieldConfig/${context.identity}/edit`);
   },
-}
+};
 
 export const writeConfigToFs = {
   name: 'save-layout',
@@ -31,4 +31,4 @@ export const writeConfigToFs = {
   action: async (args, context) => {
     context.$socket.put('/axel-manager/admin-models/save', { body: { modelName: context.identity } }).then(console.warn).catch(console.warn);
   },
-}
+};

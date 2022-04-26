@@ -34,8 +34,8 @@ const serializeSchema = (name, schema) => {
     `
     /* eslint max-len: "warn" */
     module.exports = ${serialize({
-      ...schema, em: undefined, entity: undefined, hooks: undefined
-    }, { space: 2, unsafe: true })}`,
+    ...schema, em: undefined, entity: undefined, hooks: undefined
+  }, { space: 2, unsafe: true })}`,
     { encoding: 'utf8' }
   );
 };

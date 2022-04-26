@@ -1,9 +1,5 @@
-const debug = require('debug')('app:boostrap');
-const core = require('axel-core');
 const I18n = require('./api/services/I18n');
-const CronService = require('./api/services/CronService');
 
-const { AxelAdmin, AxelManager, SchemaValidator } = core;
 
 // eslint-disable-next-line
 module.exports.beforeFn = (app) => {
@@ -20,22 +16,10 @@ module.exports.beforeFn = (app) => {
   });
 };
 
-module.exports.afterFn = app => new Promise((resolve, reject) => {
+module.exports.afterFn = () => new Promise((resolve, reject) => {
   // add the function that you'd like to run after the app has started
   // Example the cron services.
   try {
-    if (SchemaValidator) {
-      SchemaValidator.init();
-    }
-
-    if (AxelAdmin) {
-      AxelAdmin.init(app);
-    }
-
-    if (process.env.NODE_ENV !== 'test') {
-      AxelManager.init(app);
-    }
-
     resolve();
   } catch (error) {
     reject(error);

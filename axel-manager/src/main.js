@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Vue from 'vue'
+import Vue from 'vue';
 import Vuex from 'vuex';
 import VueI18n from 'vue-i18n';
 import CripVueLoading from 'crip-vue-loading';
@@ -19,7 +19,6 @@ import VueAwesomeComponents from 'vue-aw-components/src/plugin';
 
 import { FormGenerator, notificationsMixin } from 'vue-aw-components';
 
-
 // import en from 'vue-aw-components/src/translations/en.json';
 import fr from 'vue-aw-components/src/translations/fr.json';
 import en from 'vue-aw-components/src/translations/en.json';
@@ -31,12 +30,9 @@ import localeFr from './locales/fr.json';
 import localeEn from './locales/en.json';
 import store from './store';
 
-
 import './assets/scss/main.scss';
 
-import App from './App.vue'
-
-
+import App from './App.vue';
 
 axios.defaults.withCredentials = process.env.NODE_ENV === 'production';
 
@@ -59,11 +55,9 @@ Vue.component('Draggable', Draggable);
 // Vue.use(VTooltip);
 Vue.use(GlobalComponents);
 
-
 const isProduction = process.env.NODE_ENV === 'production';
 
-Vue.config.productionTip = isProduction
-
+Vue.config.productionTip = isProduction;
 
 Vue.use(FormGenerator, {
   fields: _.values(FormGenerator.fieldsLoader),
@@ -125,7 +119,6 @@ Vue.use(VueAwesomeComponents, {
   },
 });
 
-
 const i18n = new VueI18n({
   locale: store.state.locale || config.defaultLocale, // set locale
   messages: _.merge({ fr, en }, {
@@ -151,6 +144,5 @@ function init() {
     window.myApp.vue = vInstance;
   }
 }
-
 
 init();

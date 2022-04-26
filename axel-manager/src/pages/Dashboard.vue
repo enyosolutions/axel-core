@@ -576,9 +576,9 @@ export default {
           query: { full: true },
         })
         .then((data) => {
-          this.models =
-            data.body &&
-            data.body.models.filter((model) => !model.name.startsWith('axel'));
+          this.models
+            = data.body
+            && data.body.models.filter((model) => !model.name.startsWith('axel'));
           this.tables = data.body && data.body.tables;
         })
         .catch((err) => {
@@ -637,22 +637,22 @@ export default {
         showCancelButton: true,
         reverseButtons: true,
         preConfirm: () => {
-          let values = [
+          let vals = [
             document.getElementById('swal-name').value,
             document.getElementById('swal-type').value,
-            document.getElementById('swal-force').value == 'true',
+            document.getElementById('swal-force').value === 'true',
           ];
-          values = values.filter((v) => v);
-          if (values.length < 3) {
+          vals = vals.filter((v) => v);
+          if (vals.length < 3) {
             return Swal2.fire({
               title: 'Please fill in all the data',
               icon: 'error',
             });
           }
-          if (values[2] == 'true') {
-            values[2] = true;
+          if (vals[2] === 'true') {
+            vals[2] = true;
           }
-          return values;
+          return vals;
         },
       });
       this.$socket
@@ -663,15 +663,12 @@ export default {
             force: values.value[2],
           },
         })
-        .then(() => {
-          return Swal2.fire({
+        .then(() =>
+          Swal2.fire({
             title: 'Controller successfully created',
             icon: 'success',
-          });
-        })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
+          }))
+        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
     },
 
     async createRoute() {
@@ -684,32 +681,29 @@ export default {
         showCancelButton: true,
         reverseButtons: true,
         preConfirm: () => {
-          let values = [document.getElementById('swal-name').value];
-          values = values.filter((v) => v);
-          if (values.length < 1) {
+          let vals = [document.getElementById('swal-name').value];
+          vals = vals.filter((v) => v);
+          if (vals.length < 1) {
             return Swal2.fire({
               title: 'Please fill in all the data',
               icon: 'error',
             });
           }
-          if (values[2] == 'true') {
-            values[2] = true;
+          if (vals[2] === 'true') {
+            vals[2] = true;
           }
-          return values;
+          return vals;
         },
       });
       this.$socket
         .post('/axel-manager/routes', { body: { name: values.value[0] } })
-        .then(() => {
-          return Swal2.fire({
+        .then(() =>
+          Swal2.fire({
             title: 'Route successfully created',
             icon: 'success',
             toast: true,
-          });
-        })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
+          }))
+        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
     },
 
     validateCreateModelForm(options = {}) {
@@ -755,9 +749,7 @@ export default {
             toast: true,
           });
         })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message, icon: 'error' });
-        });
+        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
     },
 
     async createModel() {
@@ -774,9 +766,8 @@ export default {
             toast: true,
           });
         })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message || err, icon: 'error' });
-        });
+        .catch((err) =>
+          Swal2.fire({ title: err.message || err, icon: 'error' }));
     },
     /**
      * Delete model file
@@ -795,9 +786,8 @@ export default {
             toast: true,
           });
         })
-        .catch((err) => {
-          return Swal2.fire({ title: err.message || err, icon: 'error' });
-        });
+        .catch((err) =>
+          Swal2.fire({ title: err.message || err, icon: 'error' }));
     },
 
     async addFieldsToModel() {
@@ -822,23 +812,22 @@ export default {
           });
         })
         .catch((err) => {
-          console.log('err', err);
+          console.warn('err', err);
 
           return Swal2.fire({ title: err.message || err, icon: 'error' });
         });
     },
 
     resetApiForm() {
-      this.newApi = Object.assign({}, this.newApiTemplate);
+      this.newApi = { ...this.newApiTemplate };
       this.newApi.fields = [];
     },
 
     toCamelCase(string) {
       string = string
         .toLowerCase()
-        .replace(/(?:(^.)|([-_\s]+.))/g, function (match) {
-          return match.charAt(match.length - 1).toUpperCase();
-        });
+        .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
+          match.charAt(match.length - 1).toUpperCase());
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
   },

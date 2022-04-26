@@ -1,9 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 import dayjs from 'dayjs';
-import 'socket.io-client/dist/socket.io';
+// import 'socket.io-client/dist/socket.io';
 import Socket from '../services/Socket';
-import FieldLayoutEditor from '../components/fields/FieldLayoutEditor.vue'
-import FieldBooleanExpressionEditor from '../components/fields/FieldBooleanExpressionEditor.vue'
+import FieldLayoutEditor from '../components/fields/FieldLayoutEditor.vue';
+import FieldBooleanExpressionEditor from '../components/fields/FieldBooleanExpressionEditor.vue';
 // import FieldTinyMce from './components/fields/FieldTinyMce.vue';
 
 /**

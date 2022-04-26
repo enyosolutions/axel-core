@@ -98,7 +98,6 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import Swal2 from 'sweetalert2';
 import { apiErrorsMixin } from 'vue-aw-components';
 
 export default {
@@ -128,9 +127,7 @@ export default {
     toCamelCase(string) {
       string = string
         .toLowerCase()
-        .replace(/(?:(^.)|([-_\s]+.))/g, function (match) {
-          return match.charAt(match.length - 1).toUpperCase();
-        });
+        .replace(/(?:(^.)|([-_\s]+.))/g, (match) => match.charAt(match.length - 1).toUpperCase());
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
 

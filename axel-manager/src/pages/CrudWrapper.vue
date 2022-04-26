@@ -92,8 +92,8 @@ export default {
 
     modelComputed() {
       return (
-        this.model ||
-        _.get(this.$store, this.storePath).find(
+        this.model
+        || _.get(this.$store, this.storePath).find(
           (model) => model.identity === this.identity
         )
       );
@@ -102,8 +102,8 @@ export default {
     isConfigMode() {
       const configModels = ['axelModelConfig', 'axelModelFieldConfig'];
       return (
-        configModels.includes(this.modelComputed.identity) &&
-        !configModels.includes(this.$route.params.id)
+        configModels.includes(this.modelComputed.identity)
+        && !configModels.includes(this.$route.params.id)
       );
     },
   },
@@ -126,9 +126,9 @@ export default {
     },
     goToItem(event) {
       if (this.$route.params.id) {
-        this.$router.push('/app/models/' + this.$route.params.id);
+        this.$router.push(`/app/models/${this.$route.params.id}`);
       } else if (event.identity) {
-        this.$router.push('/app/models/' + event.identity);
+        this.$router.push(`/app/models/${event.identity}`);
       }
     },
   },

@@ -25,8 +25,8 @@ module.exports = {
     }
     req.body = {};
     req.body.email = 'dev@enyosolutions.com';
-    req.body.firstname = 'Tony';
-    req.body.lastname = 'Stark';
+    req.body.firstName = 'Tony';
+    req.body.lastName = 'Stark';
     req.body.username = 'enyosolutions';
     req.body.password = 'Test1234';
     req.body.roles = ['USER', 'ADMIN', 'DEVELOPER'];
