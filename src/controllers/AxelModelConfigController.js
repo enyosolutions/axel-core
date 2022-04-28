@@ -12,6 +12,7 @@ const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
 const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 const { saveModel } = require('../services/ws/utils');
+const axel = require('../axel.js');
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -81,110 +82,89 @@ class AxelModelConfigController {
       });
   }
 
-  get(req, resp) {
-    console.log('REQUEST', req.url);
+  async get(req, resp) {
+    console.log('REQUEST', req.url, entity);
     const id = req.params.id;
     if (!id) {
       return false;
     }
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
 
-    const repository = Utils.getEntityManager(entity, resp);
-    if (!repository) {
-      return;
-    }
     const pKey = typeof id === 'string' && Number.isNaN(parseInt(id)) ? 'identity' : primaryKey;
-    repository
+    const itemFound = !axel.models.axelModelConfig ? {} : await axel.models.axelModelConfig.em
       .findOne({
         where: { [pKey]: id },
         raw: true
-      })
-      .catch((err) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn(err);
-        }
-        throw new ExtendedError({
-          code: 400,
-          errors: [
-            {
-              message: err.message || 'item_not_found'
-            }
-          ],
-          message: err.message || 'item_not_found'
-        });
-      })
-      .then(async (itemFound) => {
-        let item = itemFound;
-        const models = {};
-        Object.keys(axel.models).forEach((modelName) => {
-          models[modelName] = AxelAdmin.jsonSchemaToFrontModel(axel.models[modelName]);
-        });
-
-        if (itemFound) {
-          item = itemFound;
-          if (axel.models[item.identity]) {
-            item = AxelAdmin.mergeData(
-              AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
-              item.config
-            );
-            if (item.nestedModels) {
-              item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
-            }
-          }
-
-
-          if (listOfValues) {
-            item = {
-              [primaryKey]: item[primaryKey],
-              identity: item.identity,
-              name: item.name,
-              label: item.name
-            };
-          }
-          return resp.status(200).json({
-            body: item
-          });
-        }
-        if (pKey === 'identity' && axel.models[id]) {
-          await axel.models.axelModelConfig.em.create({
-            identity: id, name: id, config: {}
-          });
-          item = AxelAdmin.jsonSchemaToFrontModel(axel.models[id]);
-          if (item.nestedModels) {
-            item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
-          }
-          return resp.status(200).json({
-            body: {
-              ...item,
-              apiUrl: axel.models[id].apiUrl
-            }
-          });
-        }
-        throw new ExtendedError({
-          code: 404,
-          errors: [
-            {
-              message: 'item_not_found'
-            }
-          ],
-          message: 'item_not_found'
-        });
-      })
-      .catch((err) => {
-        console.log('err', err);
-
-        ErrorUtils.errorCallback(err, resp);
       });
+    let item = itemFound;
+    const models = {};
+    console.log('item', pKey, id);
+
+    Object.keys(axel.models).forEach((modelName) => {
+      models[modelName] = AxelAdmin.jsonSchemaToFrontModel(axel.models[modelName]);
+    });
+
+    if (itemFound && itemFound.identity) {
+      item = itemFound;
+      if (axel.models[item.identity]) {
+        item = AxelAdmin.mergeData(
+          AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
+          item.config
+        );
+        if (item.nestedModels) {
+          item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+        }
+      }
+
+
+      if (listOfValues) {
+        item = {
+          [primaryKey]: item[primaryKey],
+          identity: item.identity,
+          name: item.name,
+          label: item.name
+        };
+      }
+      return resp.status(200).json({
+        body: item
+      });
+    }
+    if (pKey === 'identity' && axel.models[id]) {
+      if (axel.models.axelModelConfig) {
+        await axel.models.axelModelConfig.em.create({
+          identity: id, name: id, config: {}
+        });
+      }
+      item = AxelAdmin.jsonSchemaToFrontModel(axel.models[id]);
+      if (item.nestedModels) {
+        item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+      }
+      return resp.status(200).json({
+        body: {
+          ...item,
+          apiUrl: axel.models[id].apiUrl
+        }
+      });
+    }
+    throw new ExtendedError({
+      code: 404,
+      errors: [
+        {
+          message: 'item_not_found'
+        }
+      ],
+      message: 'item_not_found'
+    });
   }
 
   /**
- * [put description]
- * [description]
- * @method
- * @param  {[type]} req  [description]
- * @param  {[type]} resp [description]
- * @return {[type]}      [description]
- */
+  * [put description]
+  * [description]
+  * @method
+  * @param  {[type]} req  [description]
+  * @param  {[type]} resp [description]
+  * @return {[type]}      [description]
+  */
   put(req, resp) {
     const id = req.params.id;
     const data = req.body;
@@ -266,13 +246,13 @@ class AxelModelConfigController {
   }
 
   /**
- * [delete Item]
- * [description]
- * @method
- * @param  {[type]} req  [description]
- * @param  {[type]} resp [description]
- * @return {[type]}      [description]
- */
+  * [delete Item]
+  * [description]
+  * @method
+  * @param  {[type]} req  [description]
+  * @param  {[type]} resp [description]
+  * @return {[type]}      [description]
+  */
   delete(req, resp) {
     const id = req.params.id;
 
