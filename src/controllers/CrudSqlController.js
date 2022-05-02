@@ -282,6 +282,15 @@ class CrudSqlController {
       const sequelizeQuery = { where: { [primaryKey]: id } };
 
       await execHook(endpoint, 'beforeApiDelete', { request: req, sequelizeQuery });
+      const exists = await repository
+        .findOne(sequelizeQuery);
+      if (!exists) {
+        throw new ExtendedError({
+          code: 404,
+          message: 'item_not_found',
+          errors: ['item_not_found']
+        });
+      }
       const result = {};
       sequelizeQuery.individualHooks = true;
       sequelizeQuery.raw = false;

@@ -160,26 +160,27 @@ module.exports = {
             title:
               'Field type',
             description: 'The type of the field Case sensisitive. custom types are also supported.',
-            enum: ['string',
+            enum: [
+              'string',
               'input',
               'number',
               'list-of-value',
               'list-of-data',
               'vSelect',
               'dateTime',
+
+              'datetime', 'date',
+              'time',
               'DateRange',
               'textArea',
               'JsonTextarea',
-              'date',
-              'datetime',
-              'time',
+
               'ImagePicker',
               'FilePicker',
               'FileInput',
               'Base64Upload',
               'array',
               'EnyoSelect',
-
             ],
             field: {
               type: 'vSelect',
@@ -262,6 +263,12 @@ module.exports = {
             title: 'Css classes for the inner block',
             description: 'The class that will be around the block (usefull for cols and row padding)',
             examples: ['card-body']
+          },
+          relationRoute: {
+            type: 'string',
+            title: 'Route to access the relation',
+            description: 'The front url to access the relation',
+            examples: ['/app/user']
           },
           min: {
             type: 'number',
@@ -386,20 +393,23 @@ module.exports = {
                   type: {
                     type: 'string',
                     title: 'Field type',
-                    enum: [
-                      'string',
-                      'number',
-                      'boolean',
-                      'url',
-                      'image',
-                      'date',
-                      'datetime',
-                      'checkbox',
-                      'relation',
-                      'object',
-                    ],
                     description:
                       'The type that links to the display',
+                    field: {
+                      enum: [
+                        'string',
+                        'number',
+                        'boolean',
+                        'url',
+                        'image',
+                        'date',
+                        'datetime',
+                        'checkbox',
+                        'relation',
+                        'object',
+                      ],
+                      type: 'vSelect'
+                    }
                   },
                   prefix: {
                     type: 'string',

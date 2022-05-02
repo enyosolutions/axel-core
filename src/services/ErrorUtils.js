@@ -91,7 +91,7 @@ const ErrorUtils = {
       });
     }
     return {
-      code: err.code || 422,
+      code: err.code || err.statusCode || 500,
       message: err.message || 'global_error',
       errors
     };

@@ -47,7 +47,9 @@ const loadSchemaModel = (filePath) => {
   /* eslint-enable */
 
   if (!model.identity) {
-    throw new Error(`[ORM]  missing identity for ${filePath}`);
+    console.log('[ORM] model identity not found in', filePath, model);
+
+    throw new Error(`[ORM] missing identity for ${filePath}`);
   }
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);

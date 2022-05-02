@@ -8,7 +8,7 @@ function developmentErrorHandler(err, req, res, next) {
     return next(err);
   }
 
-  return res.status(code || 422).json({
+  return res.status(code || 500).json({
     message: `[errorMiddleware] ${message}`,
     code,
     stack: process.env.NODE_ENV === 'development' ? err.stack : '',
@@ -23,7 +23,7 @@ function productionErrorHandler(err, req, res, next) {
     return next(err);
   }
 
-  return res.status(code || 422).json({ message, errors, code });
+  return res.status(code || 500).json({ message, errors, code });
 }
 
 module.exports = process.env.NODE_ENV === 'development' ? developmentErrorHandler : productionErrorHandler;
