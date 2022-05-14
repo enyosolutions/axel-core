@@ -5,15 +5,14 @@ async function loadSequelize() {
   if (axel.config.sqldb) {
     const datastore = axel.config.sqldb;
     axel.logger.debug('[ORM] Connecting to database ', datastore.database);
-    const sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, {
-      ...datastore,
+    const config = {
       host: datastore.host,
       port: datastore.port,
       dialect: datastore.options.dialect,
       logging: datastore.options.logging,
       options: datastore.options,
       retry: datastore.retry,
-      query: datastore.query ? datastore.query : {
+      query: {
         raw: false
       },
       pool: {
@@ -26,14 +25,21 @@ async function loadSequelize() {
       define: {
         charset: 'utf8',
         collate: 'utf8_general_ci'
-      }
-    });
+      },
+      ...datastore,
+    };
+    let sequelize;
+    if (datastore.connectionString) {
+      sequelize = new Sequelize(datastore.connectionString, config);
+    } else {
+      sequelize = new Sequelize(datastore.database, datastore.user, datastore.password, config);
+    }
 
     try {
       await sequelize.authenticate();
       axel.logger.warn(
         '[ORM] ✅ SQL DB Connection has been established successfully. %o',
-        datastore.options
+        datastore.connectionString || datastore.options
       );
       return sequelize;
     } catch (err) {
