@@ -38,7 +38,7 @@ async function loadSequelize() {
     try {
       await sequelize.authenticate();
       axel.logger.warn(
-        '[ORM] ✅ SQL DB Connection has been established successfully. %o',
+        '[ORM] ✅ SQL DB Connection has been established successfully.',
         datastore.connectionString || datastore.options
       );
       return sequelize;

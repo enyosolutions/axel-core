@@ -12,7 +12,7 @@ const defaultRouter = require('./router.js').router;
 const defaultModelsLoader = require('./models.js').modelsLoader;
 
 const l = require('./services/logger.js');
-const errorHandler = require('./middlewares/error-handler');
+const defaultErrorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
 const AxelManager = require('./services/AxelManager.js');
 // const AxelAdmin = require('./services/AxelAdmin.js');
@@ -28,6 +28,7 @@ class Server {
     this.router = defaultRouter;
     this.beforeFn = [];
     this.afterFn = [];
+    this.errorHandler = defaultErrorHandler;
     this.app = app;
     this.initCompleted = false;
     this.middlewares = {};
@@ -101,6 +102,17 @@ class Server {
     return this;
   }
 
+  /**
+ * Set the middlewares for handling errors
+ * @param {*} handler func | func[]
+ * @returns
+ * @memberof Server
+ */
+  setErrorHandler(handler) {
+    this.errorHandler = handler;
+    return this;
+  }
+
   models(modelsFn) {
     this.modelsFn = modelsFn;
     debug('models fn defined');
@@ -147,7 +159,7 @@ class Server {
             this.executeCallbackFunctions(this.afterFn, app);
           }
 
-          app.use(errorHandler);
+          app.use(this.errorHandler);
           app.emit('app-ready', { axel });
           return app;
         })
