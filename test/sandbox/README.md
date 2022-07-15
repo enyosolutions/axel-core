@@ -77,7 +77,7 @@ Create the `.env` file at the root (example can be found in the `.env.test` file
 Enter the MySQL database config and a token (for JSON Web Token) in `api/src/config/local.js` (`sqldb` section)
 
 
-# Synchronyze 
+# Synchronize
 
 ## Run It
 #### Run in *development* mode:

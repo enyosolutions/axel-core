@@ -67,7 +67,7 @@ module.exports = {
         title: 'Custom title for this model when displayed in a tab'
       },
       tabIsVisible: {
-        type: ['string', 'boolean', 'function'],
+        type: ['string', 'boolean'],
         title: 'Display condition for this model when displayed in a tab',
         description: 'Templated rules for displaying this field',
         field: {
