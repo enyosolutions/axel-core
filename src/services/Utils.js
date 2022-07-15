@@ -389,7 +389,13 @@ const Utils = {
         : axel.config.framework.defaultPagination;
     }
     limit = _.toNumber(limit);
-    const offset = startPage * limit;
+    let offset = 0;
+    if (axel.config.paginationStartsAtZero) {
+      offset = startPage * limit;
+    } else {
+      offset = (startPage > 0 ? startPage - 1 : 0) * limit;
+    }
+
     const sortOptions = req.query.sort || options.sort;
     const order = sortOptions ? _.toPairs(sortOptions) : [];
     let attributes = req.query.fields;

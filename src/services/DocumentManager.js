@@ -48,7 +48,7 @@ const DocumentManager = {
 
       multer({
         storage,
-        limits: {
+        limits: options.limits || {
           fieldSize: 250 * 1024 * 1024
         }
       }).single('file')(req, res, (err) => {
