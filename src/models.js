@@ -9,7 +9,7 @@ const { DataTypes } = require('sequelize');
 const axel = require('./axel.js');
 
 const hooksCache = {};
-
+axel.hooks = hooksCache;
 const loadHook = (model) => {
   if (model.hooks) {
     return;
@@ -460,6 +460,7 @@ function injectUnifiedFunctions(model) {
 async function modelsLoader(app) {
   await loadSchemaModels();
   await loadSqlModels();
+  await loadHook({ identity: '_global' });
   if (process.env.NODE_ENV === 'development') {
     await findModelsDifferences();
   }
