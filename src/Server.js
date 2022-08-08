@@ -140,6 +140,10 @@ class Server {
     }
   }
 
+  loadModels() {
+    return this.modelsFn(app);
+  }
+
   async start() {
     axel.init();
 

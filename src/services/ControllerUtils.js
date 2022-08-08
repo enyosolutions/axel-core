@@ -14,7 +14,7 @@ module.exports.execHook = async (modelName, hookName, ...rest) => {
       await output;
       return null;
     }
-    return Promise.resolve(null);
+    return null;
   }
   return null;
 };

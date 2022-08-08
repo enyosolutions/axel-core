@@ -283,6 +283,7 @@ const loadEndpointMiddleware = (endpoint) => {
     }
     req.params.endpoint = endpoint;
     req.endpoint = endpoint;
+    req.modelName = endpoint;
     next();
   };
 };

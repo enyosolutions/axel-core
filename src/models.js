@@ -47,7 +47,7 @@ const loadSchemaModel = (filePath) => {
   /* eslint-enable */
 
   if (!model.identity) {
-    console.log('[ORM] model identity not found in', filePath, model);
+    console.warn('[ORM] model identity not found in', filePath, model);
 
     throw new Error(`[ORM] missing identity for ${filePath}`);
   }
