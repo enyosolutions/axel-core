@@ -40,7 +40,7 @@ const loadHook = (model) => {
   return hooksCache[model.identity];
 };
 
-const loadSchemaModel = (filePath) => {
+const loadSchemaModel = (filePath, extensions = {}) => {
   debug('Loading schema model', filePath);
   /* eslint-disable */
   let model = require(`${path.resolve(filePath)}`);
@@ -51,6 +51,10 @@ const loadSchemaModel = (filePath) => {
 
     throw new Error(`[ORM] missing identity for ${filePath}`);
   }
+
+  // Apply schema model extensions if any
+  model = _.merge(model, extensions[model.identity] || {});
+
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);
   }
@@ -169,7 +173,7 @@ const loadSqlModel = (filePath, sequelize) => {
   axel.logger.verbose('[ORM] skipping file %s', filePath);
 };
 
-const loadSchemaModels = () => {
+const loadSchemaModels = (extensions = {}) => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
     axel.logger.info('[ORM] loading schema models');
@@ -188,7 +192,7 @@ const loadSchemaModels = () => {
       const promises = files.map((file) => {
         const filePath = `${modelsLocation}/${file}`;
         axel.logger.verbose('[ORM] loading schema model', filePath);
-        return loadSchemaModel(filePath);
+        return loadSchemaModel(filePath, extensions);
       });
 
       Promise.all(promises)
@@ -209,7 +213,7 @@ const loadSchemaModels = () => {
 /**
  * @description load all the sql defined models
  */
-const loadSqlModels = () => {
+const loadSqlModels = (extensions = {}) => {
   debug('loadSqlModels');
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
@@ -253,7 +257,10 @@ const loadSqlModels = () => {
     }
     const loadedModels = files.map((file) => {
       const filePath = `${modelsLocation}/${file}`;
-      const model = loadSqlModel(filePath, sequelize);
+      let model = loadSqlModel(filePath, sequelize);
+
+      // Apply SQL model extensions if any
+      model = _.merge(model, extensions[model.identity] || {});
       sqlModels[model.identity] = model.em;
       return model;
     });
@@ -457,9 +464,9 @@ function injectUnifiedFunctions(model) {
   model.em.unifiedCount = model.em.count;
 }
 
-async function modelsLoader(app) {
-  await loadSchemaModels();
-  await loadSqlModels();
+async function modelsLoader(app, sqlModelExtensions = {}, schemaModelExtensions = {}) {
+  await loadSchemaModels(schemaModelExtensions);
+  await loadSqlModels(sqlModelExtensions);
   await loadHook({ identity: '_global' });
   if (process.env.NODE_ENV === 'development') {
     await findModelsDifferences();
