@@ -1,6 +1,6 @@
+const debug = require('debug')('axel:api:hooks');
 const { has, get } = require('lodash');
 const axel = require('../axel');
-const debug = require('debug')('axel:api:hooks');
 
 module.exports.execHook = async (modelName, hookName, ...rest) => {
   if (axel.hooks._global && axel.hooks._global[hookName]) {

@@ -113,7 +113,28 @@ class Server {
     return this;
   }
 
+  /**
+ *
+ *
+ * @param {*} modelsFn
+ * @returns
+ * @memberof Server
+ * @deprecated
+ */
   models(modelsFn) {
+    this.modelsFn = modelsFn;
+    debug('models fn defined');
+    return this;
+  }
+
+  /**
+   * Changes the model loader function
+   *
+   * @param {*} modelsFn
+   * @returns
+   * @memberof Server
+   */
+  setModelsLoader(modelsFn) {
     this.modelsFn = modelsFn;
     debug('models fn defined');
     return this;

@@ -45,7 +45,7 @@
     "mkdirp": "^1.0.4",
     "moment": "^2.29.1",
     "multer": "^1.4.2",
-    "pino": "7.3.0",
+    "pino": "7",
     "pino-colada": "^2.1.0",
     "pino-pretty": "^4.3.0",
     "serialize-javascript": "^5.0.1",
