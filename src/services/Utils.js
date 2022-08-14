@@ -91,14 +91,14 @@ const Utils = {
   sqlFormatForSearchMode(str, mode) {
     mode = mode || axel.config.framework.defaultApiSearchMode;
     switch (mode) {
-        default:
-        case 'exact':
-          return { [Op.eq]: str };
-        case 'full':
-        case 'wildcard':
-          return { [Op.like]: `%${str}%` };
-        case 'start':
-          return { [Op.like]: `${str}%` };
+      default:
+      case 'exact':
+        return { [Op.eq]: str };
+      case 'full':
+      case 'wildcard':
+        return { [Op.like]: `%${str}%` };
+      case 'start':
+        return { [Op.like]: `${str}%` };
     }
   },
 
@@ -219,49 +219,49 @@ const Utils = {
 
   getQueryForFilter(filter, value, searchMode = 'start') {
     switch (filter) {
-        case '$isNull':
-          return { [Op.is]: null };
-        case '$isNotNull':
-          return { [Op.not]: null };
-        case '$isDefined':
-          return {
-            [Op.not]: null,
-            [Op.ne]: ''
-          };
-        case '$isNotDefined':
-          return {
-            [Op.or]: [
-              { [Op.is]: null },
-              { [Op.eq]: '' }
-            ]
-          };
-        case '$startsWith':
-          return { [Op[filter.replace('$', '')]]: `${value}%` };
-        case '$endsWith':
-          return { [Op[filter.replace('$', '')]]: `%${value}` };
-        case '$substring':
-          return { [Op[filter.replace('$', '')]]: `%${value}%` };
-        case '$eq':
-        case '$ne':
-        case '$gt':
-        case '$gte':
-        case '$lt':
-        case '$lte':
-        case '$like':
-        case '$notLike':
-        case '$in':
-        case '$notIn':
-          return { [Op[filter.replace('$', '')]]: value };
-        case '$between':
-        case '$notBetween':
-          return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
-        case '$custom':
-          return value;
-        default:
-          if (searchMode === 'exact') {
-            return this.sqlFormatForSearchMode(value, searchMode);
-          }
+      case '$isNull':
+        return { [Op.is]: null };
+      case '$isNotNull':
+        return { [Op.not]: null };
+      case '$isDefined':
+        return {
+          [Op.not]: null,
+          [Op.ne]: ''
+        };
+      case '$isNotDefined':
+        return {
+          [Op.or]: [
+            { [Op.is]: null },
+            { [Op.eq]: '' }
+          ]
+        };
+      case '$startsWith':
+        return { [Op[filter.replace('$', '')]]: `${value}%` };
+      case '$endsWith':
+        return { [Op[filter.replace('$', '')]]: `%${value}` };
+      case '$substring':
+        return { [Op[filter.replace('$', '')]]: `%${value}%` };
+      case '$eq':
+      case '$ne':
+      case '$gt':
+      case '$gte':
+      case '$lt':
+      case '$lte':
+      case '$like':
+      case '$notLike':
+      case '$in':
+      case '$notIn':
+        return { [Op[filter.replace('$', '')]]: value };
+      case '$between':
+      case '$notBetween':
+        return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
+      case '$custom':
+        return value;
+      default:
+        if (searchMode === 'exact') {
           return this.sqlFormatForSearchMode(value, searchMode);
+        }
+        return this.sqlFormatForSearchMode(value, searchMode);
     }
   },
 
@@ -379,7 +379,7 @@ const Utils = {
   ) {
     const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
-    const endpoint = req.endpoint || req.params.endpoint;
+    const endpoint = req.endpoint || req.params.endpoint || req.modelName;
     let limit;
     if (isListOfValues) {
       limit = axel.config.framework.defaultLovPagination;
@@ -519,7 +519,7 @@ const Utils = {
   },
 
   getEntityManager(req, res) {
-    const endpoint = _.isString(req) ? req : (req.params.endpoint || req.endpoint);
+    const endpoint = _.isString(req) ? req : (req.params.endpoint || req.endpoint || req.modelName);
     if (!axel.models[endpoint] || !axel.models[endpoint].em) {
       console.warn('REQUESTED  ENDPOINT', endpoint, 'DOES NOT EXISTS');
       res.status(404).json({
