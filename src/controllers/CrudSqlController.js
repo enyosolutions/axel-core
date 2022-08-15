@@ -106,7 +106,6 @@ class CrudSqlController {
         startPage, limit, offset, order
       } = req.pagination;
       let query = req.parsedQuery;
-      console.log('endpoint', endpoint);
       const repository = Utils.getEntityManager(req, resp);
       if (!repository) {
         throw new ExtendedError({
