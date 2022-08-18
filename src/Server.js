@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const bodyParser = require('body-parser');
 const http = require('http');
@@ -165,6 +166,8 @@ class Server {
         return 0;
       });
 
+    const enabledPlugins = [];
+
     for (let i = 0; i < plugins.length; i++) {
       // Load the plugin data from the specified location
       const plugin = plugins[i];
@@ -179,7 +182,7 @@ class Server {
         continue;
       }
 
-      if (!this.registeredPluginNames.includes(plugin.name)) {
+      if (this.registeredPluginNames.includes(plugin.name)) {
         debug(`Plugin ${plugin.name} has been registered already, skipping`);
         continue;
       }
@@ -191,12 +194,31 @@ class Server {
 
       debug(`Loading plugin ${plugin.name}`);
 
-      const pluginData = require(plugin.isRelative ? path.resolve(process.cwd(), plugin.location) : plugin.path);
+      let pathToPlugin;
+
+      try {
+        if (plugin.relative) {
+          pathToPlugin = path.resolve(process.cwd(), plugin.location);
+        } else {
+          pathToPlugin = path.dirname(require.resolve(plugin.location));
+        }
+      } catch (e) {
+        l.error(e);
+      }
+
+      if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
+        continue;
+      }
+
+      const pluginData = require(pathToPlugin);
 
       if (!pluginData) {
         debug(`Failed to load plugin ${plugin.name}, data not found`);
         continue;
       }
+
+      plugin.resolvedPath = pathToPlugin;
+      enabledPlugins.push(plugin);
 
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
@@ -211,71 +233,15 @@ class Server {
       if (pluginData.afterFn && _.isFunction(pluginData.afterFn)) {
         this.afterFn.push(pluginData.afterFn);
       }
+
+      this.registeredPluginNames.push(plugin.name);
       
-      // Load the model content if any are registered
-      if (pluginData.models) {
-        for (modelName in pluginData.models) {
-          const modelData = pluginData.models[modelName];
-
-          if (!modelData) {
-            debug(`Can't load model ${modelName} for plugin ${plugin.name} as it does not contain any changes, skipping`);
-            continue;
-          }
-
-          if (_.isObject(modelData.sequelize) && modelData.sequelize.identity) {
-            debug(`Loading sequelize model update ${modelName} for plugin ${plugin.name}`);
-            const currentUpdates = this.pluginSequelizeModels[modelData.sequelize.identity] || {};
-
-            const pluginUpdates = Object.assign(
-              currentUpdates,
-              _.omit(modelData.sequelize, ['entity']),
-              {
-                entity: Object.assign(
-                  currentUpdates.entity || {},
-                  _.omit(modelData.sequelize.entity || {}, ['attributes']),
-                  {
-                    attributes: Object.assign(
-                      currentUpdates.entity.attributes || {},
-                      modelData.sequelize.entity.attributes || {},
-                    ),
-                  }
-                )
-              }
-            );
-
-            this.pluginSequelizeModels[modelData.sequelize.identity] = pluginUpdates;
-            debug(`Loaded sequelize model update ${modelName} for plugin ${plugin.name}`);
-          }
-
-          if (_.isObject(modelData.schema) && modelData.schema.identity) {
-            debug(`Loading schema model update ${modelName} for plugin ${plugin.name}`);
-            const currentUpdates = this.pluginSchemaModels[modelData.schema.identity] || {};
-
-            const pluginUpdates = Object.assign(
-              currentUpdates,
-              _.omit(modelData.schema, ['schema']),
-              {
-                schema: Object.assign(
-                  currentUpdates.schema || {},
-                  _.omit(modelData.schema.schema || {}, ['properties']),
-                  {
-                    properties: Object.assign(
-                      currentUpdates.schema.properties || {},
-                      modelData.schema.schema.properties || {},
-                    ),
-                  }
-                )
-              }
-            );
-
-            this.pluginSchemaModels[modelData.schema.identity] = pluginUpdates;
-            debug(`Loaded schema model update ${modelName} for plugin ${plugin.name}`);
-          }
-        }
-      }
-
       debug(`Loaded plugin ${plugin.name} successfully`);
     }
+
+    axel.enabledPlugins = enabledPlugins;
+
+    return this;
   }
 
   async start() {

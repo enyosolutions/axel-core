@@ -40,7 +40,7 @@ const loadHook = (model) => {
   return hooksCache[model.identity];
 };
 
-const loadSchemaModel = (filePath, extensions = {}) => {
+const loadSchemaModel = (filePath) => {
   debug('Loading schema model', filePath);
   /* eslint-disable */
   let model = require(`${path.resolve(filePath)}`);
@@ -51,9 +51,6 @@ const loadSchemaModel = (filePath, extensions = {}) => {
 
     throw new Error(`[ORM] missing identity for ${filePath}`);
   }
-
-  // Apply schema model extensions if any
-  model = _.merge(model, extensions[model.identity] || {});
 
   if (model.collectionName && axel.mongodb) {
     model.collection = axel.mongodb.get(model.collectionName);
@@ -173,47 +170,80 @@ const loadSqlModel = (filePath, sequelize) => {
   axel.logger.verbose('[ORM] skipping file %s', filePath);
 };
 
-const loadSchemaModels = (extensions = {}) => {
-  debug('loadSchemaModels');
+const getSchemaFileListForSingleLocation = (modelsLocation) => {
+  console.log(modelsLocation);
+  debug('getSchemaFileListForSingleLocation');
   return new Promise((resolve, reject) => {
-    axel.logger.info('[ORM] loading schema models');
-    const modelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
-    if (!axel.models) {
-      axel.models = {};
+    if (!modelsLocation) {
+      resolve([]);
     }
+
+    axel.logger.info(`[ORM] loading schema models from ${modelsLocation}`);
+
     fs.readdir(modelsLocation, (err, files) => {
       if (err) {
         axel.logger.warn(err);
         return reject(err);
       }
+
       files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
-      axel.logger.info('[ORM] found %s schemas files', files.length);
+      axel.logger.info('[ORM] found %s schemas files', files.length, modelsLocation);
       debug('Loading schema models: ', files.length, 'files');
-      const promises = files.map((file) => {
-        const filePath = `${modelsLocation}/${file}`;
-        axel.logger.verbose('[ORM] loading schema model', filePath);
-        return loadSchemaModel(filePath, extensions);
+
+      const filePathList = files.map((file) => {
+        return `${modelsLocation}/${file}`;
       });
 
-      Promise.all(promises)
-        .then(() => {
-          axel.logger.debug('[ORM] schema final callback');
-          debug('[ORM] schema final callback');
-          resolve();
-        })
-        .catch((errAsync) => {
-          axel.logger.warn(errAsync);
-          debug(errAsync);
-          return reject(errAsync);
-        });
+      resolve(filePathList);
     });
+  });
+}
+
+const loadSchemaModels = () => {
+  debug('loadSchemaModels');
+  return new Promise((resolve, reject) => {
+    axel.logger.info('[ORM] loading schema models');
+    const commonModelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
+    
+    if (!axel.models) {
+      axel.models = {};
+    }
+
+    const modelLocations = [commonModelsLocation];
+
+    for (let i = 0; i < axel.enabledPlugins.length; i++) {
+      const pluginData = axel.enabledPlugins[i];
+
+      if (!pluginData || !pluginData.resolvedPath) {
+        continue;
+      }
+
+      modelLocations.push(`${pluginData.resolvedPath}/api/models/schema`);
+    }
+
+    Promise.all(modelLocations.map(location => getSchemaFileListForSingleLocation(location)))
+    .then((fileLists) => _.flatten(fileLists))
+    .then((filesToLoad) => Promise.all(filesToLoad.map(filePath => {
+      axel.logger.verbose('[ORM] loading schema model', filePath);
+      return loadSchemaModel(filePath);
+    })))
+    .then(() => {
+      axel.logger.debug('[ORM] schema final callback');
+      debug('[ORM] schema final callback');
+      resolve();
+    })
+    .catch((errAsync) => {
+      axel.logger.warn(errAsync);
+      debug(errAsync);
+      return reject(errAsync);
+    })
   });
 };
 
 /**
  * @description load all the sql defined models
  */
-const loadSqlModels = (extensions = {}) => {
+const loadSqlModels = () => {
   debug('loadSqlModels');
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
@@ -259,8 +289,6 @@ const loadSqlModels = (extensions = {}) => {
       const filePath = `${modelsLocation}/${file}`;
       let model = loadSqlModel(filePath, sequelize);
 
-      // Apply SQL model extensions if any
-      model = _.merge(model, extensions[model.identity] || {});
       sqlModels[model.identity] = model.em;
       return model;
     });
@@ -464,9 +492,9 @@ function injectUnifiedFunctions(model) {
   model.em.unifiedCount = model.em.count;
 }
 
-async function modelsLoader(app, sqlModelExtensions = {}, schemaModelExtensions = {}) {
-  await loadSchemaModels(schemaModelExtensions);
-  await loadSqlModels(sqlModelExtensions);
+async function modelsLoader(app) {
+  await loadSchemaModels();
+  await loadSqlModels();
   await loadHook({ identity: '_global' });
   if (process.env.NODE_ENV === 'development') {
     await findModelsDifferences();
