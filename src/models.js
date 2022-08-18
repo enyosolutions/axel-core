@@ -171,8 +171,8 @@ const loadSqlModel = (filePath, sequelize) => {
 };
 
 const getSchemaFileListForSingleLocation = (modelsLocation) => {
-  console.log(modelsLocation);
   debug('getSchemaFileListForSingleLocation');
+
   return new Promise((resolve, reject) => {
     if (!modelsLocation) {
       resolve([]);

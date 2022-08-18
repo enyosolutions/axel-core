@@ -149,8 +149,23 @@ class Server {
   }
 
   registerPlugins() {
+    if (!axel.config.plugins || !_.isObject(axel.config.plugins)) {
+      return this;
+    }
+
+    const allPlugins = [];
+
+    Object.entries(axel.config.plugins).forEach(([name, pluginData]) => {
+      if (!name || !pluginData || !_.isObject(pluginData)) {
+        return;
+      }
+
+      pluginData.name = name;
+      allPlugins.push(pluginData);
+    });
+
     // Get the sorted plugin list
-    const plugins = (axel.config && axel.config.plugins && _.isArray(axel.config.plugins) ? axel.config.plugins : [])
+    const plugins = allPlugins
       .sort((pluginA, pluginB) => {
         const priorityA = pluginA ? pluginA.priority : null;
         const priorityB = pluginB ? pluginB.priority : null;
