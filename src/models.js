@@ -57,7 +57,8 @@ const loadSchemaModel = (filePath) => {
   }
   loadHook(model);
   debug('Loaded schema model => ', model.identity);
-  axel.models[model.identity] = model;
+  const existingModel = axel.models[model.identity] || {};
+  axel.models[model.identity] = _.merge(existingModel, model);
   return axel.models[model.identity];
 };
 
@@ -100,12 +101,17 @@ const loadSqlModel = (filePath, sequelize) => {
     } catch (err) {
       console.warn('[ORM][WARN] ', filePath, err);
     }
+
     if (!model) {
       throw new Error('missing_model_' + filePath);
     }
+
     /* eslint-enable */
     const tableName = model.entity && model.entity.options && model.entity.options && model.entity.options.tableName;
     axel.logger.verbose('Loading identity', model);
+
+    const existingModel = axel.models[model.identity] || {};
+    model = _.merge(existingModel, model);
 
     // loading hooks
     if (hooks && Object.keys(hooks).length) {
@@ -122,6 +128,7 @@ const loadSqlModel = (filePath, sequelize) => {
       });
       model.hooks = hooks;
     }
+
     debug('Loading entity', model.identity);
     if (!model.identity) {
       throw new Error(`[ORM]  missing sql identity for ${filePath}`);
@@ -136,6 +143,7 @@ const loadSqlModel = (filePath, sequelize) => {
     if (!model.entity.options) {
       model.entity.options = {};
     }
+
     model.entity.options = _.merge(
       {
         freezeTableName: true,
@@ -145,9 +153,11 @@ const loadSqlModel = (filePath, sequelize) => {
       },
       model.entity.options
     );
+
     if (model.entity.attributes) {
       loadSqlAttributes(model);
     }
+
     const SqlModel = sequelize.define(
       _.upperFirst(_.camelCase(model.identity)),
       model.entity.attributes,
@@ -155,11 +165,7 @@ const loadSqlModel = (filePath, sequelize) => {
     );
     // SqlModel.sequelize = Sequelize;
 
-    if (!axel.models[model.identity]) {
-      axel.models[model.identity] = model;
-    } else {
-      axel.models[model.identity].entity = model.entity;
-    }
+    axel.models[model.identity] = model;
     axel.models[model.identity].em = SqlModel;
     // @deprecated
     axel.models[model.identity].repository = SqlModel;
@@ -190,21 +196,19 @@ const getSchemaFileListForSingleLocation = (modelsLocation) => {
       axel.logger.info('[ORM] found %s schemas files', files.length, modelsLocation);
       debug('Loading schema models: ', files.length, 'files');
 
-      const filePathList = files.map((file) => {
-        return `${modelsLocation}/${file}`;
-      });
+      const filePathList = files.map(file => `${modelsLocation}/${file}`);
 
       resolve(filePathList);
     });
   });
-}
+};
 
 const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
     axel.logger.info('[ORM] loading schema models');
     const commonModelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
-    
+
     if (!axel.models) {
       axel.models = {};
     }
@@ -214,29 +218,27 @@ const loadSchemaModels = () => {
     for (let i = 0; i < axel.enabledPlugins.length; i++) {
       const pluginData = axel.enabledPlugins[i];
 
-      if (!pluginData || !pluginData.resolvedPath) {
-        continue;
+      if (pluginData && pluginData.resolvedPath) {
+        modelLocations.push(`${pluginData.resolvedPath}/api/models/schema`);
       }
-
-      modelLocations.push(`${pluginData.resolvedPath}/api/models/schema`);
     }
 
     Promise.all(modelLocations.map(location => getSchemaFileListForSingleLocation(location)))
-    .then((fileLists) => _.flatten(fileLists))
-    .then((filesToLoad) => Promise.all(filesToLoad.map(filePath => {
-      axel.logger.verbose('[ORM] loading schema model', filePath);
-      return loadSchemaModel(filePath);
-    })))
-    .then(() => {
-      axel.logger.debug('[ORM] schema final callback');
-      debug('[ORM] schema final callback');
-      resolve();
-    })
-    .catch((errAsync) => {
-      axel.logger.warn(errAsync);
-      debug(errAsync);
-      return reject(errAsync);
-    })
+      .then(fileLists => _.flatten(fileLists))
+      .then(filesToLoad => Promise.all(filesToLoad.map((filePath) => {
+        axel.logger.verbose('[ORM] loading schema model', filePath);
+        return loadSchemaModel(filePath);
+      })))
+      .then(() => {
+        axel.logger.debug('[ORM] schema final callback');
+        debug('[ORM] schema final callback');
+        return resolve();
+      })
+      .catch((errAsync) => {
+        axel.logger.warn(errAsync);
+        debug(errAsync);
+        return reject(errAsync);
+      });
   });
 };
 
@@ -266,35 +268,55 @@ const loadSqlModels = () => {
     } catch (err) {
       console.error(err);
     }
-    const modelsLocation = _.get(axel, 'config.framework.modelsLocation', `${process.cwd()}/src/api/models/sequelize`);
-    debug('[ORM] sql models location', modelsLocation);
+
+    const commonModelsLocation = _.get(axel, 'config.framework.modelsLocation', `${process.cwd()}/src/api/models/sequelize`);
+    const modelLocations = [commonModelsLocation];
+
+    for (let i = 0; i < axel.enabledPlugins.length; i++) {
+      const pluginData = axel.enabledPlugins[i];
+
+      if (pluginData && pluginData.resolvedPath) {
+        modelLocations.push(`${pluginData.resolvedPath}/api/models/sequelize`);
+      }
+    }
+
+    debug('[ORM] sql models locations', modelLocations.join(', '));
+
     if (!axel.models) {
       axel.models = {};
     }
-    let files;
-    try {
-      files = fs.readdirSync(modelsLocation);
-      files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
-    } catch (err) {
-      console.error('[ORM] sequelize models location not found\n', err.message);
-      process.exit(-1);
-    }
 
-    axel.logger.info('[ORM] found %s sequelize models files', files.length);
-    debug('MODELS :: found %s sequelize models files', files.length);
-    if (!files.length) {
+    const modelFilePaths = [];
+
+    modelLocations.forEach((location) => {
+      try {
+        const singleLocationFilePaths = fs.readdirSync(location).filter(
+          filePath => _.endsWith(filePath, '.js') || _.endsWith(filePath, '.mjs') || _.endsWith(filePath, '.ts')
+        ).map((filePath => `${location}/${filePath}`));
+        modelFilePaths.push(...singleLocationFilePaths);
+      } catch (err) {
+        console.error('[ORM] sequelize models location not found\n', err.message);
+        process.exit(-1);
+      }
+    });
+
+    axel.logger.info('[ORM] found %s sequelize models files', modelFilePaths.length);
+    debug('MODELS :: found %s sequelize models files', modelFilePaths.length);
+    if (!modelFilePaths.length) {
       axel.logger.warn('[ORM] no sequelize models found in the provided location');
     }
-    const loadedModels = files.map((file) => {
-      const filePath = `${modelsLocation}/${file}`;
-      let model = loadSqlModel(filePath, sequelize);
+
+    const loadedModels = modelFilePaths.map((filePath) => {
+      const model = loadSqlModel(filePath, sequelize);
 
       sqlModels[model.identity] = model.em;
       return model;
     });
+
     try {
       axel.logger.verbose('[ORM] loading associations');
       debug('[ORM] loading associations', loadedModels.map(m => m.identity));
+
       Object.keys(loadedModels).forEach((key) => {
         const model = loadedModels[key];
         if (model.entity && model.entity.attributes) {

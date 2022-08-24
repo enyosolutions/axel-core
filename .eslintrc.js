@@ -103,5 +103,8 @@ module.exports = {
     'max-lines-per-function': ['error', { max: 100, skipComments: true, skipBlankLines: true }],
     'max-lines': ['error', { max: 800, skipComments: true }],
     'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 0 }],
+    'no-continue': 0,
+    'global-require': 0,
+    'import/no-dynamic-require': 0,
   },
 };

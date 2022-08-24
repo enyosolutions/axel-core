@@ -192,6 +192,11 @@ class Server {
         continue;
       }
 
+      if (!plugin.enabled) {
+        debug(`Plugin at index ${i} is disabled, skipping`);
+        continue;
+      }
+
       if (!plugin.name) {
         debug(`Plugin at index ${i} has no associated name, skipping`);
         continue;
@@ -238,7 +243,7 @@ class Server {
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
         pluginData.register(app);
-      } 
+      }
 
       // Handle beforeFn/afterFn if any
       if (pluginData.beforeFn && _.isFunction(pluginData.beforeFn)) {
@@ -249,8 +254,16 @@ class Server {
         this.afterFn.push(pluginData.afterFn);
       }
 
+      if (pluginData.routes) {
+        axel.config.routes = _.merge(axel.config.routes, pluginData.routes);
+      }
+
+      if (pluginData.policies) {
+        axel.config.policies = _.merge(axel.config.policies || {}, pluginData.policies);
+      }
+
       this.registeredPluginNames.push(plugin.name);
-      
+
       debug(`Loaded plugin ${plugin.name} successfully`);
     }
 
