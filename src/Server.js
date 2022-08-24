@@ -238,7 +238,6 @@ class Server {
       }
 
       plugin.resolvedPath = pathToPlugin;
-      enabledPlugins.push(plugin);
 
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
@@ -255,14 +254,15 @@ class Server {
       }
 
       if (pluginData.routes) {
-        axel.config.routes = _.merge(axel.config.routes, pluginData.routes);
+        plugin.routes = pluginData.routes;
       }
 
       if (pluginData.policies) {
-        axel.config.policies = _.merge(axel.config.policies || {}, pluginData.policies);
+        plugin.policies = pluginData.policies;
       }
 
       this.registeredPluginNames.push(plugin.name);
+      enabledPlugins.push(plugin);
 
       debug(`Loaded plugin ${plugin.name} successfully`);
     }

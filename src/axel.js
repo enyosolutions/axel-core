@@ -37,6 +37,7 @@ function loadConfig() {
     debug('merge', e);
     config = _.merge(config, data || data);
   });
+
   return config;
 }
 
@@ -66,6 +67,22 @@ const axel = {
     }
     axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
       if (config) {
+        debug('Applying routes/policies updates from the enabled plugins');
+
+        for (let i = 0; i < axel.enabledPlugins.length; i++) {
+          const pluginData = axel.enabledPlugins[i];
+
+          if (pluginData.routes) {
+            config.routes = _.merge(config.routes || {}, pluginData.routes);
+          }
+
+          if (pluginData.policies) {
+            config.policies = _.merge(config.policies || {}, pluginData.policies);
+          }
+        }
+
+        debug('Applied routes/policies updates from the enabled plugins');
+
         axel.config = config;
       }
 
