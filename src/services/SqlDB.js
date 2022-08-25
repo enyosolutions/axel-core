@@ -43,7 +43,8 @@ async function loadSequelize() {
       );
       return sequelize;
     } catch (err) {
-      axel.logger.error('[ORM] Unable to connect to the database:', err);
+      axel.logger.error(`[ORM] Unable to connect to the database: ${datastore.database}`);
+      console.error(err);
       process.exit(-1);
     }
   }

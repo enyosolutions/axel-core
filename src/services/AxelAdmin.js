@@ -7,6 +7,7 @@ const axel = require('../axel.js');
 
 const SchemaValidator = require('./SchemaValidator.js');
 const { loadSqlModel, loadSchemaModel } = require('../models.js');
+const { execHook } = require('./ControllerUtils.js');
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -360,7 +361,7 @@ class AxelAdmin {
 
   translateField(field, modelId, locale, fallback) {
     const key = `${axel.config.framework.axelAdmin.translationPrefix}.${modelId}.${field
-    }`;
+      }`;
     _.set(global.translationFallbacks, key, fallback);
     const tranlation = axel.i18n.__({
       phrase: key,

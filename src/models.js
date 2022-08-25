@@ -7,6 +7,7 @@ const path = require('path');
 const debug = d('axel:models');
 const { DataTypes } = require('sequelize');
 const axel = require('./axel.js');
+const logger = require('./services/logger');
 
 const hooksCache = {};
 axel.hooks = hooksCache;
@@ -87,7 +88,7 @@ const loadSqlAttributes = (model) => {
 
 const loadSqlModel = (filePath, sequelize) => {
   if (sequelize) {
-    axel.logger.verbose('[ORM] loading sequelize model  %s', filePath);
+    logger.verbose('[ORM] loading sequelize model  %s', filePath);
 
     let model;
     let hooks;
@@ -104,7 +105,7 @@ const loadSqlModel = (filePath, sequelize) => {
     }
     /* eslint-enable */
     const tableName = model.entity && model.entity.options && model.entity.options && model.entity.options.tableName;
-    axel.logger.verbose('Loading identity', model);
+    logger.verbose('Loading identity', model);
 
     // loading hooks
     if (hooks && Object.keys(hooks).length) {
@@ -166,39 +167,39 @@ const loadSqlModel = (filePath, sequelize) => {
 
     return axel.models[model.identity];
   }
-  axel.logger.verbose('[ORM] skipping file %s', filePath);
+  logger.verbose('[ORM] skipping file %s', filePath);
 };
 
 const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
-    axel.logger.info('[ORM] loading schema models');
+    logger.info('[ORM] loading schema models');
     const modelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
     if (!axel.models) {
       axel.models = {};
     }
     fs.readdir(modelsLocation, (err, files) => {
       if (err) {
-        axel.logger.warn(err);
+        logger.warn(err);
         return reject(err);
       }
       files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
-      axel.logger.info('[ORM] found %s schemas files', files.length);
+      logger.info('[ORM] found %s schemas files', files.length);
       debug('Loading schema models: ', files.length, 'files');
       const promises = files.map((file) => {
         const filePath = `${modelsLocation}/${file}`;
-        axel.logger.verbose('[ORM] loading schema model', filePath);
+        logger.verbose('[ORM] loading schema model', filePath);
         return loadSchemaModel(filePath);
       });
 
       Promise.all(promises)
         .then(() => {
-          axel.logger.debug('[ORM] schema final callback');
+          logger.debug('[ORM] schema final callback');
           debug('[ORM] schema final callback');
           resolve();
         })
         .catch((errAsync) => {
-          axel.logger.warn(errAsync);
+          logger.warn(errAsync);
           debug(errAsync);
           return reject(errAsync);
         });
@@ -214,7 +215,7 @@ const loadSqlModels = () => {
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
     debug('ORM : loading sql models');
-    axel.logger.debug('ORM : loading sql models');
+    logger.debug('ORM : loading sql models');
     if (!(axel.config && axel.config.sqldb && axel.config.sqldb.host)) {
       debug('ORM : ⚠️ no sql configured');
       return resolve();
@@ -246,10 +247,10 @@ const loadSqlModels = () => {
       process.exit(-1);
     }
 
-    axel.logger.info('[ORM] found %s sequelize models files', files.length);
+    logger.info('[ORM] found %s sequelize models files', files.length);
     debug('MODELS :: found %s sequelize models files', files.length);
     if (!files.length) {
-      axel.logger.warn('[ORM] no sequelize models found in the provided location');
+      logger.warn('[ORM] no sequelize models found in the provided location');
     }
     const loadedModels = files.map((file) => {
       const filePath = `${modelsLocation}/${file}`;
@@ -258,7 +259,7 @@ const loadSqlModels = () => {
       return model;
     });
     try {
-      axel.logger.verbose('[ORM] loading associations');
+      logger.verbose('[ORM] loading associations');
       debug('[ORM] loading associations', loadedModels.map(m => m.identity));
       Object.keys(loadedModels).forEach((key) => {
         const model = loadedModels[key];
@@ -301,10 +302,10 @@ const loadSqlModels = () => {
         }
       });
 
-      axel.logger.verbose('[ORM] sequelize final callback');
+      logger.verbose('[ORM] sequelize final callback');
       resolve();
     } catch (errAsync) {
-      axel.logger.warn(errAsync);
+      logger.warn(errAsync);
       return reject(errAsync);
     }
   });
@@ -313,9 +314,9 @@ const loadSqlModels = () => {
 const findModelsDifferences = () => new Promise((resolve, reject) => {
   try {
     /* eslint-disable */
-    axel.logger.verbose('[ORM] compare definitions');
-    axel.logger.info('\n\n\n');
-    axel.logger.info('___________________________');
+    logger.verbose('[ORM] compare definitions');
+    logger.info('\n\n\n');
+    logger.info('___________________________');
     const diffTable1 = [];
     const diffTable2 = [];
     Object.keys(axel.models).forEach(key => {
@@ -341,16 +342,16 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
       }
     });
     if (diffTable1.length) {
-      axel.logger.warn('[ORM] Fields present in sql but not in json');
+      logger.warn('[ORM] Fields present in sql but not in json');
       console.table(diffTable1);
     }
     if (diffTable2.length) {
-      axel.logger.warn('[ORM] Fields present in json but not in sql');
+      logger.warn('[ORM] Fields present in json but not in sql');
       console.table(diffTable2);
     }
     /* eslint-enable */
-    axel.logger.info('___________________________');
-    axel.logger.info('\n\n\n');
+    logger.info('___________________________');
+    logger.info('\n\n\n');
     resolve();
   } catch (err) {
     reject(err);
