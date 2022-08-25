@@ -361,7 +361,7 @@ class AxelAdmin {
 
   translateField(field, modelId, locale, fallback) {
     const key = `${axel.config.framework.axelAdmin.translationPrefix}.${modelId}.${field
-      }`;
+    }`;
     _.set(global.translationFallbacks, key, fallback);
     const tranlation = axel.i18n.__({
       phrase: key,
