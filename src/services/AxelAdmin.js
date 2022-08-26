@@ -7,6 +7,7 @@ const axel = require('../axel.js');
 
 const SchemaValidator = require('./SchemaValidator.js');
 const { loadSqlModel, loadSchemaModel } = require('../models.js');
+const { execHook } = require('./ControllerUtils.js');
 
 /**
  * COntains all the code necessary for bootstrapping the admin.

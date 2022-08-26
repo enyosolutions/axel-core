@@ -40,9 +40,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'yarn'
-    - run: cd axel-manager
-    - run: yarn
-    - run: yarn lint
-    - run: yarn build
-    
-    
+    - run: cd axel-manager && yarn
+    - run: cd axel-manager && yarn lint
+    - run: cd axel-manager && yarn build
+
+

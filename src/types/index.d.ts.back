@@ -39,6 +39,26 @@ export type Axel = {
   renderView: Function;
 };
 
+
+type Axel = {
+  port: number;
+  app?: Application;
+  config: { [key: string]: any };
+  logger: PinoLogger;
+  logg: PinoLogger;
+  rootPath: string;
+  init: Function;
+  models: { [key: string]: AxelModel };
+  routes: { [key: string] };
+  controllers: { [key: string] };
+  policies: { [key: string] };
+  mongodb?;
+  sqldb?;
+  rootPath: string;
+  renderView: Function;
+};
+
+
 export type ServerInitFunction = (app) => Promise<any>;
 
 

@@ -117,7 +117,28 @@ class Server {
     return this;
   }
 
+  /**
+ *
+ *
+ * @param {*} modelsFn
+ * @returns
+ * @memberof Server
+ * @deprecated
+ */
   models(modelsFn) {
+    this.modelsFn = modelsFn;
+    debug('models fn defined');
+    return this;
+  }
+
+  /**
+   * Changes the model loader function
+   *
+   * @param {*} modelsFn
+   * @returns
+   * @memberof Server
+   */
+  setModelsLoader(modelsFn) {
     this.modelsFn = modelsFn;
     debug('models fn defined');
     return this;
@@ -145,99 +166,24 @@ class Server {
   }
 
   loadModels() {
+    debug('loadModels: start');
     return this.modelsFn(app, this.pluginSequelizeModels, this.pluginSchemaModels);
   }
 
   registerPlugins() {
-    if (!axel.config.plugins || !_.isObject(axel.config.plugins)) {
+    debug('registerPlugins: start');
+    if (!axel.plugins || !_.isObject(axel.plugins)) {
       return this;
     }
 
-    const allPlugins = [];
 
-    Object.entries(axel.config.plugins).forEach(([name, pluginData]) => {
-      if (!name || !pluginData || !_.isObject(pluginData)) {
-        return;
-      }
+    const plugins = Object.values(axel.config.plugins);
 
-      pluginData.name = name;
-      allPlugins.push(pluginData);
-    });
-
-    // Get the sorted plugin list
-    const plugins = allPlugins
-      .sort((pluginA, pluginB) => {
-        const priorityA = pluginA ? pluginA.priority : null;
-        const priorityB = pluginB ? pluginB.priority : null;
-
-        if (priorityA < priorityB) {
-          return -1;
-        }
-
-        if (priorityA > priorityB) {
-          return 1;
-        }
-
-        return 0;
-      });
-
-    const enabledPlugins = [];
 
     for (let i = 0; i < plugins.length; i++) {
       // Load the plugin data from the specified location
-      const plugin = plugins[i];
+      const pluginData = plugins[i];
 
-      if (!plugin) {
-        debug(`Plugin at index ${i} has no data, skipping`);
-        continue;
-      }
-
-      if (!plugin.enabled) {
-        debug(`Plugin at index ${i} is disabled, skipping`);
-        continue;
-      }
-
-      if (!plugin.name) {
-        debug(`Plugin at index ${i} has no associated name, skipping`);
-        continue;
-      }
-
-      if (this.registeredPluginNames.includes(plugin.name)) {
-        debug(`Plugin ${plugin.name} has been registered already, skipping`);
-        continue;
-      }
-
-      if (!plugin.location) {
-        debug(`Plugin ${plugin.name} has no location path, skipping`);
-        continue;
-      }
-
-      debug(`Loading plugin ${plugin.name}`);
-
-      let pathToPlugin;
-
-      try {
-        if (plugin.relative) {
-          pathToPlugin = path.resolve(process.cwd(), plugin.location);
-        } else {
-          pathToPlugin = path.dirname(require.resolve(plugin.location));
-        }
-      } catch (e) {
-        l.error(e);
-      }
-
-      if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
-        continue;
-      }
-
-      const pluginData = require(pathToPlugin);
-
-      if (!pluginData) {
-        debug(`Failed to load plugin ${plugin.name}, data not found`);
-        continue;
-      }
-
-      plugin.resolvedPath = pathToPlugin;
 
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
@@ -253,28 +199,26 @@ class Server {
         this.afterFn.push(pluginData.afterFn);
       }
 
+      debug('Applying routes/policies updates from the enabled plugins');
+
       if (pluginData.routes) {
-        plugin.routes = pluginData.routes;
+        axel.config.routes = _.merge(axel.config.routes || {}, pluginData.routes);
       }
 
       if (pluginData.policies) {
-        plugin.policies = pluginData.policies;
+        axel.config.policies = _.merge(axel.config.policies || {}, pluginData.policies);
       }
 
-      this.registeredPluginNames.push(plugin.name);
-      enabledPlugins.push(plugin);
-
-      debug(`Loaded plugin ${plugin.name} successfully`);
+      debug('Applied routes/policies updates from the enabled plugins');
+      debug(`Loaded plugin ${pluginData.name} successfully`);
     }
-
-    axel.enabledPlugins = enabledPlugins;
 
     return this;
   }
 
   async start() {
     axel.init();
-
+    this.registerPlugins();
     if (this.beforeFn.length) {
       await this.executeCallbackFunctions(this.beforeFn, app);
     }

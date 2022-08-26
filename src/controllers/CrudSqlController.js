@@ -19,7 +19,7 @@ const { execHook, getPrimaryKey } = require('../services/ControllerUtils');
 
 const debug = d('axel:CrudSqlController');
 
-class CrudSqlController {
+const CrudSqlController = {
   stats(req, resp, next) {
     const output = {};
     const endpoint = req.params.endpoint;
@@ -96,17 +96,16 @@ class CrudSqlController {
         });
       })
       .catch(next);
-  }
+  },
 
-  async list(req, resp, next) {
-    const endpoint = req.endpoint || req.params.endpoint;
+  async findAll(req, resp, next) {
+    const endpoint = req.endpoint || req.params.endpoint || req.modelName;
     try {
       let items = [];
       const {
         startPage, limit, offset, order
       } = req.pagination;
       let query = req.parsedQuery;
-
       const repository = Utils.getEntityManager(req, resp);
       if (!repository) {
         throw new ExtendedError({
@@ -148,9 +147,10 @@ class CrudSqlController {
     } catch (err) {
       next(err);
     }
-  }
+  },
 
-  async get(req, resp, next) {
+
+  async findOne(req, resp, next) {
     const id = req.params.id;
     const endpoint = req.params.endpoint;
     try {
@@ -186,11 +186,12 @@ class CrudSqlController {
     } catch (err) {
       next(err);
     }
-  }
+  },
 
-  async post(req, resp, next) {
+
+  async create(req, resp, next) {
     const data = req.body;
-    const endpoint = req.endpoint || req.params.endpoint;
+    const endpoint = req.endpoint || req.params.endpoint || req.modelName;
     try {
       await execHook(endpoint, 'beforeApiCreate', { request: req, sequelizeQuery: {} });
       const repository = Utils.getEntityManager(req, resp);
@@ -208,7 +209,7 @@ class CrudSqlController {
     } catch (err) {
       next(err);
     }
-  }
+  },
 
   /**
   * [put description]
@@ -218,11 +219,11 @@ class CrudSqlController {
   * @param  {[type]} resp [description]
   * @return {[type]}      [description]
   */
-  async put(req, resp, next) {
+  async update(req, resp, next) {
     const id = req.params.id;
     const data = req.body;
 
-    const endpoint = req.params.endpoint || req.endpoint;
+    const endpoint = req.params.endpoint || req.endpoint || req.modelName;
     try {
       const primaryKey = getPrimaryKey(endpoint);
       const repository = Utils.getEntityManager(req, resp);
@@ -259,7 +260,7 @@ class CrudSqlController {
     } catch (err) {
       next(err);
     }
-  }
+  },
 
   /**
   * [delete Item]
@@ -269,10 +270,10 @@ class CrudSqlController {
   * @param  {[type]} resp [description]
   * @return {[type]}      [description]
   */
-  async delete(req, resp, next) {
+  async deleteOne(req, resp, next) {
     try {
       const id = req.params.id;
-      const endpoint = req.params.endpoint || req.endpoint;
+      const endpoint = req.params.endpoint || req.endpoint || req.modelName;
       const primaryKey = getPrimaryKey(endpoint);
       const repository = Utils.getEntityManager(req, resp);
 
@@ -302,7 +303,7 @@ class CrudSqlController {
     } catch (err) {
       next(err);
     }
-  }
+  },
 
   export(req, resp, next) {
     const endpoint = req.params.endpoint;
@@ -351,7 +352,7 @@ class CrudSqlController {
         });
       })
       .catch(next);
-  }
+  },
 
   getImportTemplate(req, resp, next) {
     const endpoint = req.params.endpoint;
@@ -394,7 +395,7 @@ class CrudSqlController {
         });
       })
       .catch(next);
-  }
+  },
 
   import(req, resp, next) {
     const repository = Utils.getEntityManager(req, resp);
@@ -469,7 +470,59 @@ class CrudSqlController {
         improperData
       }))
       .catch(next);
-  }
-}
+  },
 
-module.exports = new CrudSqlController();
+
+  list(req, resp, next) {
+    return this.findAll(req, resp, next);
+  },
+
+  get(req, resp, next) {
+    return this.findOne(req, resp, next);
+  },
+
+  post(req, resp, next) {
+    return this.create(req, resp, next);
+  },
+
+  put(req, resp, next) {
+    return this.update(req, resp, next);
+  },
+
+  async delete(req, resp, next) {
+    try {
+      const id = req.params.id;
+      const endpoint = req.params.endpoint || req.endpoint || req.modelName;
+      const primaryKey = getPrimaryKey(endpoint);
+      const repository = Utils.getEntityManager(req, resp);
+
+      if (!repository) {
+        throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
+      }
+      const sequelizeQuery = { where: { [primaryKey]: id } };
+
+      await execHook(endpoint, 'beforeApiDelete', { request: req, sequelizeQuery });
+      const exists = await repository
+        .findOne(sequelizeQuery);
+      if (!exists) {
+        throw new ExtendedError({
+          code: 404,
+          message: 'item_not_found',
+          errors: ['item_not_found']
+        });
+      }
+      const result = {};
+      sequelizeQuery.individualHooks = true;
+      sequelizeQuery.raw = false;
+      result.body = await repository
+        .destroy(sequelizeQuery);
+      await execHook(endpoint, 'afterApiDelete', result, { request: req, response: resp });
+
+      return resp.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+};
+
+module.exports = CrudSqlController;

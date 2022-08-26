@@ -2,7 +2,7 @@ const pino = require('pino');
 const colada = require('pino-colada');
 
 const l = pino({
-  prettyPrint: {},
+  prettyPrint: true,
   prettifier: colada,
   name: process.env.APP_ID,
   enabled: process.env.LOG_ENABLED || true,

@@ -5,6 +5,7 @@
  */
 
 const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
+const { execHook } = require('../services/ControllerUtils.js');
 
 const entity = 'axelModelConfig';
 
@@ -12,15 +13,24 @@ class AxelAdminController {
   /**
    * @description formats and serves the app schemas for the use of axel admin
    */
-  listModels(req, res) {
-    AxelAdmin.serveModels(req, res);
+  async listModels(req, res, next) {
+    try {
+      await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {} });
+      const models = await AxelAdmin.serveModels();
+      await execHook('axelModelConfig', 'afterApiFind', { request: req, sequelizeQuery: {} });
+      return res.json({
+        body: models
+      });
+    } catch (err) {
+      return next(err);
+    }
   }
 
   /**
    * @description formats and serves a single schemas for the use of axel admin
    * @param model id
    */
-  getModel(req, resp) {
+  async getModel(req, resp) {
     if (!req.params.id) {
       return resp.json({ message: 'missing_model_identifier' });
     }
@@ -30,8 +40,11 @@ class AxelAdminController {
       });
     }
     try {
+      await execHook('axelModelConfig', 'beforeApiFindOne', { request: req, sequelizeQuery: {} });
+      const body = AxelAdmin.mergeModel(req.params.id, false);
+      await execHook('axelModelConfig', 'afterApiFindOne', { request: req, sequelizeQuery: {} });
       resp.json({
-        body: AxelAdmin.mergeModel(req.params.id, false)
+        body
       });
     } catch (err) {
       console.warn(err);
