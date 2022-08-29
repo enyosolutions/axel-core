@@ -40,13 +40,7 @@ module.exports = {
     'consistent-return': 0,
     'comma-dangle': 0,
     'guard-for-in': 0,
-    indent: [
-      2,
-      2,
-      {
-        SwitchCase: 2,
-      },
-    ],
+    indent: 0,
     radix: 0,
     'object-shorthand': 1,
     'newline-per-chained-call': [

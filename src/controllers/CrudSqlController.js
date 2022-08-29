@@ -304,7 +304,7 @@ const CrudSqlController = {
     }
   },
 
-  export(req, resp, next) {
+  exportData(req, resp, next) {
     const endpoint = req.params.endpoint;
     const schema = axel.models[endpoint] && axel.models[endpoint].schema;
     let data = [];
@@ -396,7 +396,8 @@ const CrudSqlController = {
       .catch(next);
   },
 
-  import(req, resp, next) {
+
+  importData(req, resp, next) {
     const repository = Utils.getEntityManager(req, resp);
     if (!repository) {
       throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
@@ -486,6 +487,14 @@ const CrudSqlController = {
 
   put(req, resp, next) {
     return this.update(req, resp, next);
+  },
+
+  import(req, resp, next) {
+    this.importData(req, resp, next);
+  },
+
+  export(req, resp, next) {
+    this.exportData(req, resp, next);
   },
 
   async delete(req, resp, next) {

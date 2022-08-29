@@ -328,7 +328,7 @@ function injectCrudRoutesConfig() {
     },
     'GET {routeUrl}/export': {
       controller: '@axel/controllers/CrudSqlController',
-      action: 'export',
+      action: 'exportData',
     },
     'GET {routeUrl}/get-import-template': {
       controller: '@axel/controllers/CrudSqlController',
@@ -336,7 +336,7 @@ function injectCrudRoutesConfig() {
     },
     'POST {routeUrl}/import': {
       controller: '@axel/controllers/CrudSqlController',
-      action: 'import',
+      action: 'importData',
     },
     'GET {routeUrl}': { controller: '@axel/controllers/CrudSqlController', action: 'findAll' },
     'GET {routeUrl}/:id': { controller: '@axel/controllers/CrudSqlController', action: 'findOne' },
@@ -344,7 +344,7 @@ function injectCrudRoutesConfig() {
     'PUT {routeUrl}/:id': { controller: '@axel/controllers/CrudSqlController', action: 'update' },
     'DELETE {routeUrl}/:id': {
       controller: '@axel/controllers/CrudSqlController',
-      action: 'delete',
+      action: 'deleteOne',
     },
   };
   Object.keys(axel.models).forEach((key) => {

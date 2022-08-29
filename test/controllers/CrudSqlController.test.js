@@ -25,5 +25,17 @@ describe('CrudSqlController TESTING :: ', () => {
     it('should have a delete method', () => {
       expect(CrudSqlController.delete).toBeDefined();
     });
+    it('should have a exports method', () => {
+      expect(CrudSqlController.exportData).toBeDefined();
+    });
+    it('should have a import method', () => {
+      expect(CrudSqlController.importData).toBeDefined();
+    });
+    it('should have a exports method', () => {
+      expect(typeof CrudSqlController.export).toBe('function');
+    });
+    it('should have a import method', () => {
+      expect(typeof CrudSqlController.import).toBe('function');
+    });
   });
 });
