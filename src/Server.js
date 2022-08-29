@@ -16,6 +16,7 @@ const l = require('./services/logger.js');
 const defaultErrorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
 const AxelManager = require('./services/AxelManager.js');
+const AxelPlugin = require('./services/AxelPlugin.js');
 // const AxelAdmin = require('./services/AxelAdmin.js');
 
 console.time('[axel] STARTUP TIME');
@@ -33,7 +34,6 @@ class Server {
     this.app = app;
     this.initCompleted = false;
     this.middlewares = {};
-    this.registeredPluginNames = [];
     this.pluginSequelizeModels = {};
     this.pluginSchemaModels = {};
 
@@ -42,6 +42,7 @@ class Server {
       .then(() => {
         debug('', 'init in server.js');
         axel.app = app;
+        axel.server = this;
         // app.set('appPath', root + 'client');
         app.set('appPath', root);
 
@@ -82,7 +83,7 @@ class Server {
         if (adminConfig) {
           this.after((theApp) => {
             if (adminConfig && adminConfig.enabled) {
-              debug('starting admin panel init');
+              debug('starting admin panel');
               AxelManager.init(theApp);
             } else {
               debug('admin panel is disabled');
@@ -156,11 +157,13 @@ class Server {
   }
 
   async executeCallbackFunctions(functionsArray, myApp) {
+    debug('executeCallbackFunctions', functionsArray.length);
     for (let index = 0; index < functionsArray.length; index++) {
       const func = functionsArray[index];
       if (typeof func === 'function') {
+        debug('callbackfunction =>', index);
         // eslint-disable-next-line no-await-in-loop
-        await func(myApp);
+        await func(myApp, axel);
       }
     }
   }
@@ -170,20 +173,19 @@ class Server {
     return this.modelsFn(app, this.pluginSequelizeModels, this.pluginSchemaModels);
   }
 
-  registerPlugins() {
+  async registerPlugins() {
     debug('registerPlugins: start');
     if (!axel.plugins || !_.isObject(axel.plugins)) {
       return this;
     }
 
 
-    const plugins = Object.values(axel.config.plugins);
-
+    const plugins = Object.values(axel.plugins);
 
     for (let i = 0; i < plugins.length; i++) {
       // Load the plugin data from the specified location
       const pluginData = plugins[i];
-
+      debug('registerPlugins: ', pluginData.name);
 
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
@@ -210,7 +212,7 @@ class Server {
       }
 
       debug('Applied routes/policies updates from the enabled plugins');
-      debug(`Loaded plugin ${pluginData.name} successfully`);
+      debug(`Loaded plugin ${pluginData.name} successfully ✅`);
     }
 
     return this;
@@ -222,40 +224,31 @@ class Server {
     if (this.beforeFn.length) {
       await this.executeCallbackFunctions(this.beforeFn, app);
     }
+    return this.modelsFn(app)
+      // .then(() => installValidator(app, this.routes))
+      .then(() => this.router(app))
+      .then(async () => {
+        if (!process.env.NODE_ENV) {
+          process.env.NODE_ENV = 'development';
+        }
+        if (this.afterFn.length) {
+          this.executeCallbackFunctions(this.afterFn, app);
+          AxelPlugin.init(app, axel);
+        }
 
-    return (
-      this.modelsFn(app)
-        // .then(() => installValidator(app, this.routes))
-        .then(() => this.router(app))
-        .then(async () => {
-          if (!process.env.NODE_ENV) {
-            process.env.NODE_ENV = 'development';
-          }
-          if (this.afterFn.length) {
-            this.executeCallbackFunctions(this.afterFn, app);
-          }
-
-          app.use(this.errorHandler);
-          app.emit('app-ready', { axel });
-          return app;
-        })
-        .catch((e) => {
-          l.error(e);
-          exit(1);
-        })
-    );
+        app.use(this.errorHandler);
+        app.emit('app-ready', { axel });
+        console.timeEnd('[axel] STARTUP TIME');
+        return app;
+      })
+      .catch((e) => {
+        l.error(e);
+        process.exit(1);
+      });
   }
 
   async listen(port) {
     const welcome = p => () => {
-      l.info(
-        `up and running in ${process.env.NODE_ENV
-        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
-      );
-      debug(
-        `up and running in ${process.env.NODE_ENV
-        || 'development'} @: ${os.hostname()} on port: ${p}}  => http://localhost:${p}`
-      );
       l.info('\n');
       l.info('__________________________________');
       l.info('__________________________________');
@@ -266,7 +259,6 @@ class Server {
       l.info(`NODE_ENV: ${process.env.NODE_ENV}`);
       l.info('__________________________________');
       l.info('__________________________________');
-      console.timeEnd('[axel] STARTUP TIME');
       app.emit('server-ready', { axel });
     };
     try {

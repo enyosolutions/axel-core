@@ -4,9 +4,9 @@
  * @module axel-core
  */
 
-const axel = require('./axel.js');
+const axel = require('./axel');
 
-const AuthService = require('./services/AuthService.js');
+const AuthService = require('./services/AuthService');
 
 if (!axel.initCompleted) {
   axel.init();
@@ -15,8 +15,8 @@ if (!axel.initCompleted) {
 module.exports = axel;
 module.exports.axel = axel;
 
-module.exports.Server = require('./Server.js').Server;
-module.exports.router = require('./router.js').router;
+module.exports.Server = require('./Server').Server;
+module.exports.router = require('./router').router;
 module.exports.modelsLoader = require('./models.js').modelsLoader;
 
 module.exports.AuthService = AuthService;

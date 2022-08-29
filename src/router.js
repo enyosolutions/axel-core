@@ -87,7 +87,7 @@ function loadControllerPolicies(target, policies) {
           // remove the default security policy
           target.secure = false;
         } else {
-          console.log('warning weird policy detected', policy, policyType);
+          console.warn('warning weird policy detected', policy, policyType);
         }
       } else if (controllerPolicies['*']) {
         if (!Array.isArray(controllerPolicies['*'])) {

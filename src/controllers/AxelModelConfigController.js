@@ -83,7 +83,6 @@ class AxelModelConfigController {
   }
 
   async get(req, resp) {
-    console.log('REQUEST', req.url, entity);
     const id = req.params.id;
     if (!id) {
       return false;
@@ -98,7 +97,6 @@ class AxelModelConfigController {
       });
     let item = itemFound;
     const models = {};
-    console.log('item', pKey, id);
 
     Object.keys(axel.models).forEach((modelName) => {
       models[modelName] = AxelAdmin.jsonSchemaToFrontModel(axel.models[modelName]);

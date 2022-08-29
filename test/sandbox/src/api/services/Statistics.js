@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 /**
 * [exports description]
@@ -48,7 +48,7 @@ module.exports = {
           results.week = {
             list: list ? list.map(listItem => ({
               value: listItem.value,
-              week: moment(listItem.week, 'YYYY-WW').format('YYYY-MM-DD')
+              week: dayjs(listItem.week, 'YYYY-WW').format('YYYY-MM-DD')
             })) : null,
             total: list ? roundValue(list.reduce((reducer, current) => (current.value || 0) + reducer, 0)) : 0
           };
@@ -81,7 +81,7 @@ module.exports = {
           results.year = {
             list: list ? list.map(listItem => ({
               value: listItem.value,
-              year: moment(listItem.year.toString(), 'YYYY').format('YYYY-[01]-[01]')
+              year: dayjs(listItem.year.toString(), 'YYYY').format('YYYY-[01]-[01]')
             })) : null,
             total: list ? roundValue(list.reduce((reducer, current) => (current.value || 0) + reducer, 0)) : 0
           };
@@ -132,7 +132,7 @@ module.exports = {
           results.week = {
             list: list ? list.map(listItem => ({
               value: listItem.value,
-              week: moment(listItem.week, 'YYYY-WW').format('YYYY-MM-DD')
+              week: dayjs(listItem.week, 'YYYY-WW').format('YYYY-MM-DD')
             })) : null,
             total: list ? roundValue(list.reduce((reducer, current) => (current.value || 0) + reducer, 0)) : 0
           };
@@ -164,7 +164,7 @@ module.exports = {
           results.year = {
             list: list ? list.map(listItem => ({
               value: listItem.value,
-              year: moment(listItem.year.toString(), 'YYYY').format('YYYY-[01]-[01]')
+              year: dayjs(listItem.year.toString(), 'YYYY').format('YYYY-[01]-[01]')
             })) : null,
             total: list ? roundValue(list.reduce((reducer, current) => (current.value || 0) + reducer, 0)) : 0
           };

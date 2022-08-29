@@ -5,7 +5,7 @@
  * @help        :: See http://links.axel.s.org/docs/controllers
  */
 
-const moment = require('moment');
+const dayjs = require('dayjs');
 const _ = require('lodash');
 const Utils = require('../services/Utils');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
@@ -213,7 +213,7 @@ module.exports = {
         }
         if (
           !data.passwordResetRequestedOn
-          || moment(data.passwordResetRequestedOn)
+          || dayjs(data.passwordResetRequestedOn)
             .add(10, 'm')
             .isBefore(new Date())
         ) {
@@ -272,7 +272,7 @@ module.exports = {
         user = u.get();
         if (
           !user.passwordResetRequestedOn
-          || moment(user.passwordResetRequestedOn)
+          || dayjs(user.passwordResetRequestedOn)
             .add(20, 'm')
             .isBefore(new Date())
         ) {

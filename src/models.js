@@ -185,7 +185,7 @@ const getSchemaFileListForSingleLocation = (modelsLocation) => {
       resolve([]);
     }
 
-    axel.logger.info(`[ORM] loading schema models from ${modelsLocation}`);
+    debug(`[ORM] loading schema models from ${modelsLocation}`);
 
     fs.readdir(modelsLocation, (err, files) => {
       if (err) {
@@ -194,7 +194,7 @@ const getSchemaFileListForSingleLocation = (modelsLocation) => {
       }
 
       files = files.filter(file => _.endsWith(file, '.js') || _.endsWith(file, '.mjs') || _.endsWith(file, '.ts'));
-      axel.logger.info('[ORM] found %s schemas files', files.length, modelsLocation);
+      debug('[ORM] found %s schemas files', files.length, modelsLocation);
       debug('Loading schema models: ', files.length, 'files');
 
       const filePathList = files.map(file => `${modelsLocation}/${file}`);
@@ -207,7 +207,7 @@ const getSchemaFileListForSingleLocation = (modelsLocation) => {
 const loadSchemaModels = () => {
   debug('loadSchemaModels');
   return new Promise((resolve, reject) => {
-    axel.logger.info('[ORM] loading schema models');
+    debug('[ORM] loading schema models');
     const commonModelsLocation = _.get(axel, 'config.framework.schemasLocation') || `${process.cwd()}/src/api/models/schema`;
 
     if (!axel.models) {
@@ -215,28 +215,32 @@ const loadSchemaModels = () => {
     }
 
     const modelLocations = [commonModelsLocation];
-
-    for (let i = 0; i < axel.plugins.length; i++) {
-      const pluginData = axel.plugins[i];
-
+    for (const pluginData of Object.values(axel.plugins)) {
       if (pluginData && pluginData.resolvedPath) {
-        modelLocations.push(`${pluginData.resolvedPath}/api/models/schema`);
+        // if plugin is in the root folder
+        if (fs.existsSync(`${pluginData.resolvedPath}/models/schema`)) {
+          modelLocations.push(`${pluginData.resolvedPath}/models/schema`);
+        } else if (fs.existsSync(`${pluginData.resolvedPath}/dist/models/schema`)) { // if plugin is typescript compiled
+          modelLocations.push(`${pluginData.resolvedPath}/dist/models/schema`);
+        } else if (fs.existsSync(`${pluginData.resolvedPath}/src/models/schema`)) { // if plugin is in a source folder
+          modelLocations.push(`${pluginData.resolvedPath}/src/models/schema`);
+        }
       }
     }
 
     Promise.all(modelLocations.map(location => getSchemaFileListForSingleLocation(location)))
       .then(fileLists => _.flatten(fileLists))
       .then(filesToLoad => Promise.all(filesToLoad.map((filePath) => {
-        axel.logger.verbose('[ORM] loading schema model', filePath);
+        logger.verbose('[ORM] loading schema model', filePath);
         return loadSchemaModel(filePath);
       })))
       .then(() => {
-        axel.logger.debug('[ORM] schema final callback');
+        logger.debug('[ORM] schema final callback');
         debug('[ORM] schema final callback');
         return resolve();
       })
       .catch((errAsync) => {
-        axel.logger.warn(errAsync);
+        logger.warn(errAsync);
         debug(errAsync);
         return reject(errAsync);
       });
@@ -273,11 +277,16 @@ const loadSqlModels = () => {
     const commonModelsLocation = _.get(axel, 'config.framework.modelsLocation', `${process.cwd()}/src/api/models/sequelize`);
     const modelLocations = [commonModelsLocation];
 
-    for (let i = 0; i < axel.plugins.length; i++) {
-      const pluginData = axel.plugins[i];
-
+    for (const pluginData of Object.values(axel.plugins)) {
       if (pluginData && pluginData.resolvedPath) {
-        modelLocations.push(`${pluginData.resolvedPath}/api/models/sequelize`);
+        // if plugin is in the root folder
+        if (fs.existsSync(`${pluginData.resolvedPath}/models/sequelize`)) {
+          modelLocations.push(`${pluginData.resolvedPath}/models/sequelize`);
+        } else if (fs.existsSync(`${pluginData.resolvedPath}/dist/models/sequelize`)) { // if plugin is typescript compiled
+          modelLocations.push(`${pluginData.resolvedPath}/dist/models/sequelize`);
+        } else if (fs.existsSync(`${pluginData.resolvedPath}/src/models/sequelize`)) { // if plugin is in a source folder
+          modelLocations.push(`${pluginData.resolvedPath}/src/models/sequelize`);
+        }
       }
     }
 
@@ -301,10 +310,10 @@ const loadSqlModels = () => {
       }
     });
 
-    axel.logger.info('[ORM] found %s sequelize models files', modelFilePaths.length);
+    logger.info('[ORM] found %s sequelize models files', modelFilePaths.length);
     debug('MODELS :: found %s sequelize models files', modelFilePaths.length);
     if (!modelFilePaths.length) {
-      axel.logger.warn('[ORM] no sequelize models found in the provided location');
+      logger.warn('[ORM] no sequelize models found in the provided location');
     }
 
     const loadedModels = modelFilePaths.map((filePath) => {

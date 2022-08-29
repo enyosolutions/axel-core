@@ -234,7 +234,6 @@ const CrudSqlController = {
       const sequelizeQuery = { where: { [primaryKey]: id } };
       await execHook(endpoint, 'beforeApiUpdate', { request: req, sequelizeQuery });
       await SchemaValidator.validateAsync(data, endpoint);
-      console.log('sequelizeQuery', sequelizeQuery);
 
       const exists = await repository
         .findOne(sequelizeQuery);

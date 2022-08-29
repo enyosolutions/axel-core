@@ -20,6 +20,7 @@ describe('axel.js :: ', () => {
     expect(axel.services).toBeDefined();
     expect(axel.policies).toBeDefined();
     expect(axel.plugins).toBeDefined();
+    expect(typeof axel.plugins).toBe('object');
     expect(axel.rootPath).toBeDefined();
     expect(axel.logger).toBeDefined();
     expect(axel.init).toBeDefined();
@@ -42,13 +43,36 @@ describe('global.Axel', () => {
 
 
 describe('axel.renderView', () => {
-  test('renderview', async () => {
+  test('renderview requires a template', async () => {
     try {
       const axel = require('../../src/axel');
       await axel.renderView('', {});
     } catch (error) {
       expect(error).toBeDefined();
       expect(error.message).toBe('template file is required');
+    }
+  });
+  test('renderview requires an app', async () => {
+    try {
+      const axel = require('../../src/axel');
+      await axel.renderView('axel-manager', {});
+    } catch (error) {
+      expect(error).toBeDefined();
+      expect(error.message).toBe('axel.app is not defined');
+    }
+  });
+
+
+  test('renderview starts', async () => {
+    try {
+      const { axel, Server } = require('../../src/index');
+      const server = new Server();
+      // await server.start();
+      // server.listen(3333);
+      await axel.renderView('axel-manager', {});
+    } catch (error) {
+      expect(error).toBeDefined();
+      expect(error.message).toBe('axel.app is not defined');
     }
   });
 });

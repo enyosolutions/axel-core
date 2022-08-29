@@ -31,7 +31,12 @@ module.exports = {
     ],
     'prefer-destructuring': 0,
     'no-iterator': 1,
-    'no-restricted-syntax': 1,
+    'no-restricted-syntax': [
+      'error',
+      'ForInStatement',
+      'LabeledStatement',
+      'WithStatement',
+    ],
     'consistent-return': 0,
     'comma-dangle': 0,
     'guard-for-in': 0,

@@ -214,9 +214,7 @@ export default {
       list.splice(index, 1);
     },
     onAdd(event) {
-      console.log('args', event);
       const source = this.internalValue[parseInt(event.from.dataset.id, 10)];
-      console.log('source', source, event.from.dataset.id);
 
       this.removeField(source.fields, event.oldIndex);
     },

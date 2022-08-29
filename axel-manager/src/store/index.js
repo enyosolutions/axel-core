@@ -89,9 +89,6 @@ export default new Vuex.Store({
     getAuth({ commit, state }) {
       const promise = this._vm.$socket.post('/axel-manager/auth', { token: state.token });
       return promise
-        .then(res => {
-          console.log('user getAuth');
-        })
         .catch(err => {
           console.error('getAuth', err);
         });
@@ -117,12 +114,12 @@ export default new Vuex.Store({
         }
         if (err.response) {
           switch (err.response.status) {
-          case 404:
-          case 401:
-            dispatch('logout');
-            break;
-          default:
-            break;
+            case 404:
+            case 401:
+              dispatch('logout');
+              break;
+            default:
+              break;
           }
         }
         throw err;
