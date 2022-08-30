@@ -40,8 +40,8 @@ class AxelPlugin {
     const axelPlugin = loadSqlModel(`${__dirname}/../models/sequelize/AxelPlugin.js`, axel.sqldb);
     axelPlugin.em.options.logging = false;
 
-    if (!axel.models.axelModelConfig) {
-      return Promise.reject(new Error('missing_axelModelConfig'));
+    if (!axel.models.axelPlugin) {
+      return Promise.reject(new Error('missing_axelPlugin'));
     }
 
     debug('Start create table if needed');

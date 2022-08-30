@@ -8,6 +8,7 @@ const os = require('os');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const debug = require('debug')('axel:server');
+const debugPlugin = require('debug')('axel:plugins');
 const axel = require('./axel.js');
 const defaultRouter = require('./router.js').router;
 const defaultModelsLoader = require('./models.js').modelsLoader;
@@ -17,7 +18,6 @@ const defaultErrorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
 const AxelManager = require('./services/AxelManager.js');
 const AxelPlugin = require('./services/AxelPlugin.js');
-// const AxelAdmin = require('./services/AxelAdmin.js');
 
 console.time('[axel] STARTUP TIME');
 const app = express();
@@ -83,10 +83,10 @@ class Server {
         if (adminConfig) {
           this.after((theApp) => {
             if (adminConfig && adminConfig.enabled) {
-              debug('starting admin panel');
+              debugPlugin('starting admin panel');
               AxelManager.init(theApp);
             } else {
-              debug('admin panel is disabled');
+              debugPlugin('admin panel is disabled');
             }
           });
         }
@@ -174,7 +174,7 @@ class Server {
   }
 
   async registerPlugins() {
-    debug('registerPlugins: start');
+    debugPlugin('registerPlugins: start');
     if (!axel.plugins || !_.isObject(axel.plugins)) {
       return this;
     }
@@ -185,7 +185,7 @@ class Server {
     for (let i = 0; i < plugins.length; i++) {
       // Load the plugin data from the specified location
       const pluginData = plugins[i];
-      debug('registerPlugins: ', pluginData.name);
+      debugPlugin('registerPlugins: ', pluginData.name);
 
       // Invoke plugin register function if it is defined
       if (pluginData.register && _.isFunction(pluginData.register)) {
@@ -201,7 +201,7 @@ class Server {
         this.afterFn.push(pluginData.afterFn);
       }
 
-      debug('Applying routes/policies updates from the enabled plugins');
+      debugPlugin('Applying routes/policies updates from the enabled plugins');
 
       if (pluginData.routes) {
         axel.config.routes = _.merge(axel.config.routes || {}, pluginData.routes);
@@ -211,8 +211,8 @@ class Server {
         axel.config.policies = _.merge(axel.config.policies || {}, pluginData.policies);
       }
 
-      debug('Applied routes/policies updates from the enabled plugins');
-      debug(`Loaded plugin ${pluginData.name} successfully ✅`);
+      debugPlugin('Applied routes/policies updates from the enabled plugins');
+      debugPlugin(`Loaded plugin ${pluginData.name} successfully ✅`);
     }
 
     return this;

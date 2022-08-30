@@ -11,7 +11,7 @@ const wsController = require('./ws/wsController');
 /**
  * Contains all the code necessary for bootstrapping the code manager page.
  *
- * @class AxelAdmin
+ * @class AxelManager
  */
 class AxelManager {
   /**
@@ -19,7 +19,7 @@ class AxelManager {
    *
    * @param {Application} app
    * @returns {Promise<any>}
-   * @memberof AxelAdmin
+   * @memberof AxelManager
    */
   init(app) {
     try {
@@ -58,21 +58,21 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          default:
-          case 'GET':
-            break;
-          case 'POST':
+        default:
+        case 'GET':
+          break;
+        case 'POST':
 
-            try {
-              process.kill(process.pid, 'SIGUSR2');
-              cb(null, {
-                body: 'ok',
-              });
-            } catch (err) {
-              process.kill(process.pid, 'SIGTERM');
-              cb(err);
-            }
-            break;
+          try {
+            process.kill(process.pid, 'SIGUSR2');
+            cb(null, {
+              body: 'ok',
+            });
+          } catch (err) {
+            process.kill(process.pid, 'SIGTERM');
+            cb(err);
+          }
+          break;
       }
     });
 
@@ -83,15 +83,15 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          case 'POST':
-            try {
-              AuthService.verify(req.body.token, (err, result) => cb(err, { body: result }));
-            } catch (err) {
-              cb(err.message);
-            }
-            break;
-          default:
-            break;
+        case 'POST':
+          try {
+            AuthService.verify(req.body.token, (err, result) => cb(err, { body: result }));
+          } catch (err) {
+            cb(err.message);
+          }
+          break;
+        default:
+          break;
       }
     });
     /** Get models definition */
@@ -100,15 +100,15 @@ class AxelManager {
         cb = req;
       }
       switch (req.method) {
-          case 'GET':
-            try {
-              cb(null, { body: axel.config });
-            } catch (err) {
-              cb(err.message);
-            }
-            break;
-          default:
-            break;
+        case 'GET':
+          try {
+            cb(null, { body: axel.config });
+          } catch (err) {
+            cb(err.message);
+          }
+          break;
+        default:
+          break;
       }
     });
   }

@@ -27,6 +27,8 @@ module.exports.ErrorUtils = require('./services/ErrorUtils.js');
 module.exports.ControllerUtils = require('./services/ControllerUtils.js');
 
 module.exports.SchemaValidator = require('./services/SchemaValidator.js');
-module.exports.AxelAdmin = require('./services/AxelAdmin.js');
+module.exports.AxelModelsService = require('./services/AxelModelsService.js');
+// legacy service that was renamed to avoid confusion
+module.exports.AxelAdmin = require('./services/AxelModelsService.js');
 module.exports.AxelManager = require('./services/AxelManager.js');
 module.exports.DocumentManager = require('./services/DocumentManager.js');

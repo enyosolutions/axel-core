@@ -66,13 +66,13 @@ const axel = {
   rootPath: path.resolve(process.cwd()),
   init() {
     debug('Init started');
-    console.count('Init started');
     if (axel.initCompleted && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
     }
     if (axel.initPromise) {
       return axel.initPromise;
     }
+    // console.count('Init started');
     const plugins = loadPlugins(axel);
     axel.plugins = plugins.reduce((acc, current) => {
       acc[current.name] = current;

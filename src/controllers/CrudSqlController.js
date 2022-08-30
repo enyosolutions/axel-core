@@ -152,7 +152,7 @@ const CrudSqlController = {
 
   async findOne(req, resp, next) {
     const id = req.params.id;
-    const endpoint = req.params.endpoint;
+    const endpoint = req.params.endpoint || req.endpoint || req.modelName;
     try {
       const primaryKey = getPrimaryKey(endpoint);
       const repository = Utils.getEntityManager(req, resp);

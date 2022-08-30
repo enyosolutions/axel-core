@@ -67,10 +67,6 @@ const AxelPlugin = {
         //  unique: false,
         //  fields: ['userId'],
         // },
-        {
-          unique: true,
-          fields: ['identity']
-        }
       ]
     },
     // Create relations

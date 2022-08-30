@@ -8,7 +8,7 @@ const { identity } = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
-const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
+const AxelModelsService = require('../services/AxelModelsService.js'); // adjust path as needed
 const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 const { saveModel } = require('../services/ws/utils');
@@ -57,8 +57,8 @@ class AxelModelConfigController {
       })
       .then((result) => {
         items = result.rows;
-        items = items.map(item => AxelAdmin.mergeData(
-          AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
+        items = items.map(item => AxelModelsService.mergeData(
+          AxelModelsService.jsonSchemaToFrontModel(axel.models[item.identity] || {}),
           item.config
         ));
         if (listOfValues) {
@@ -99,18 +99,18 @@ class AxelModelConfigController {
     const models = {};
 
     Object.keys(axel.models).forEach((modelName) => {
-      models[modelName] = AxelAdmin.jsonSchemaToFrontModel(axel.models[modelName]);
+      models[modelName] = AxelModelsService.jsonSchemaToFrontModel(axel.models[modelName]);
     });
 
     if (itemFound && itemFound.identity) {
       item = itemFound;
       if (axel.models[item.identity]) {
-        item = AxelAdmin.mergeData(
-          AxelAdmin.jsonSchemaToFrontModel(axel.models[item.identity]),
+        item = AxelModelsService.mergeData(
+          AxelModelsService.jsonSchemaToFrontModel(axel.models[item.identity]),
           item.config
         );
         if (item.nestedModels) {
-          item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+          item.nestedModels = AxelModelsService.prepareNestedModels(item.nestedModels, models);
         }
       }
 
@@ -133,9 +133,9 @@ class AxelModelConfigController {
           identity: id, name: id, config: {}
         });
       }
-      item = AxelAdmin.jsonSchemaToFrontModel(axel.models[id]);
+      item = AxelModelsService.jsonSchemaToFrontModel(axel.models[id]);
       if (item.nestedModels) {
-        item.nestedModels = AxelAdmin.prepareNestedModels(item.nestedModels, models);
+        item.nestedModels = AxelModelsService.prepareNestedModels(item.nestedModels, models);
       }
       return resp.status(200).json({
         body: {

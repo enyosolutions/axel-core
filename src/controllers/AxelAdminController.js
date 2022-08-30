@@ -4,7 +4,7 @@
  * @description :: Server-side logic for managing AxelModelConfig entities
  */
 
-const AxelAdmin = require('../services/AxelAdmin.js'); // adjust path as needed
+const AxelModelsService = require('../services/AxelModelsService.js'); // adjust path as needed
 const { execHook } = require('../services/ControllerUtils.js');
 
 const entity = 'axelModelConfig';
@@ -16,7 +16,7 @@ class AxelAdminController {
   async listModels(req, res, next) {
     try {
       await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {} });
-      const models = await AxelAdmin.serveModels();
+      const models = await AxelModelsService.serveModels();
       await execHook('axelModelConfig', 'afterApiFind', { request: req, sequelizeQuery: {} });
       return res.json({
         body: models
@@ -41,7 +41,7 @@ class AxelAdminController {
     }
     try {
       await execHook('axelModelConfig', 'beforeApiFindOne', { request: req, sequelizeQuery: {} });
-      const body = AxelAdmin.mergeModel(req.params.id, false);
+      const body = AxelModelsService.mergeModel(req.params.id, false);
       await execHook('axelModelConfig', 'afterApiFindOne', { request: req, sequelizeQuery: {} });
       resp.json({
         body
