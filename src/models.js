@@ -88,7 +88,7 @@ const loadSqlAttributes = (model) => {
 };
 
 
-const loadSqlModel = (filePath, sequelize) => {
+const loadSqlModel = (filePath, sequelize, options) => {
   if (sequelize) {
     logger.verbose('[ORM] loading sequelize model  %s', filePath);
 
@@ -97,8 +97,9 @@ const loadSqlModel = (filePath, sequelize) => {
     try {
       /* eslint-disable */
       model = require(`${path.resolve(filePath)}`);
-      hooks = loadHook(model);
-
+      if (!options || options.loadHooks) {
+        hooks = loadHook(model);
+      }
     } catch (err) {
       console.warn('[ORM][WARN] ', filePath, err);
     }
@@ -250,7 +251,7 @@ const loadSchemaModels = () => {
 /**
  * @description load all the sql defined models
  */
-const loadSqlModels = () => {
+const loadSqlModels = (options = { loadHooks: true }) => {
   debug('loadSqlModels');
   return new Promise(async (resolve, reject) => {
     const sqlModels = {};
@@ -290,7 +291,7 @@ const loadSqlModels = () => {
       }
     }
 
-    debug('[ORM] sql models locations', modelLocations.join(', '));
+    debug('[ORM] sql models locations', modelLocations.join('\n'));
 
     if (!axel.models) {
       axel.models = {};
@@ -317,8 +318,7 @@ const loadSqlModels = () => {
     }
 
     const loadedModels = modelFilePaths.map((filePath) => {
-      const model = loadSqlModel(filePath, sequelize);
-
+      const model = loadSqlModel(filePath, sequelize, options);
       sqlModels[model.identity] = model.em;
       return model;
     });
@@ -368,8 +368,8 @@ const loadSqlModels = () => {
         }
       });
 
-      logger.verbose('[ORM] sequelize final callback');
-      resolve();
+      debug('[ORM] sequelize final callback');
+      resolve(axel);
     } catch (errAsync) {
       logger.warn(errAsync);
       return reject(errAsync);
