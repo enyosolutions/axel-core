@@ -79,21 +79,30 @@ export default {
   },
   mounted() {
     // this.$store.dispatch('getAuth');
-    this.$store.dispatch('refreshUser').catch((err) => {
-      console.warn('[refresh error]', err.response.status);
-      if (err.response) {
-        switch (err.response.status) {
-        case 404:
-        case 401:
-          this.$router.push('/login');
-          break;
-        default:
-          break;
+    this.$store
+      .dispatch('refreshUser')
+      .then(() => {
+        this.$store.dispatch('refreshWsUser');
+        this.$store.dispatch('getModels');
+        this.$store.dispatch('getConfig');
+      })
+      .catch((err) => {
+        console.warn(
+          '[refresh error]',
+          err.response ? err.response.status : err
+        );
+        if (err.response) {
+          switch (err.response.status) {
+            case 404:
+            case 401:
+            case 500:
+              this.$router.push('/login');
+              break;
+            default:
+              break;
+          }
         }
-      }
-    });
-    this.$store.dispatch('getModels');
-    this.$store.dispatch('getConfig');
+      });
   },
   watch: {
     $route() {
@@ -122,8 +131,8 @@ export default {
       */
     },
     sidebar_toggle_var() {
-      this.resized
-        = this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
+      this.resized =
+        this.width <= 991 ? !this.sidebar_toggle_var : this.sidebar_toggle_var;
     },
   },
   methods: {

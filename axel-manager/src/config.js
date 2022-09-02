@@ -1,6 +1,6 @@
 export default {
   appName: 'Axel admin dashboard',
-  appKey: 'axel-admin-panel',
+  zappKey: 'axel_admin_panel',
   appLogo: '',
   display: {
     primaryColor: '#0077b6',

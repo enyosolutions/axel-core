@@ -42,6 +42,7 @@ export default new Vuex.Store({
     primaryColor: localStorage.getItem(`${config.appKey}_primaryColor`),
     secondaryColor: localStorage.getItem(`${config.appKey}_secondaryColor`),
     appConfig: {},
+    appEnv: 'production',
     currentUser: {},
     roles: [],
   },
@@ -67,6 +68,9 @@ export default new Vuex.Store({
     currentLocale(state, locale) {
       state.locale = locale;
       localStorage.setItem(`${config.appKey}_locale`, locale);
+    },
+    appEnv(state, appEnv) {
+      state.appEnv = appEnv;
     },
 
     colors(state, { primaryColor, secondaryColor }) {
@@ -94,12 +98,44 @@ export default new Vuex.Store({
         });
     },
 
-    refreshUser({ commit, dispatch }) {
-      const q = this._vm.$http.get('/api/auth/user');
+    refreshWsUser({ commit, dispatch, state }) {
+      const q = this._vm.$socket.get('/axel-admin/auth/user', { headers: { authorization: state.token } });
+      return q.then(res => {
+        const { user } = res;
+        if (user) {
+          commit('currentUser', user);
+          dispatch('getModels');
+        }
+      }).catch(err => {
+        console.warn('[USER STORE] user refresh error', err);
+        this._vm.$awEventBus.$emit('api-network-error');
+
+        if (this._vm.$awNotify) {
+          this._vm.$awNotify({
+            title: err.response ? err.response : err,
+            type: 'warning',
+          });
+        }
+        if (err.response) {
+          switch (err.response.status) {
+            case 404:
+            case 401:
+            case 500:
+              dispatch('logout');
+              break;
+            default:
+              break;
+          }
+        }
+        throw err;
+      });
+    },
+    refreshUser({ commit, dispatch, state }) {
+      const q = this._vm.$http.get('/api/axel-admin/auth/user');
       return q.then(res => {
         // eslint-disable-next-line
-        const { user, appRoles } = res.data;
-        commit('roles', appRoles);
+        const { user } = res;
+        // commit('roles', appRoles);
         commit('currentUser', user);
         return user;
       }).catch(err => {
@@ -108,7 +144,7 @@ export default new Vuex.Store({
 
         if (this._vm.$awNotify) {
           this._vm.$awNotify({
-            title: err.response ? err.response.data : err,
+            title: err.response ? err.response : err,
             type: 'warning',
           });
         }
@@ -149,6 +185,7 @@ export default new Vuex.Store({
               editFields,
             ];
             delete model.url;
+            delete model.nestedModels;
             return model;
           });
           commit('models', apiModels);
@@ -183,6 +220,7 @@ export default new Vuex.Store({
       commit('token', null);
       commit('auth', null);
       commit('currentUser', null);
+      this._vm.$router.push('/login');
       return true;
     },
   },

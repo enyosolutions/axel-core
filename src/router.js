@@ -287,10 +287,13 @@ const loadEndpointMiddleware = (endpoint) => {
     next();
   };
 };
-
+// @todo move this to the AxelManager and axelModelsServices. MOdels services should always be on.
 function injectAxelAdminConfig() {
   debug('injectAxelAdminConfig');
-  if (!axel.config.framework || !axel.config.framework.axelAdmin || !axel.config.framework.axelAdmin.enabled) {
+  const pluginEnabled = axel.config && axel.config.plugins.admin && axel.config.plugins.admin.enabled;
+  const frameworkAdminEnabled = axel.config && axel.config.framework && axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.enabled;
+
+  if (!frameworkAdminEnabled || pluginEnabled) {
     debug('[AXEL ADMIN] axel admin is disabled. not mounting admin apis');
     return;
   }
@@ -299,14 +302,38 @@ function injectAxelAdminConfig() {
   // axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelAdminController.getModel';
   axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelModelConfigController.get';
 
-  if (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.editableModels) {
-    axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
-    axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
+  // if admin is enabled then we create the routes for managing axel users
+  if (pluginEnabled && axel.sqldb) {
+    axel.config.routes['GET /api/axel-admin/axel-user'] = '@axel/controllers/UserSqlController.findAll';
+    axel.config.routes['GET /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.findOne';
+    axel.config.routes['PUT /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.update';
+    axel.config.routes['DELETE /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.delete';
+
+    axel.config.routes['POST /api/axel-admin/auth/register'] = {
+      controller: '@axel/controllers/UserSqlController',
+      action: 'create',
+      secure: false,
+    };
+    axel.config.routes['POST /api/axel-admin/auth/login'] = {
+      controller: '@axel/controllers/AuthController',
+      action: 'login',
+      secure: false,
+    };
+    axel.config.routes['/api/axel-admin/status'] = async (req, res) => {
+      const userExists = await axel.models.axelUser.em.findOne();
+      res.json({ env: process.env.NODE_ENV, firstUser: !userExists });
+    };
+  }
+  axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
+  axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
+  axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
+  axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
+
+  // Model edition is enabled only with admin panel and only in dev mode.
+  if ((pluginEnabled) && process.env.NODE_ENV === 'development') {
     axel.config.routes['PUT /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.put';
     axel.config.routes['DELETE /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.delete';
 
-    axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
-    axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';
     axel.config.routes['POST /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.post';
     axel.config.routes['PUT /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.put';
     axel.config.routes['DELETE /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.delete';

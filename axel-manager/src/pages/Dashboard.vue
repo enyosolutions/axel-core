@@ -466,6 +466,9 @@ export default {
         this.refreshLists();
       }
     },
+    '$store.state.currentUser': function () {
+      this.refreshLists();
+    },
   },
   data() {
     return {
@@ -576,9 +579,9 @@ export default {
           query: { full: true },
         })
         .then((data) => {
-          this.models
-            = data.body
-            && data.body.models.filter((model) => !model.name.startsWith('axel'));
+          this.models =
+            data.body &&
+            data.body.models.filter((model) => !model.name.startsWith('axel'));
           this.tables = data.body && data.body.tables;
         })
         .catch((err) => {
@@ -667,7 +670,8 @@ export default {
           Swal2.fire({
             title: 'Controller successfully created',
             icon: 'success',
-          }))
+          })
+        )
         .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
     },
 
@@ -702,7 +706,8 @@ export default {
             title: 'Route successfully created',
             icon: 'success',
             toast: true,
-          }))
+          })
+        )
         .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
     },
 
@@ -767,7 +772,8 @@ export default {
           });
         })
         .catch((err) =>
-          Swal2.fire({ title: err.message || err, icon: 'error' }));
+          Swal2.fire({ title: err.message || err, icon: 'error' })
+        );
     },
     /**
      * Delete model file
@@ -787,7 +793,8 @@ export default {
           });
         })
         .catch((err) =>
-          Swal2.fire({ title: err.message || err, icon: 'error' }));
+          Swal2.fire({ title: err.message || err, icon: 'error' })
+        );
     },
 
     async addFieldsToModel() {
@@ -827,7 +834,8 @@ export default {
       string = string
         .toLowerCase()
         .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
-          match.charAt(match.length - 1).toUpperCase());
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
   },

@@ -11,10 +11,10 @@ const Utils = require('../services/Utils');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../index');
 const AuthService = require('../services/AuthService');
-const MailService = require('../services/MailService');
+// const MailService = require('../services/MailService');
 
-const primaryKey = axel.models.user && axel.models.user.em && axel.models.user.em.primaryKeyField
-  ? axel.models.user.em.primaryKeyField
+const primaryKey = axel.models.axelUser && axel.models.axelUser.em && axel.models.axelUser.em.primaryKeyField
+  ? axel.models.axelUser.em.primaryKeyField
   : axel.config.framework.primaryKey;
 
 module.exports = {
@@ -85,11 +85,12 @@ module.exports = {
     newUser.email = newUser.email.toLowerCase();
     newUser.username = newUser.username.toLowerCase();
 
-    axel.models.user.em
+    axel.models.axelUser.em
       .findOne({
         where: {
           email: newUser.email
-        }
+        },
+        raw: true
       })
       .then((user) => {
         if (user) {
@@ -100,7 +101,6 @@ module.exports = {
             errors: ['error_conflict_email']
           });
         }
-        user = user.get();
         if (!newUser.roles) {
           newUser.roles = JSON.stringify(['USER']);
         }
@@ -110,7 +110,7 @@ module.exports = {
       })
       .then((data) => {
         if (data) {
-          return axel.models.user.em.create(newUser, {
+          return axel.models.axelUser.em.create(newUser, {
             raw: true
           });
         }
@@ -142,7 +142,7 @@ module.exports = {
             delete newUser.activationToken;
           }
 
-          return axel.models.user.em.update(newUser, {
+          return axel.models.axelUser.em.update(newUser, {
             where: {
               [primaryKey]: newUser[primaryKey]
             }
@@ -152,7 +152,11 @@ module.exports = {
       })
       .then(() => {
         if (newUser && newUser[primaryKey] && axel.config.framework.user.emailConfirmationRequired) {
-          return MailService.sendEmailConfirmation(
+          if (!axel.services.mailService) {
+            console.warn('[warn] no mailService registered, please inject the mail service into axel.services.mailService = <your mail service> ');
+            return false;
+          }
+          return axel.services.mailService.sendEmailConfirmation(
             Object.assign(
               {
                 activationToken: Utils.md5(`${Date.now() + Math.random() * 1000}`)
@@ -196,7 +200,7 @@ module.exports = {
       });
     }
 
-    axel.models.user.em
+    axel.models.axelUser.em
       .findOne({
         where: {
           resetToken
@@ -255,7 +259,7 @@ module.exports = {
     }
 
     let user;
-    axel.models.user.em
+    axel.models.axelUser.em
       .findOne({
         where: {
           resetToken
@@ -294,7 +298,7 @@ module.exports = {
       .then((result) => {
         if (result) {
           user.resetToken = '';
-          return axel.models.user.em.update(user, {
+          return axel.models.axelUser.em.update(user, {
             where: {
               [primaryKey]: user[primaryKey]
             }
@@ -322,7 +326,7 @@ module.exports = {
       });
   },
 
-  list(req, resp) {
+  findAll(req, resp) {
     const { listOfValues, startPage, limit } = Utils.injectPaginationQuery(req);
 
     const options = {
@@ -344,7 +348,7 @@ module.exports = {
     }
     query = Utils.cleanSqlQuery(query);
 
-    axel.models.user.em
+    axel.models.axelUser.em
       .findAndCountAll({ where: query, raw: false, nested: true }, options)
       .then((result) => {
         let data;
@@ -386,7 +390,7 @@ module.exports = {
       });
   },
 
-  get(req, resp) {
+  findOne(req, resp) {
     const id = req.param('userId');
     if (axel.mongodb) {
       if (!Utils.checkIsMongoId(id, resp)) {
@@ -394,7 +398,7 @@ module.exports = {
       }
     }
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
-    axel.models.user.em
+    axel.models.axelUser.em
       .findByPk({
         [primaryKey]: id
       })
@@ -446,7 +450,7 @@ module.exports = {
         message: 'missing_argument'
       });
     }
-    axel.models.user.em
+    axel.models.axelUser.em
       .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
       .then((doc) => {
         if (doc) {
@@ -493,7 +497,7 @@ module.exports = {
       req.body.username = req.body.email;
     }
 
-    axel.models.user.em
+    axel.models.axelUser.em
       .findByPk(id)
       .then((u) => {
         user = u;
@@ -541,7 +545,7 @@ module.exports = {
       })
       .then(() => {
         if (data) {
-          return axel.models.user.em.update(data, {
+          return axel.models.axelUser.em.update(data, {
             where: {
               [primaryKey]: id
             }
@@ -559,7 +563,7 @@ module.exports = {
           }
         }
       })
-      .then(() => axel.models.user.em.findByPk(parseInt(id)))
+      .then(() => axel.models.axelUser.em.findByPk(parseInt(id)))
       .then((userModel) => {
         delete userModel.encryptedPassword;
         userModel = userModel.get();
@@ -578,7 +582,7 @@ module.exports = {
       return false;
     }
 
-    const collection = axel.models.user.em;
+    const collection = axel.models.axelUser.em;
     collection
       .findByPk(id)
       .then((user) => {

@@ -25,6 +25,7 @@ export default {
   },
   mounted() {
     this.timeOut();
+    this.getEnv();
   },
   methods: {
     timeOut() {
@@ -32,6 +33,10 @@ export default {
       setTimeout(() => {
         self.show = false;
       }, 500);
+    },
+    async getEnv() {
+      const { data } = await this.$http.get('/api/axel-admin/status');
+      this.$store.commit('appEnv', data.env);
     },
   },
 };

@@ -91,19 +91,19 @@ export default {
     },
 
     modelComputed() {
-      return (
-        this.model
-        || _.get(this.$store, this.storePath).find(
-          (model) => model.identity === this.identity
-        )
-      );
+      const model =
+        this.model ||
+        _.get(this.$store, this.storePath).find(
+          (m) => m.identity === this.identity
+        );
+      return model;
     },
 
     isConfigMode() {
       const configModels = ['axelModelConfig', 'axelModelFieldConfig'];
       return (
-        configModels.includes(this.modelComputed.identity)
-        && !configModels.includes(this.$route.params.id)
+        configModels.includes(this.modelComputed.identity) &&
+        !configModels.includes(this.$route.params.id)
       );
     },
   },

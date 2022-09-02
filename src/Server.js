@@ -34,8 +34,6 @@ class Server {
     this.app = app;
     this.initCompleted = false;
     this.middlewares = {};
-    this.pluginSequelizeModels = {};
-    this.pluginSchemaModels = {};
 
     axel
       .init()
@@ -170,7 +168,7 @@ class Server {
 
   loadModels() {
     debug('loadModels: start');
-    return this.modelsFn(app, this.pluginSequelizeModels, this.pluginSchemaModels);
+    return this.modelsFn(app);
   }
 
   async registerPlugins() {

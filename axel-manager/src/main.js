@@ -15,10 +15,6 @@ import Draggable from 'vuedraggable';
 
 // import { Integrations } from '@sentry/tracing';
 
-import VueAwesomeComponents from 'vue-aw-components/src/plugin';
-
-import { FormGenerator, notificationsMixin } from 'vue-aw-components';
-
 // import en from 'vue-aw-components/src/translations/en.json';
 import fr from 'vue-aw-components/src/translations/fr.json';
 import en from 'vue-aw-components/src/translations/en.json';
@@ -34,6 +30,8 @@ import './assets/scss/main.scss';
 
 import App from './App.vue';
 
+let vInstance;
+
 axios.defaults.withCredentials = process.env.NODE_ENV === 'production';
 
 Vue.prototype.$http = axios.create({
@@ -44,6 +42,35 @@ Vue.prototype.$http = axios.create({
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem(`${config.appKey}_token`)}`,
   },
+});
+Vue.prototype.$awApi = axios.create({
+  // baseURL: '/api/axel-admin/crud/',
+  baseURL: '/',
+  timeout: 20000,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem(`${config.appKey}_token`)}`,
+  },
+});
+
+Vue.prototype.$awApi.interceptors.request.use((conf) => {
+  // Do something before request is sent
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('$awApi interceptor before', conf.url);
+  }
+  if (conf.url.startsWith('/api/axel-admin')) {
+    return conf;
+  }
+  const model = vInstance.$store.state.models.find(m => conf.url.startsWith(m.apiUrl));
+  if (model) {
+    conf.url = conf.url.replace(model.apiUrl, `/api/axel-admin/crud/${model.identity}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('$awApi interceptor after', model, conf.url);
+    }
+  }
+
+  return conf;
 });
 
 Vue.use(Vuex);
@@ -59,66 +86,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 Vue.config.productionTip = isProduction;
 
-Vue.use(FormGenerator, {
-  fields: _.values(FormGenerator.fieldsLoader),
-});
-
-Vue.use(VueAwesomeComponents, {
-  config: {
-    modelsStorePath: 'models',
-    rolesStorePath: 'user.user.roles',
-    extendedRolesStorePath: 'user.extendedRoles',
-    primaryKey: 'id',
-  },
-  AwesomeCrud: {
-    props: {
-      primaryKey: { type: String, default: 'id' },
-      modelsStorePath: {
-        type: String,
-        default: 'models'
-      },
-      options: { detailPageMode: 'sidebar' }
-    }
-  },
-  AwesomeTable: {
-    props: {
-      primaryKey: {
-        type: String,
-        default: 'id',
-      },
-      modelsStorePath: {
-        type: String,
-        default: 'models'
-      }
-    }
-  },
-  AwesomeList: {
-    props: {
-      primaryKey: {
-        type: String,
-        default: 'id',
-      },
-      modelsStorePath: {
-        type: String,
-        default: 'models'
-      }
-    }
-  },
-  AwesomeForm: {
-    props: {
-      primaryKey: {
-        type: String,
-        default: 'id'
-      },
-      modelsStorePath: {
-        type: String,
-        default: 'models'
-      }
-    },
-
-  },
-});
-
 const i18n = new VueI18n({
   locale: store.state.locale || config.defaultLocale, // set locale
   messages: _.merge({ fr, en }, {
@@ -127,13 +94,12 @@ const i18n = new VueI18n({
   }),
   silentTranslationWarn: process.env.VUE_APP_NO_I18N_LOGS || isProduction
 });
-let vInstance;
+
 function init() {
   vInstance = new Vue({
     router,
     store,
     i18n,
-    mixins: [notificationsMixin],
     render: h => h(App),
 
   }).$mount('#app');

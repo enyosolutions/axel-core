@@ -17,7 +17,6 @@
                       v-model="newUser.firstName"
                       type="text"
                       class="form-control form-control-user"
-                      id="exampleFirstName"
                       placeholder="First Name"
                     />
                   </div>
@@ -121,13 +120,19 @@ export default {
   },
   mounted() {
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+    // if we are not in dev then refuse user creation
+    if (this.$store.state.appEnv !== 'development') {
+      this.$router.push('/login');
+    }
   },
 
   methods: {
     toCamelCase(string) {
       string = string
         .toLowerCase()
-        .replace(/(?:(^.)|([-_\s]+.))/g, (match) => match.charAt(match.length - 1).toUpperCase());
+        .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
 
@@ -142,7 +147,7 @@ export default {
       }
       this.$store.dispatch('logout');
       this.$http
-        .post('/api/user', {
+        .post('/api/axel-admin/auth/register', {
           ...this.newUser,
         })
         .then(async (res) => {
@@ -150,6 +155,7 @@ export default {
           this.$store.commit('currentUser', user);
           await this.$store.commit('token', token);
           this.$store.dispatch('refreshListOfValues');
+          this.$store.dispatch('refreshWsUser');
           if (user && token) {
             this.$router.push('/');
           }

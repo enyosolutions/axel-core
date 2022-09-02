@@ -63,7 +63,10 @@
                     <a class="small" href="#">Forgot Password?</a>
                   </div>
                   <div class="text-center">
-                    <router-link class="small" to="/register"
+                    <router-link
+                      class="small"
+                      to="/register"
+                      v-if="appEnv === 'development'"
                       >Create an Account!</router-link
                     >
                   </div>
@@ -86,7 +89,11 @@ export default {
   name: 'Login',
   mixins: [apiErrorsMixin],
   components: {},
-  computed: {},
+  computed: {
+    appEnv() {
+      return this.$store.state.appEnv;
+    },
+  },
   watch: {},
   data() {
     return {
@@ -98,6 +105,7 @@ export default {
   },
   mounted() {
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+    document.body.classList.add('bg-dark');
   },
 
   methods: {
@@ -114,11 +122,13 @@ export default {
     toCamelCase(string) {
       string = string
         .toLowerCase()
-        .replace(/(?:(^.)|([-_\s]+.))/g, (match) => match.charAt(match.length - 1).toUpperCase());
+        .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
     login() {
-      return this.$http.post('/api/auth/login', {
+      return this.$http.post('/api/axel-admin/auth/login', {
         email: this.email,
         password: this.password,
       });
@@ -140,8 +150,9 @@ export default {
         await this.$store.commit('currentUser', get(res, 'data.user'));
         await this.$store.commit('token', get(res, 'data.token'));
         await this.$store.commit('auth', get(res, 'data.token'));
+        await this.$socket.connect();
+        this.$store.dispatch('refreshWsUser');
         this.$store.dispatch('refreshListOfValues');
-        this.$socket.connect();
       }
       if (this.$store.state.currentUser) {
         const { currentUser } = this.$store.state;

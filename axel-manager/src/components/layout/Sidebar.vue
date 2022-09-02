@@ -163,6 +163,14 @@
     </li>
 
     <!-- Divider -->
+    <hr class="sidebar-divider d-md-block" />
+
+    <li class="nav-item">
+      <a class="nav-link" @click.prevent="logout()">
+        <i class="fa fa-fw fa-table"></i>
+        <span>logout</span></a
+      >
+    </li>
     <hr class="sidebar-divider d-none d-md-block" />
 
     <!-- Sidebar Toggler (Sidebar) -->
@@ -208,7 +216,7 @@ export default {
       config,
       openedSubmenus: {
         api: false,
-        models: false,
+        models: true,
       },
     };
   },
@@ -229,8 +237,8 @@ export default {
     ...mapState(['appConfig']),
     searchResultIsEmpty() {
       return (
-        !this.menuItems.length
-        && !Object.values(this.apiSearchResults).reduce(
+        !this.menuItems.length &&
+        !Object.values(this.apiSearchResults).reduce(
           (prev, next) => next.count + prev,
           0
         )
@@ -239,7 +247,7 @@ export default {
 
     viewableModels() {
       return this.$store.state.models.filter(
-        (m) => !m.identity.startsWith('axel')
+        (m) => m.identity === 'axelModel' || !m.identity.startsWith('axel')
       );
     },
   },
@@ -267,9 +275,13 @@ export default {
           })
           .then((data) => {
             this.apiSearchResults[type] = data;
-          }));
+          })
+      );
     },
-    logout() {},
+    logout() {
+      this.$store.dispatch('logout');
+      this.$router.push('/login');
+    },
 
     getNotifications() {
       if (this.$socket) {

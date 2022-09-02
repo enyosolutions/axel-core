@@ -1,5 +1,8 @@
 /* eslint-disable no-underscore-dangle, no-console */
-import * as io from 'socket.io-client/dist/socket.io.dev';
+import qs from 'qs';
+// import * as io from 'socket.io-client/dist/socket.io.dev';
+import { io } from 'socket.io-client';
+// eslint-disable-next-line
 import config from '../config';
 
 export default {
@@ -29,9 +32,18 @@ export default {
 
     socket._call = function apiCall(method, event, options) {
       return new Promise((resolve, reject) => {
-        socket.emit(event, { ...options, method }, (err, data) => {
+        let eventUrl;
+        let query;
+        if (event.includes('?')) {
+          const [url, q] = event.split('?');
+          eventUrl = url;
+          query = qs.parse(q);
+        } else {
+          eventUrl = event;
+        }
+        socket.emit(eventUrl, { query, ...options, method }, (err, data) => {
           if (process.env.NODE_ENV === 'development') {
-            console.log('[socket callback]', err, data);
+            console.log('[socket callback]', method, event, err, data);
           }
           if (err) {
             console.error(err);

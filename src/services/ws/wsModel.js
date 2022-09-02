@@ -66,7 +66,7 @@ module.exports = (socket) => {
         let tables = await axel.sqldb.query('show tables');
         tables = tables.map(t => Object.values(t)[0]);
         try {
-          const models = Object.entries(axel.models).map(([modelName, modelDef]) => ({
+          const models = Object.entries(axel.models).filter(([, modelDef]) => modelDef.entity).map(([modelName, modelDef]) => ({
             name: modelName,
             fields: Object.keys(modelDef.entity.attributes).map(idx => ({
               name: idx,

@@ -377,7 +377,6 @@ class AxelModelsService {
       .then(mappedSavedConfig => this.mergeDbModelsWithInMemory(mappedSavedConfig))
       .then(models => this.translateModels(models, req && req.locale))
       .then((models) => {
-        // console.log('translateModels', JSON.stringify(global.translationFallbacks));
         if (res) {
           return res.json({
             body: models
