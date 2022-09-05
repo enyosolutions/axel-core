@@ -293,7 +293,7 @@ function injectAxelAdminConfig() {
   const pluginEnabled = axel.config && axel.config.plugins.admin && axel.config.plugins.admin.enabled;
   const frameworkAdminEnabled = axel.config && axel.config.framework && axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.enabled;
 
-  if (!frameworkAdminEnabled || pluginEnabled) {
+  if (!frameworkAdminEnabled && !pluginEnabled) {
     debug('[AXEL ADMIN] axel admin is disabled. not mounting admin apis');
     return;
   }
