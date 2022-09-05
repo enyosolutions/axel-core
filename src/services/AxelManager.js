@@ -29,7 +29,7 @@ class AxelManager {
     try {
       // load the axel admin user model.
       // loadSchemaModel(`${__dirname}/../models/schema/axelUser.js`);
-      const axelUser = loadSqlModel(`${__dirname}/../models/sequelize/axelUser.js`, axel.sqldb);
+      const axelUser = loadSqlModel(`${__dirname}/../models/sequelize/AxelUser.js`, axel.sqldb);
       axelUser.em.options.logging = false;
       axelUser.em.logging = false;
 
@@ -55,7 +55,7 @@ class AxelManager {
    * @memberof AxelManager
    */
   injectExpressRoutes(app) {
-    app.get('/',
+    app.get(['/', '/axel-admin-panel'],
       (req, res) => {
         try {
           res.sendFile(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'));
