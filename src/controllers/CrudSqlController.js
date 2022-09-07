@@ -95,7 +95,7 @@ const CrudSqlController = {
           body: output
         });
       })
-      .catch(next);
+      .catch(next); // eslint-disable-line
   },
 
   async findAll(req, resp, next) {

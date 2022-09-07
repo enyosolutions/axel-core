@@ -204,7 +204,7 @@ module.exports = (socket) => {
         if (!em) {
           return cb(`error_while_accessing_model${JSON.stringify(id)}`);
         }
-        console.log('[AXELMANAGER] syncing sql model', id, { force, alter });
+        axel.logger.log('[AXELMANAGER] syncing sql model', id, { force, alter });
         em.sync({ force, alter }, { logging: true })
           .then(() => {
             cb(null, { body: 'OK' });

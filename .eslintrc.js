@@ -53,9 +53,9 @@ module.exports = {
     'import/extensions': 0,
     'no-mixed-operators': 2,
     'no-console': [
-      'warn',
+      'error',
       {
-        allow: ['warn', 'error'],
+        allow: ['warn', 'error', 'time', 'timeEnd'],
       },
     ],
     'no-unused-vars': [

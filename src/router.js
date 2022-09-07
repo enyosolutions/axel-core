@@ -55,7 +55,7 @@ function wrapRoute(fn) {
         }
         return result;
       })
-        .catch(next);
+        .catch(next); // eslint-disable-line
     }
     return p;
   };

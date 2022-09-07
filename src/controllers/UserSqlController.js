@@ -180,6 +180,7 @@ module.exports = {
             message: 'user_not_saved'
           });
         }
+        return null;
       })
       .catch((err) => {
         axel.logger.warn(err && err.message ? err.message : err);
@@ -228,7 +229,7 @@ module.exports = {
             errors: ['expired_token']
           });
         }
-        res.json({
+        return res.json({
           resetToken: data.resetToken,
           [primaryKey]: data[primaryKey]
         });
@@ -304,6 +305,7 @@ module.exports = {
             }
           });
         }
+        return null;
       })
       .catch((err) => {
         res.status(err.code ? parseInt(err.code) : 400).json({
@@ -317,6 +319,7 @@ module.exports = {
             body: 'password_reset_success'
           });
         }
+        return null;
       })
       .catch((err) => {
         res.status(400).json({
@@ -551,6 +554,7 @@ module.exports = {
             }
           });
         }
+        return null;
       })
       .then((doc) => {
         if (doc) {
@@ -562,6 +566,7 @@ module.exports = {
             }
           }
         }
+        return null;
       })
       .then(() => axel.models.axelUser.em.findByPk(parseInt(id)))
       .then((userModel) => {
@@ -570,6 +575,7 @@ module.exports = {
         res.json({
           user: userModel
         });
+        return null;
       })
       .catch((err) => {
         ErrorUtils.errorCallback(err, res);
@@ -620,11 +626,9 @@ module.exports = {
           );
           */
       })
-      .then(() => {
-        resp.status(200).json({
-          body: true
-        });
-      })
+      .then(() => resp.status(200).json({
+        body: true
+      }))
       .catch((err) => {
         ErrorUtils.errorCallback(err, resp);
       });
