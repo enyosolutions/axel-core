@@ -55,7 +55,7 @@ class AxelManager {
    * @memberof AxelManager
    */
   injectExpressRoutes(app) {
-    app.get(['/', '/axel-admin-panel'],
+    app.get(['/', '/admin-panel'],
       (req, res) => {
         try {
           res.sendFile(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'));
@@ -111,6 +111,9 @@ class AxelManager {
     debug('[AXELMANAGER] WS client connected', socket.id);
     const self = this;
     socket.on('Authorization', (data, cb) => {
+      if (!data) {
+        return cb('no_authorization_header_found');
+      }
       socket.Authorization = data;
       AuthService.verify(socket.Authorization.token, async (err, decryptedToken) => {
         if (!err) {
