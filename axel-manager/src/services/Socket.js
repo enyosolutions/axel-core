@@ -65,7 +65,9 @@ export default {
     });
     socket.on('connect', () => {
       console.log('[SOCKET] connecting');
-      socket.emit('Authorization', localStorage.getItem(`${config.appKey}_token`));
+      socket.emit('Authorization', {
+        token: localStorage.getItem(`${config.appKey}_token`)
+      });
     });
 
     socket.on('disconnect', (a) => {

@@ -2,10 +2,9 @@
 import dayjs from 'dayjs';
 import _ from 'lodash';
 import VueAwesomeComponents from 'vue-aw-components/src/plugin';
-import { FormGenerator, notificationsMixin } from 'vue-aw-components';
+import { FormGenerator } from 'vue-aw-components';
 
 // import 'socket.io-client/dist/socket.io';
-import axios from 'axios';
 import Socket from '../services/Socket';
 import FieldLayoutEditor from '../components/fields/FieldLayoutEditor.vue';
 import FieldBooleanExpressionEditor from '../components/fields/FieldBooleanExpressionEditor.vue';
@@ -30,7 +29,6 @@ const GlobalComponents = {
     Vue.use(FormGenerator, {
       fields: _.values(FormGenerator.fieldsLoader),
     });
-    Vue.mixin(notificationsMixin);
 
     Vue.use(VueAwesomeComponents, {
       config: {

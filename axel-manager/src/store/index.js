@@ -220,7 +220,6 @@ export default new Vuex.Store({
       commit('token', null);
       commit('auth', null);
       commit('currentUser', null);
-      this._vm.$router.push('/login');
       return true;
     },
   },

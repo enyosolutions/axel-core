@@ -158,7 +158,7 @@ export default {
         const { currentUser } = this.$store.state;
         this.$router.push('/');
         setTimeout(() => {
-          this.$notify({
+          this.$awNotify({
             title: this.$t('common.messages.loginWelcome', {
               name: `${currentUser.firstName}
                 ${currentUser.lastName}`,
@@ -168,7 +168,7 @@ export default {
         }, 250);
         return;
       }
-      this.$notify({
+      this.$awNotify({
         title: this.$t('common.messages.no_access_account'),
         type: 'warning',
       });

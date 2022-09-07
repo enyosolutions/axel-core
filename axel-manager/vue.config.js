@@ -6,7 +6,7 @@ const API_URL = process.env.API_URL || 'http://localhost:1335';
 // vue.config.js
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production' ? '/' : '/',
-  indexPath: process.env.NODE_ENV === 'production' ? 'axel-manager.html' : 'index.html',
+  indexPath: process.env.NODE_ENV === 'production' ? 'admin-panel.html' : 'index.html',
   pluginOptions: {},
   lintOnSave: true,
   filenameHashing: false,

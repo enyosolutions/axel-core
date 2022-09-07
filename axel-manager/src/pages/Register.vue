@@ -113,6 +113,7 @@ export default {
         username: null,
         email: null,
         password: null,
+        cPassword: null,
       },
       pageLoaded: false,
       isRequestInProgress: false,

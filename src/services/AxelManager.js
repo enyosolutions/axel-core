@@ -58,7 +58,7 @@ class AxelManager {
     app.get(['/', '/admin-panel'],
       (req, res) => {
         try {
-          res.sendFile(resolve(__dirname, '../../axel-manager/dist/axel-manager.html'));
+          res.sendFile(resolve(__dirname, '../../axel-manager/dist/admin-panel.html'));
         } catch (e) {
           console.error(e.message);
           res.status(500).json({
@@ -112,9 +112,15 @@ class AxelManager {
     const self = this;
     socket.on('Authorization', (data, cb) => {
       if (!data) {
-        return cb('no_authorization_header_found');
+        if (cb) {
+          return cb('no_authorization_header_found');
+        }
+        return;
       }
       socket.Authorization = data;
+      if (!socket.Authorization) {
+        console.warn('socket.Authorization', socket.Authorization);
+      }
       AuthService.verify(socket.Authorization.token, async (err, decryptedToken) => {
         if (!err) {
           const user = await axel.models.axelUser.em.findOne({

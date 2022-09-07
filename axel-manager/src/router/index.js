@@ -145,4 +145,11 @@ const router = new Router({
   }
 });
 
+store.subscribeAction((action, state) => {
+  console.warn('action event', action, router.currentRoute.path);
+  if (action.type === 'logout' && router.currentRoute && !['/login', '/register'].includes(router.currentRoute.path)) {
+    router.push('/login');
+  }
+});
+
 export default router;

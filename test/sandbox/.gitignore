@@ -3,6 +3,7 @@ dist
 node_modules
 *node_modules
 public/axel-manager.html
+public/admin-panel.html
 
 ################################################
 # axel.js / Waterline / Grunt
