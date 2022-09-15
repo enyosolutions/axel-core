@@ -8,9 +8,11 @@ const debug = d('axel:models');
 const { DataTypes } = require('sequelize');
 const axel = require('./axel.js');
 const logger = require('./services/logger');
+const { models } = require('./axel.js');
 
 const hooksCache = {};
 axel.hooks = hooksCache;
+const pluginsHooksLocations = [];
 const loadHook = (model) => {
   if (model.hooks) {
     return;
@@ -34,8 +36,27 @@ const loadHook = (model) => {
     model.hooks = require(filePathLc);
     debug('Loaded hooks from', filePathLc);
   } else {
+    // @fixme reduce the amount of fs calls. by searching all locations at once
+    // @fixme use a for loop for the locations.
+    for (const pluginData of Object.values(axel.plugins)) {
+      if (fs.existsSync(`${pluginData.resolvedPath}/models/hooks/${model.identity}.js`)) {
+        model.hooks = require(`${pluginData.resolvedPath}/models/hooks/${model.identity}.js`);
+        debug('Loaded hooks from', `${pluginData.resolvedPath}/models/hooks/${model.identity}.js`);
+        break;
+      } else if (fs.existsSync(`${pluginData.resolvedPath}/dist/models/hooks/${model.identity}.js`)) { // if plugin is typescript compiled
+        model.hooks = require(`${pluginData.resolvedPath}/dist/models/hooks/${model.identity}.js`);
+        debug('Loaded hooks from', `${pluginData.resolvedPath}/dist/models/hooks/${model.identity}.js`);
+        break;
+      } else if (fs.existsSync(`${pluginData.resolvedPath}/src/models/hooks/${model.identity}.js`)) { // if plugin is in a source folder
+        model.hooks = require(`${pluginData.resolvedPath}/src/models/hooks/${model.identity}.js`);
+        debug('Loaded hooks from', `${pluginData.resolvedPath}/src/models/hooks/${model.identity}.js`);
+        break;
+      }
+    }
+  }
+  if (!model.hooks) {
     model.hooks = {};
-    debug('no hooks found in ', filePath, filePathLc);
+    debug('⚠️ no hooks found in ', filePath, filePathLc);
   }
   hooksCache[model.identity] = model.hooks;
   return hooksCache[model.identity];

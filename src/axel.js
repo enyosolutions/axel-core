@@ -56,7 +56,8 @@ const axel = {
   models: {},
   controllers: {},
   routes: {},
-  services: {},
+  services: {}, // services globally needed
+  hooks: {}, // hooks loaded foreach model
   policies: {},
   logger: l,
   log: l,
