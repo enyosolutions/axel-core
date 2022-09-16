@@ -2,14 +2,16 @@ const debug = require('debug')('axel:api:hooks');
 const { has, get } = require('lodash');
 const axel = require('../axel');
 
-module.exports.execHook = async (modelName, hookName, ...rest) => {
+module.exports.execHook = async (modelName, hookName, context, ...rest) => {
   if (axel.hooks._global && axel.hooks._global[hookName]) {
-    await axel.hooks._global[hookName](...rest);
+    context.modelName = modelName;
+    context.hookName = hookName;
+    await axel.hooks._global[hookName](context, ...rest);
   }
   if (has(axel, `models.${modelName}.hooks.${hookName}`)) {
     debug('executing hook', `models.${modelName}.hooks.${hookName}`);
     const func = get(axel, `models.${modelName}.hooks.${hookName}`);
-    const output = func(...rest);
+    const output = func(context, ...rest);
     if (output && output.then) {
       await output;
       return null;
