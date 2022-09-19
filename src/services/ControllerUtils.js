@@ -4,8 +4,14 @@ const axel = require('../axel');
 
 module.exports.execHook = async (modelName, hookName, context, ...rest) => {
   if (axel.hooks._global && axel.hooks._global[hookName]) {
-    context.modelName = modelName;
-    context.hookName = hookName;
+    if (hookName.startsWith('before')) {
+      context.modelName = modelName;
+      context.hookName = hookName;
+    }
+    else {
+      rest[0].modelName = modelName;
+      rest[0].hookName = hookName;
+    }
     await axel.hooks._global[hookName](context, ...rest);
   }
   if (has(axel, `models.${modelName}.hooks.${hookName}`)) {
@@ -20,6 +26,7 @@ module.exports.execHook = async (modelName, hookName, context, ...rest) => {
   }
   return null;
 };
+
 module.exports.getPrimaryKey = (endpoint) => {
   if (!axel.models[endpoint]) {
     return;

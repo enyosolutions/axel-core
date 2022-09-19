@@ -142,7 +142,6 @@ class AxelModelsService {
 
 
   insertSingleModelIntoDb(model) {
-    axel.logger.debug('[AxelModelsService] insertSingleModelIntoDb');
     if (!axel.models.axelModelConfig || !axel.models.axelModelFieldConfig) {
       return Promise.resolve();
     }

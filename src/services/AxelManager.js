@@ -55,7 +55,7 @@ class AxelManager {
    * @memberof AxelManager
    */
   injectExpressRoutes(app) {
-    app.get(['/', '/admin-panel'],
+    app.get(['/admin-panel'],
       (req, res) => {
         try {
           res.sendFile(resolve(__dirname, '../../axel-manager/dist/admin-panel.html'));

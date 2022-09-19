@@ -521,7 +521,7 @@ const Utils = {
   getEntityManager(req, res) {
     const endpoint = _.isString(req) ? req : (req.params.endpoint || req.endpoint || req.modelName);
     if (!axel.models[endpoint] || !axel.models[endpoint].em) {
-      console.warn('THE REQUESTED ENDPOINT [', endpoint, '] DOES NOT EXISTS');
+      console.warn('THE REQUESTED ENDPOINT [', endpoint, '] DOES NOT EXISTS. source: ', req.method, req.url);
       res.status(404).json({
         errors: ['model_not_found_error'],
         message: 'model_not_found_error'
