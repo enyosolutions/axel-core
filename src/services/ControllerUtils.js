@@ -7,8 +7,7 @@ module.exports.execHook = async (modelName, hookName, context, ...rest) => {
     if (hookName.startsWith('before')) {
       context.modelName = modelName;
       context.hookName = hookName;
-    }
-    else {
+    } else if (rest[0]) {
       rest[0].modelName = modelName;
       rest[0].hookName = hookName;
     }
