@@ -180,7 +180,7 @@ const CrudSqlController = {
       const result = {
         body: item.get ? item.get() : item
       };
-      execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
+      await execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
       resp.set('X-Axel-core-endpoint', 'get');
       return resp.status(200).json(result);
     } catch (err) {
