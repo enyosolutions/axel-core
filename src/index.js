@@ -19,6 +19,8 @@ module.exports.Server = require('./Server').Server;
 module.exports.router = require('./router').router;
 module.exports.modelsLoader = require('./models.js').modelsLoader;
 
+module.exports.loadModels = module.exports.modelsLoader;
+
 module.exports.AuthService = AuthService;
 module.exports.tokenDecryptMiddleware = AuthService.tokenDecryptMiddleware;
 module.exports.ExtendedError = require('./services/ExtendedError.js');

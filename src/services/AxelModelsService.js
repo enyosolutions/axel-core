@@ -306,7 +306,7 @@ class AxelModelsService {
 
 
   translateModels(models, locale,) {
-    if (axel.config.framework.AxelModelsService && axel.config.framework.AxelModelsService.multilang && axel.i18n && locale) {
+    if (axel.config.framework.axelModels && axel.config.framework.axelModels.multilang && axel.i18n && locale) {
       const options = {
         fields: ['title', 'description']
       };
@@ -359,7 +359,7 @@ class AxelModelsService {
   }
 
   translateField(field, modelId, locale, fallback) {
-    const key = `${axel.config.framework.AxelModelsService.translationPrefix}.${modelId}.${field
+    const key = `${axel.config.framework.axelModels.translationPrefix}.${modelId}.${field
       }`;
     _.set(global.translationFallbacks, key, fallback);
     const tranlation = axel.i18n.__({

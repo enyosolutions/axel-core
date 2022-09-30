@@ -12,7 +12,7 @@ const {
 
 const debug = d('axel:init');
 
-// eslint-disable-next-line
+// eslint-disable-next-line`
 const port = (process.env.PORT ? parseInt(process.env.PORT) : 0)
   || axel.config.port
   || 3333;
