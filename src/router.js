@@ -291,7 +291,10 @@ const loadEndpointMiddleware = (endpoint) => {
 function injectAxelAdminConfig() {
   debug('injectAxelAdminConfig');
   const pluginEnabled = axel.config && axel.config.plugins.admin && axel.config.plugins.admin.enabled;
-  const frameworkAdminEnabled = axel.config && axel.config.framework && axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.enabled;
+  const frameworkAdminEnabled = axel.config && axel.config.framework && (
+    (axel.config.framework.axelAdmin && axel.config.framework.axelAdmin.enabled)
+    || (axel.config.framework.axelModels && axel.config.framework.axelModels.enabled)
+  );
 
   if (!frameworkAdminEnabled && !pluginEnabled) {
     debug('[AXEL ADMIN] axel admin is disabled. not mounting admin apis');

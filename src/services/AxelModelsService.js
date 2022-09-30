@@ -369,7 +369,7 @@ class AxelModelsService {
     return tranlation || fallback;
   }
 
-  serveModels(req = null, res = null) {
+  serveModels(req, res = null) {
     const promise = Promise.resolve([]);
     return promise
       .then(this.loadDbModelsInMemory) // noop

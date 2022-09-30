@@ -16,7 +16,7 @@ class AxelAdminController {
   async listModels(req, res, next) {
     try {
       await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {} });
-      const models = await AxelModelsService.serveModels();
+      const models = await AxelModelsService.serveModels(req); // req is needed to get the locale
       await execHook('axelModelConfig', 'afterApiFind', { request: req, sequelizeQuery: {} });
       return res.json({
         body: models
