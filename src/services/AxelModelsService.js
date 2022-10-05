@@ -36,7 +36,7 @@ class AxelModelsService {
    */
   async init(app) { // eslint-disable-line no-unused-vars
     if (!axel.sqldb) {
-      return Promise.reject(new Error('missing_sqldb'));
+      return 'missing_sqldb';
     }
     loadSchemaModel(`${__dirname}/../models/schema/AxelModelConfig.js`);
     loadSchemaModel(`${__dirname}/../models/schema/AxelModelFieldConfig.js`);

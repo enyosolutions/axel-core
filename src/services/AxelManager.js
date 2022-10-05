@@ -27,6 +27,9 @@ class AxelManager {
    */
   init(app) {
     try {
+      if (!axel.sqldb) {
+        return 'missing_sqldb';
+      }
       // load the axel admin user model.
       // loadSchemaModel(`${__dirname}/../models/schema/axelUser.js`);
       const axelUser = loadSqlModel(`${__dirname}/../models/sequelize/AxelUser.js`, axel.sqldb);

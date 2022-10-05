@@ -32,7 +32,7 @@ class AxelPlugin {
    */
   async init(app, axel) { // eslint-disable-line no-unused-vars
     if (!axel.sqldb) {
-      return Promise.reject(new Error('missing_sqldb'));
+      return 'missing_sqldb';
     }
     debug('Start plugin system init');
     // eslint-disable-next-line
