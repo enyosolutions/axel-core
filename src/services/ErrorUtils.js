@@ -41,6 +41,7 @@ const ErrorUtils = {
       throw new Error('error_handler_called_without_error_arg');
     }
     if (err.name === 'SequelizeValidationError') {
+      err.code = 400;
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
         err.errors = err.errors.map(e => e.message);
@@ -48,7 +49,17 @@ const ErrorUtils = {
       err.message = 'validation_error';
     }
 
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      err.code = 400;
+      if (err.errors && Array.isArray(err.errors)) {
+        // @ts-ignore
+        err.errors = err.errors.map(e => e.message.replace('.PRIMARY', ''));
+      }
+      err.message = 'validation_error';
+    }
+
     if (err.name === 'SequelizeDatabaseError') {
+      err.code = 400;
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
         err.errors = err.errors.map(e => e.sqlMessage);
@@ -58,8 +69,8 @@ const ErrorUtils = {
       }
       err.message = 'database_error';
     }
-
     if (err.message === 'Validation error') {
+      err.code = 400;
       if (err.errors && Array.isArray(err.errors)) {
         // @ts-ignore
         err.errors = err.errors.map(e => `${e.path}_${e.validatorKey}`);

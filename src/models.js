@@ -75,7 +75,7 @@ const loadSchemaModel = (filePath) => {
   }
 
   if (model.collectionName && axel.mongodb) {
-    model.collection = axel.mongodb.get(model.collectionName);
+    model.collection = axel.mongodb.db().collection(model.collectionName);
   }
   loadHook(model);
   debug('Loaded schema model => ', model.identity);
