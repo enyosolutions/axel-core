@@ -1,6 +1,6 @@
 {
   "name": "axel-core",
-  "version": "0.25.4",
+  "version": "0.25.5",
   "description": "Axel: Express + OhMyGoodness",
   "main": "src/index.js",
   "types": "dist/index.d.ts",
