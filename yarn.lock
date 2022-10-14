@@ -1807,10 +1807,10 @@ aws4@^1.8.0:
   resolved "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
 
-axel-cli@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/axel-cli/-/axel-cli-0.10.0.tgz#754d4f27b26e732ed7048ded693195058e1040f4"
-  integrity sha512-XJQTEF5tfgqzs/UcwwiUmM/po6RZsqgdLXUd5l5fej9ssc9j/tsd1Ro3AkwbwOHmTe6IuBwE+c54WA1HSxHLlA==
+axel-cli@^0.11.0:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/axel-cli/-/axel-cli-0.11.1.tgz#4452e1c18734f7826d2e2aaf966f861d4b7db1e9"
+  integrity sha512-ZIJPfPGopAvOpj/Bk3+9/W3cNv0DhYNmYRPaH076l7VIJhOFxo4leFarBz6CoShGHP8Q3iUaFep3k2fgSNExKQ==
   dependencies:
     "@oclif/command" "^1"
     "@oclif/config" "^1"

@@ -118,6 +118,14 @@ class SchemaValidator {
       allowUnionTypes: true,
       ...axel.config.schemaValidator,
     });
+    this.ajvEditValidator = new Ajv({
+      useDefaults: false,
+      coerceTypes: false,
+      allErrors: true,
+      removeAdditional: false,
+      allowUnionTypes: true,
+      ...axel.config.schemaValidator,
+    });
     this.ajvStrict = new Ajv({
       useDefaults: 'empty',
       coerceTypes: false,
@@ -128,13 +136,16 @@ class SchemaValidator {
     });
 
     addFormats(this.ajv);
+    addFormats(this.ajvEditValidator);
     addFormats(this.ajvStrict);
     ['relation', 'relationKey', 'foreignKey', 'relationLabel', 'relationUrl', 'field', 'column'].forEach((keyword) => {
       this.ajv.addKeyword(keyword);
+      this.ajvEditValidator.addKeyword(keyword);
       this.ajvStrict.addKeyword(keyword);
     });
 
     this.validators = {};
+    this.editValidators = {};
     this.strictValidators = {};
     this.missingSchemas = {};
     this.initialized = false;
@@ -173,6 +184,7 @@ class SchemaValidator {
       try {
         // @ts-ignore
         this.validators[identity] = this.ajv.compile(axel.models[identity].schema);
+        this.editValidators[identity] = this.ajvEditValidator.compile(axel.models[identity].schema);
         if (this.ajvStrict) {
           this.strictValidators[identity] = this.ajvStrict.compile(axel.models[identity].schema);
         }
@@ -195,8 +207,12 @@ class SchemaValidator {
   validate(data, model, options = { strict: false }) {
     let result = { isValid: true, context: model };
     try {
-      const validator =
+      let validator =
         options && options.strict ? this.strictValidators[model] : this.validators[model];
+      if (options && options.isUpdate) {
+        console.log('using edit validator', Object.keys(this.editValidators));
+        validator = this.editValidators[model];
+      }
       if (!validator) {
         {
           axel.logger.warn(
@@ -208,7 +224,7 @@ class SchemaValidator {
         }
       }
       if (typeof validator === 'function') {
-        result.isValid = this.validators[model](data);
+        result.isValid = validator(data);
       } else {
         axel.logger.warn(
           'VALIDATOR :: ' + model + ' validator is not a function',
@@ -222,11 +238,11 @@ class SchemaValidator {
     }
     if (!result.isValid) {
       // result = normalize(this.validators[model.toLowerCase()].errors);
-      result.errors = normaliseErrorMessages(this.validators[model].errors);
+      result.errors = normaliseErrorMessages(validator.errors);
       result.formatedErrors = _.flattenDeep([
         Object.keys(result.errors.fields).map(index => result.errors.fields[index]),
       ]);
-      result.rawErrors = this.validators[model].errors;
+      result.rawErrors = validator.errors;
     }
     return result;
   }

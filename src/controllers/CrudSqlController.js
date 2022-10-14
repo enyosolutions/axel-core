@@ -233,7 +233,7 @@ const CrudSqlController = {
 
       const sequelizeQuery = { where: { [primaryKey]: id } };
       await execHook(endpoint, 'beforeApiUpdate', { request: req, sequelizeQuery });
-      await SchemaValidator.validateAsync(data, endpoint);
+      await SchemaValidator.validateAsync(data, endpoint, { isUpdate: true });
 
       const exists = await repository
         .findOne(sequelizeQuery);
@@ -246,10 +246,10 @@ const CrudSqlController = {
       }
       sequelizeQuery.individualHooks = true;
       sequelizeQuery.raw = false;
-      await repository.update(data, sequelizeQuery);
+      const [success, output] = await repository.update(data, sequelizeQuery);
 
       const result = {};
-      result.body = await repository.findOne(sequelizeQuery);
+      result.body = output && output.length ? output[0] : await repository.findOne(sequelizeQuery);
       if (result.body && result.body.get) {
         result.body = result.body.get();
       }

@@ -61,6 +61,8 @@ const axel = {
   policies: {},
   logger: l,
   log: l,
+  sqldb: null,
+  mongodb: null,
   plugins: {},
   enabledPlugins: [],
 
