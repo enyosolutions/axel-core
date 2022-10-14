@@ -206,11 +206,12 @@ class SchemaValidator {
 
   validate(data, model, options = { strict: false }) {
     let result = { isValid: true, context: model };
+    let validator = this.validators[model];
     try {
-      let validator =
-        options && options.strict ? this.strictValidators[model] : this.validators[model];
+      if (options && options.strict) {
+        validator = this.strictValidators[model];
+      }
       if (options && options.isUpdate) {
-        console.log('using edit validator', Object.keys(this.editValidators));
         validator = this.editValidators[model];
       }
       if (!validator) {
