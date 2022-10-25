@@ -128,10 +128,12 @@ const CrudSqlController = {
         raw: false,
         nested: true
       };
-      await execHook(endpoint, 'beforeApiFind', { request: req, sequelizeQuery });
+      await execHook(endpoint, 'beforeApiFind', { request: req, sequelizeQuery, response: resp });
       const { rows, count } = await repository
         .findAndCountAll(sequelizeQuery);
-
+      if (resp.headersSent) {
+        return;
+      }
 
       items = rows.map(item => (item.get ? item.get() : item));
       const result = {
@@ -142,7 +144,8 @@ const CrudSqlController = {
         totalCount: count
       };
       await execHook(endpoint, 'afterApiFind', result, { request: req, response: resp });
-      resp.set('X-Axel-core-endpoint', 'list');
+      resp.set('X-axel-core-endpoint', endpoint);
+      resp.set('X-axel-core-action', 'list');
       resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -164,6 +167,9 @@ const CrudSqlController = {
         raw: false
       };
       await execHook(endpoint, 'beforeApiFindOne', { request: req, sequelizeQuery });
+      if (resp.headersSent) {
+        return;
+      }
       const item = await repository
         .findOne(sequelizeQuery);
 
@@ -181,7 +187,8 @@ const CrudSqlController = {
         body: item.get ? item.get() : item
       };
       await execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
-      resp.set('X-Axel-core-endpoint', 'get');
+      resp.set('X-axel-core-endpoint', endpoint);
+      resp.set('X-axel-core-action', 'get');
       return resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -194,6 +201,9 @@ const CrudSqlController = {
     const endpoint = req.endpoint || req.params.endpoint || req.modelName;
     try {
       await execHook(endpoint, 'beforeApiCreate', { request: req, sequelizeQuery: {} });
+      if (resp.headersSent) {
+        return;
+      }
       const repository = Utils.getEntityManager(req, resp);
       if (!repository) {
         throw new ExtendedError({ code: 400, message: 'error_model_not_found_for_this_url' });
@@ -204,7 +214,8 @@ const CrudSqlController = {
       result.body = await repository
         .create(data);
       await execHook(endpoint, 'afterApiCreate', result, { request: req, response: resp });
-
+      resp.set('X-axel-core-endpoint', endpoint);
+      resp.set('X-axel-core-action', 'create');
       resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -233,6 +244,9 @@ const CrudSqlController = {
 
       const sequelizeQuery = { where: { [primaryKey]: id } };
       await execHook(endpoint, 'beforeApiUpdate', { request: req, sequelizeQuery });
+      if (resp.headersSent) {
+        return;
+      }
       await SchemaValidator.validateAsync(data, endpoint, { isUpdate: true });
 
       const exists = await repository
@@ -254,7 +268,8 @@ const CrudSqlController = {
         result.body = result.body.get();
       }
       await execHook(endpoint, 'afterApiUpdate', result, { request: req, response: resp });
-
+      resp.set('X-axel-core-endpoint', endpoint);
+      resp.set('X-axel-core-action', 'update');
       return resp.status(200).json(result);
     } catch (err) {
       next(err);
@@ -282,6 +297,9 @@ const CrudSqlController = {
       const sequelizeQuery = { where: { [primaryKey]: id } };
 
       await execHook(endpoint, 'beforeApiDelete', { request: req, sequelizeQuery });
+      if (resp.headersSent) {
+        return;
+      }
       const exists = await repository
         .findOne(sequelizeQuery);
       if (!exists) {
@@ -297,7 +315,8 @@ const CrudSqlController = {
       result.body = await repository
         .destroy(sequelizeQuery);
       await execHook(endpoint, 'afterApiDelete', result, { request: req, response: resp });
-
+      resp.set('X-axel-core-endpoint', endpoint);
+      resp.set('X-axel-core-action', 'delete');
       return resp.status(200).json(result);
     } catch (err) {
       next(err);

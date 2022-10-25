@@ -66,7 +66,7 @@ const Utils = {
 
   /**
    *
-   * Inject userId if required
+   * Inject userId if required£
    */
   injectUserId(data, user, fields = null) {
     if (!fields) {

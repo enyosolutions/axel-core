@@ -361,6 +361,13 @@ module.exports = {
                   visible: "{{ (!currentItem.field || currentItem.field.type === 'vSelect') && !!currentItem.relation  }}"
                 }
               },
+              hideIdsInSelect: {
+                type: 'boolean',
+                title: 'hide ids when show select options',
+                field: {
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'vSelect') && !!currentItem.relation  }}"
+                }
+              },
               prefix: {
                 type: 'string',
                 title: 'Prefix',
