@@ -270,7 +270,7 @@ const DocumentManager = {
       // if (doc.indexOf('/public') !== -1) {
       //   doc = doc.substr(doc.indexOf('/public') + 7);
       // }
-      if (doc.indexOf(axel.config.appUrl) !== -1) {
+      if (doc && doc.indexOf(axel.config.appUrl) !== -1) {
         doc = doc.replace(axel.config.appUrl, '');
       }
       fs.unlink(`${process.cwd()}/${doc}`, (err) => {

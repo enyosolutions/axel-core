@@ -209,6 +209,7 @@ module.exports = {
           pagination: { type: 'boolean', default: true },
           collapse: { type: 'boolean', default: true },
           formPagination: { type: 'boolean', default: true },
+          tableConfiguration: { type: 'boolean', default: true },
           addKanbanList: {
             title: 'Add new list in kanban', description: 'show the button to create a new list in the awesome kanban', type: 'boolean', default: true
           },

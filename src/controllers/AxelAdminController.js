@@ -15,12 +15,13 @@ class AxelAdminController {
    */
   async listModels(req, res, next) {
     try {
-      await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {} });
+      await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {}, response: res });
       const models = await AxelModelsService.serveModels(req); // req is needed to get the locale
-      await execHook('axelModelConfig', 'afterApiFind', { request: req, sequelizeQuery: {} });
-      return res.json({
+      const results = {
         body: models
-      });
+      };
+      await execHook('axelModelConfig', 'afterApiFind', results, { request: req, sequelizeQuery: {}, response: res });
+      return res.json(results);
     } catch (err) {
       return next(err);
     }
