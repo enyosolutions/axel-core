@@ -1,4 +1,7 @@
 # Axel framework
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dad1078e6ab64704aaf9401fa40d4c89)](https://app.codacy.com/gh/enyosolutions-team/axel-core?utm_source=github.com&utm_medium=referral&utm_content=enyosolutions-team/axel-core&utm_campaign=Badge_Grade_Settings)
+
 Axel (like Axel Foley or a fusion word between Accelerate and express) is a framework based on express. image
 
 ## History
