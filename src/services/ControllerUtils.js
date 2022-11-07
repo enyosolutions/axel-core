@@ -28,7 +28,7 @@ module.exports.execHook = async (modelName, hookName, context, ...rest) => {
 
 module.exports.getPrimaryKey = (endpoint) => {
   if (!axel.models[endpoint]) {
-    return;
+    return null;
   }
   return axel.models[endpoint].primaryKeyField || axel.models[endpoint].em.primaryKeyField
     || axel.config.framework.primaryKeyField || axel.config.framework.primaryKey;

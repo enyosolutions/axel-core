@@ -4,7 +4,7 @@
   "description": "Axel: Express + OhMyGoodness",
   "main": "src/index.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:enyosolutions-team/axel-axel.git",
+  "repository": "git@github.com:enyosolutions-team/axel-core.git",
   "author": "fb@enyosolutions.com <fb@enyosolutions.com>",
   "license": "MIT",
   "scripts": {
