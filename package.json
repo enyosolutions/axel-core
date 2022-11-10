@@ -46,8 +46,7 @@
     "mkdirp": "^1.0.4",
     "multer": "^1.4.2",
     "pino": "7",
-    "pino-colada": "^2.1.0",
-    "pino-pretty": "^4.3.0",
+    "pino-pretty": "^9.1.1",
     "serialize-javascript": "^5.0.1",
     "socket.io": "^4.5.1",
     "xlsx": "^0.16.8"

@@ -227,12 +227,12 @@ function connectRoute(app, source, _target) {
           console.error('[ROUTING]', target.controller, target.action, e.message);
         }
       } else {
-        axel.logger.warn('[ROUTING] missing Action for', controllerRoute, target.policies, target.action, target.route);
+        axel.logger.warn('[ROUTING] missing Action for %s %s %s', controllerRoute, target.action, target.route);
       }
       return true;
     })
     .catch((err) => {
-      axel.logger.warn('[ROUTING] Error while loading', controllerRoute, err.message, err);
+      axel.logger.warn(err, '[ROUTING] Error while loading %s %s', controllerRoute, err.message);
       throw err;
     });
 }
