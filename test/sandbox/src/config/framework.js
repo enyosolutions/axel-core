@@ -8,7 +8,7 @@ module.exports.framework = {
   secondaryColor: '#fc544b',
   backgroundColor: '#fff',
   user: {
-    emailConfirmationRequired: true,
+    emailConfirmationRequired: false,
     publicId: false,
     username: false,
     email: true,

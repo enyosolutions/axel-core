@@ -85,7 +85,7 @@ module.exports = {
       isActive: {
         type: 'DataTypes.BOOLEAN',
         allowNull: true,
-        defaultValue: 1,
+        defaultValue: true,
       },
       passwordResetToken: {
         type: 'DataTypes.STRING(200)',

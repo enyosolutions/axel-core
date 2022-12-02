@@ -323,7 +323,7 @@ function injectAxelAdminConfig() {
       secure: false,
     };
     axel.config.routes['/api/axel-admin/status'] = async (req, res) => {
-      const userExists = await axel.models.axelUser.em.findOne();
+      const userExists = await axel.models.user.em.findOne();
       res.json({ env: process.env.NODE_ENV, firstUser: !userExists });
     };
   }

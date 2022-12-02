@@ -609,13 +609,13 @@ export default {
         (err) => {
           if (err) {
             console.warn(err);
-            this.$notify(
+            this.$awNotify(
               `Error while updating Model ${modelName} [${err.message || err}]`,
               'error'
             );
             return;
           }
-          this.$notify(`Model ${modelName} was updated`, 'success');
+          this.$awNotify(`Model ${modelName} was updated`, 'success');
           this.listModels();
         }
       );

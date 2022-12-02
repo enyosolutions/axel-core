@@ -131,7 +131,7 @@ class AxelPlugin {
       }
 
       if (!fs.existsSync(pathToPlugin) || !fs.statSync(pathToPlugin).isDirectory()) {
-        console.warn(`Plugin ${plugin.name} not found at ${pathToPlugin}, skipping.`);
+        logger.log(`⚠️ Plugin ${plugin.name} not found at ${pathToPlugin}, skipping.`);
         continue;
       }
 

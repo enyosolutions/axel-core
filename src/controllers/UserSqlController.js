@@ -13,8 +13,8 @@ const { ExtendedError } = require('../index');
 const AuthService = require('../services/AuthService');
 // const MailService = require('../services/MailService');
 
-const primaryKey = axel.models.axelUser && axel.models.axelUser.em && axel.models.axelUser.em.primaryKeyField
-  ? axel.models.axelUser.em.primaryKeyField
+const primaryKey = axel.models.axelUser && axel.models.user.em && axel.models.user.em.primaryKeyField
+  ? axel.models.user.em.primaryKeyField
   : axel.config.framework.primaryKey;
 
 module.exports = {
@@ -85,7 +85,7 @@ module.exports = {
     newUser.email = newUser.email.toLowerCase();
     newUser.username = newUser.username.toLowerCase();
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne({
         where: {
           email: newUser.email
@@ -104,13 +104,14 @@ module.exports = {
         if (!newUser.roles) {
           newUser.roles = JSON.stringify(['USER']);
         }
-        newUser.isActive = !axel.config.framework.emailConfirmationRequired && !axel.config.framework.accountManualVerification;
+        newUser.isActive = true;
+        // newUser.isActive = !axel.config.framework.emailConfirmationRequired && !axel.config.framework.accountManualVerification;
 
         return AuthService.beforeCreate(newUser);
       })
       .then((data) => {
         if (data) {
-          return axel.models.axelUser.em.create(newUser, {
+          return axel.models.user.em.create(newUser, {
             raw: true
           });
         }
@@ -142,7 +143,7 @@ module.exports = {
             delete newUser.activationToken;
           }
 
-          return axel.models.axelUser.em.update(newUser, {
+          return axel.models.user.em.update(newUser, {
             where: {
               [primaryKey]: newUser[primaryKey]
             }
@@ -201,7 +202,7 @@ module.exports = {
       });
     }
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne({
         where: {
           resetToken
@@ -260,7 +261,7 @@ module.exports = {
     }
 
     let user;
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne({
         where: {
           resetToken
@@ -299,7 +300,7 @@ module.exports = {
       .then((result) => {
         if (result) {
           user.resetToken = '';
-          return axel.models.axelUser.em.update(user, {
+          return axel.models.user.em.update(user, {
             where: {
               [primaryKey]: user[primaryKey]
             }
@@ -351,7 +352,7 @@ module.exports = {
     }
     query = Utils.cleanSqlQuery(query);
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findAndCountAll({ where: query, raw: false, nested: true }, options)
       .then((result) => {
         let data;
@@ -401,7 +402,7 @@ module.exports = {
       }
     }
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
-    axel.models.axelUser.em
+    axel.models.user.em
       .findByPk({
         [primaryKey]: id
       })
@@ -453,7 +454,7 @@ module.exports = {
         message: 'missing_argument'
       });
     }
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
       .then((doc) => {
         if (doc) {
@@ -500,7 +501,7 @@ module.exports = {
       req.body.username = req.body.email;
     }
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findByPk(id)
       .then((u) => {
         user = u;
@@ -548,7 +549,7 @@ module.exports = {
       })
       .then(() => {
         if (data) {
-          return axel.models.axelUser.em.update(data, {
+          return axel.models.user.em.update(data, {
             where: {
               [primaryKey]: id
             }
@@ -568,7 +569,7 @@ module.exports = {
         }
         return null;
       })
-      .then(() => axel.models.axelUser.em.findByPk(parseInt(id)))
+      .then(() => axel.models.user.em.findByPk(parseInt(id)))
       .then((userModel) => {
         delete userModel.encryptedPassword;
         userModel = userModel.get();
@@ -588,7 +589,7 @@ module.exports = {
       return false;
     }
 
-    const collection = axel.models.axelUser.em;
+    const collection = axel.models.user.em;
     collection
       .findByPk(id)
       .then((user) => {

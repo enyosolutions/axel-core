@@ -43,7 +43,7 @@ module.exports = {
       return;
     }
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findByPk(req.user[primaryKey])
       .then((user) => {
         if (user) {
@@ -51,7 +51,7 @@ module.exports = {
             user.roles = ['USER'];
           }
           user.visits += 1;
-          axel.models.axelUser.em.update(user, {
+          axel.models.user.em.update(user, {
             where: {
               id: user.id
             }
@@ -106,7 +106,7 @@ module.exports = {
       });
     }
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne({
         where: { email }
       })
@@ -126,7 +126,7 @@ module.exports = {
         user.resetToken = hash;
 
         user.passwordResetRequestedOn = new Date();
-        return axel.models.axelUser.em.update(
+        return axel.models.user.em.update(
           {
             $set: {
               resetToken: hash,
@@ -204,7 +204,7 @@ module.exports = {
       });
     }
 
-    axel.models.axelUser.em
+    axel.models.user.em
       .findOne({
         where: {
           email
@@ -251,7 +251,7 @@ module.exports = {
 
         const updatedUser = _.cloneDeep(user);
 
-        return axel.models.axelUser.em.update(updatedUser, {
+        return axel.models.user.em.update(updatedUser, {
           where: {
             id: updatedUser.id
           }

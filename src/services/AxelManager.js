@@ -37,7 +37,7 @@ class AxelManager {
       axelUser.em.logging = false;
 
       // SchemaValidator.loadSchema(axelUser);
-      axel.models.axelUser.em.sync();
+      // axel.models.axelUser.em.sync();
       debug('Copying manager to the front project', `${process.cwd()}/views/axel-manager.html`);
       this.injectExpressRoutes(app);
     } catch (err) {
@@ -86,7 +86,7 @@ class AxelManager {
     if (!req.user) {
       return next('user_not_set');
     }
-    const user = await axel.models.axelUser.em.findOne({
+    const user = await axel.models.user.em.findOne({
       where: { id: req.user.id, email: req.user.email },
       attributes: ['id', 'email', 'firstName', 'lastName']
     });
@@ -126,7 +126,7 @@ class AxelManager {
       }
       AuthService.verify(socket.Authorization.token, async (err, decryptedToken) => {
         if (!err) {
-          const user = await axel.models.axelUser.em.findOne({
+          const user = await axel.models.user.em.findOne({
             where: { id: decryptedToken.id, email: decryptedToken.email }
           });
 
@@ -160,7 +160,7 @@ class AxelManager {
             }
             try {
               const response = { status: 200 };
-              const user = await axel.models.axelUser.em.findByPk(decryptedToken.id);
+              const user = await axel.models.user.em.findByPk(decryptedToken.id);
               if (!user) {
                 return cb('user_not_found');
               }

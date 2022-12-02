@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle, no-console */
 import qs from 'qs';
-// import * as io from 'socket.io-client/dist/socket.io.dev';
 import { io } from 'socket.io-client';
 // eslint-disable-next-line
 import config from '../config';

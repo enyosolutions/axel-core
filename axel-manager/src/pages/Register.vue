@@ -140,7 +140,7 @@ export default {
     submitForm() {
       // this.$notifications.clear();
       if (this.newUser.password !== this.newUser.cPassword) {
-        this.$notify({
+        this.$awNotify({
           title: this.$t('common.messages.password_not_match'),
           type: 'warning',
         });
