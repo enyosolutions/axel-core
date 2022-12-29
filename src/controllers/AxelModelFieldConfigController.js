@@ -58,7 +58,7 @@ const schemaKeywords = [
 ];
 
 class AxelModelFieldConfigController {
-  list(req, resp) {
+  listFields(req, resp) {
     let items = [];
     const {
       listOfValues, startPage, limit, offset, order
@@ -75,7 +75,7 @@ class AxelModelFieldConfigController {
 
     const parentIdentity = req.query && req.query.filters && req.query.filters.parentIdentity;
     if (req.query.search) {
-      query = Utils.injectSqlSearchParams(req, query, {
+      query = Utils.injectSqlSearchParams(req.query.search, query, {
         modelName: entity
       });
     }
@@ -132,6 +132,52 @@ class AxelModelFieldConfigController {
         axel.logger.warn(err);
         ErrorUtils.errorCallback(err, resp);
       });
+  }
+
+  list(req, resp) {
+    try {
+      let items = [];
+      const parentIdentity = req.query && req.query.filters && req.query.filters.parentIdentity;
+      if (parentIdentity && typeof parentIdentity === 'string' && axel.models[parentIdentity] && axel.models[parentIdentity].schema) {
+        // merge existing fields with the ones in the DB
+        Object.entries(axel.models[parentIdentity].schema.properties).forEach(([field, definition]) => {
+          const savedField = items.find(item => item.name === field);
+          if (!savedField) {
+            items.push({
+              id: null,
+              parentIdentity,
+              name: field,
+              config: definition
+            });
+          } else {
+            savedField.config = { ...definition, ...savedField.config };
+          }
+        });
+      }
+
+      if (req.query.listOfValues) {
+        items = items.map(item => ({
+          [primaryKey]: item[primaryKey],
+          label: item.identity,
+          name: item.name
+        }));
+      } else {
+        items = items.map(item => ({
+          id: item.id, parentIdentity: item.parentIdentity, name: item.name, ...item.config
+        }));
+      }
+
+      resp.status(200).json({
+        body: items,
+        page: 0,
+        perPage: items.length,
+        count: items.length,
+        totalCount: items.length,
+      });
+    } catch (err) {
+      axel.logger.warn(err);
+      ErrorUtils.errorCallback(err, resp);
+    }
   }
 
   get(req, resp) {

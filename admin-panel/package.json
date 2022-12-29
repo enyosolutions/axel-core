@@ -1,0 +1,167 @@
+{
+  "name": "manager",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "vue-cli-service serve",
+    "dev": "vite serve",
+    "serve": "vite serve",
+    "build": "vite build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@tinymce/tinymce-vue": "^5.0.0",
+    "axios": "^0.24.0",
+    "chartist": "^0.11.4",
+    "core-js": "^3.6.5",
+    "crip-vue-loading": "^1.2.5",
+    "dayjs": "^1.10.7",
+    "debug": "^4.3.4",
+    "lodash": "^4.17.21",
+    "qs": "^6.10.3",
+    "socket.io-client": "^4.5.1",
+    "striptags": "^3.2.0",
+    "sweetalert2": "^11.3.0",
+    "tinymce": "^6.3.1",
+    "vue": "2.7.14",
+    "vue-aw-components": "^1.56.2",
+    "vue-datetime": "^1.0.0-beta.14",
+    "vue-good-table": "^2.21.11",
+    "vue-i18n": "^8.26.7",
+    "vue-loading-skeleton": "^1.1.9",
+    "vue-popperjs": "^2.3.0",
+    "vue-router": "^3.5.3",
+    "vue-select": "^3.16.0",
+    "vue2-daterange-picker": "^0.6.8",
+    "vuedraggable": "^2.24.3",
+    "vuejs-paginate": "^2.1.0",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.0",
+    "@vue/cli-plugin-eslint": "^4.5.0",
+    "@vue/cli-service": "^4.5.0",
+    "@vue/eslint-config-airbnb": "^6.0.0",
+    "autoprefixer": "^7.1.2",
+    "babel-eslint": "^10.1.0",
+    "eslint": "7",
+    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vuejs-accessibility": "^1.1.1",
+    "html-webpack-inline-source-plugin": "1.0.0-beta.2",
+    "html-webpack-plugin": "4.5.2",
+    "lint-staged": "^9.4.2",
+    "node-sass": "6",
+    "prettier-package-json": "^2.0.0",
+    "sass": "^1.57.1",
+    "sass-loader": "10",
+    "vite": "^4.0.3",
+    "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-singlefile": "^0.13.2",
+    "vite-plugin-vue2": "^2.0.3",
+    "vue-template-compiler": "^2.7.14"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended",
+      "@vue/airbnb"
+    ],
+    "globals": {
+      "App": true,
+      "$": true
+    },
+    "rules": {
+      "arrow-parens": 0,
+      "comma-dangle": [
+        "error",
+        "only-multiline"
+      ],
+      "operator-linebreak": [
+        "warn",
+        "before"
+      ],
+      "no-unused-vars": [
+        "error",
+        {
+          "args": "none"
+        }
+      ],
+      "no-underscore-dangle": [
+        "error",
+        {
+          "allow": [
+            "_vm",
+            "_id"
+          ]
+        }
+      ],
+      "no-console": [
+        "warn",
+        {
+          "allow": [
+            "warn",
+            "error"
+          ]
+        }
+      ],
+      "no-param-reassign": 0,
+      "no-plusplus": 0,
+      "no-useless-escape": 0,
+      "no-warning-comments": "off",
+      "consistent-return": 0,
+      "vue/no-use-v-if-with-v-for": 0,
+      "implicit-arrow-linebreak": 0,
+      "vuejs-accessibility/form-control-has-label": 0,
+      "vuejs-accessibility/label-has-for": 0,
+      "vuejs-accessibility/click-events-have-key-events": 0,
+      "vuejs-accessibility/anchor-has-content": 0,
+      "prefer-regex-literals": [
+        "error",
+        {
+          "disallowRedundantWrapping": true
+        }
+      ],
+      "indent": [
+        "error",
+        2,
+        {
+          "ignoredNodes": [
+            "TemplateLiteral"
+          ]
+        }
+      ],
+      "max-len": [
+        "warn",
+        {
+          "code": 120,
+          "tabWidth": 2
+        }
+      ]
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "lint-staged": {
+    "*.{js,vue}": [
+      "vue-cli-service lint",
+      "git add"
+    ],
+    "package.json": [
+      "prettier-package-json --write"
+    ]
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
+}

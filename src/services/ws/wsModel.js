@@ -49,7 +49,7 @@ const getMergedModel = modelName => Promise.all([
 
 
 module.exports = (socket) => {
-  socket.on('/axel-manager/models', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
+  socket.on('/admin-panel/models', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }
@@ -63,17 +63,23 @@ module.exports = (socket) => {
           return cb('sqldb_not_ready');
         }
         // eslint-disable -next-line
-        let tables = await axel.sqldb.query('show tables');
+        let tables = await axel.sqldb.query(axel.sqldb.options.dialect === 'postgres'
+          ? `SELECT *
+        FROM pg_catalog.pg_tables
+        WHERE schemaname != 'pg_catalog' AND
+            schemaname != 'information_schema';`
+          : 'show tables');
         tables = tables.map(t => Object.values(t)[0]);
         try {
-          const models = Object.entries(axel.models).filter(([, modelDef]) => modelDef.entity).map(([modelName, modelDef]) => ({
-            name: modelName,
-            fields: Object.keys(modelDef.entity.attributes).map(idx => ({
-              name: idx,
-              ...modelDef.entity.attributes[idx],
-              type: modelDef.properties,
-            })),
-          }));
+          const models = Object.entries(axel.models).filter(([, modelDef]) => modelDef.entity)
+            .map(([modelName, modelDef]) => ({
+              name: modelName,
+              fields: Object.keys(modelDef.entity.attributes).map(idx => ({
+                name: idx,
+                ...modelDef.entity.attributes[idx],
+                type: modelDef.properties,
+              })),
+            }));
           cb(null, {
             body: {
               models,
@@ -132,7 +138,7 @@ module.exports = (socket) => {
         break;
     }
   });
-  socket.on('/axel-manager/models/add-fields', async (req = { method: 'PUT', query: {}, body: {} }, cb) => {
+  socket.on('/admin-panel/models/add-fields', async (req = { method: 'PUT', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }
@@ -185,7 +191,7 @@ module.exports = (socket) => {
     }
   });
 
-  socket.on('/axel-manager/models/sync', (req = { method: 'GET', query: {}, body: {} }, cb) => {
+  socket.on('/admin-panel/models/sync', (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }
@@ -218,7 +224,7 @@ module.exports = (socket) => {
   });
 
   /** Reset all the details saved in the data base for models. */
-  socket.on('/axel-manager/reset-models-config', (req = { method: 'POST', query: {}, body: {} }, cb) => {
+  socket.on('/admin-panel/reset-models-config', (req = { method: 'POST', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }
@@ -237,7 +243,7 @@ module.exports = (socket) => {
   });
 
   /** Get models definition */
-  socket.on('/axel-manager/admin-models', (req = { method: 'GET', query: {}, body: {} }, cb) => {
+  socket.on('/admin-panel/admin-models', (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
     }

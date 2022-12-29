@@ -11,7 +11,6 @@
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 
-const Utils = require('../services/Utils.js');
 const { ExtendedError } = require('../services/ExtendedError.js');
 const AuthService = require('../services/AuthService.js');
 const ErrorUtils = require('../services/ErrorUtils.js');

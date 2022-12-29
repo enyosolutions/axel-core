@@ -2,7 +2,6 @@
 @description Exports the global axel object.
 */
 
-const ejs = require('ejs');
 const path = require('path');
 const _ = require('lodash');
 const d = require('debug');
@@ -110,7 +109,8 @@ const axel = {
         }
         return;
       }
-      axel.app.render(relPath.indexOf('.ejs') > -1 ? relPath : `${relPath}.ejs`, {
+      const ext = _.get(axel, 'config.views.engine', 'ejs');
+      axel.app.render(relPath.indexOf(`.${ext}`) > -1 ? relPath : `${relPath}.${ext}`, {
         ...data,
         // eslint-disable-next-line
         __: data.__ || axel.app && axel.app.locals && axel.app.locals.i18n && axel.app.locals.i18n.__,

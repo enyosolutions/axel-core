@@ -8,6 +8,7 @@ const axel = require('../axel.js');
 const SchemaValidator = require('./SchemaValidator.js');
 const { loadSqlModel, loadSchemaModel } = require('../models.js');
 const { execHook } = require('./ControllerUtils.js');
+const ExtendedError = require('./ExtendedError.js');
 
 /**
  * COntains all the code necessary for bootstrapping the admin.
@@ -268,7 +269,7 @@ class AxelModelsService {
     return mappedSavedConfig;
   }
 
-  mergeDbModelsWithInMemory(mappedSavedConfig, options = {
+  async mergeDbModelsWithInMemory(mappedSavedConfig, options = {
     prepareNestedModels: true, identity: undefined
   }) {
     const models = Object.keys(axel.models)
@@ -301,11 +302,12 @@ class AxelModelsService {
         m.nestedModels = this.prepareNestedModels(m.nestedModels, mappedSavedConfig);
       });
     }
+
     return models;
   }
 
 
-  translateModels(models, locale,) {
+  translateModels(models, locale) {
     if (axel.config.framework.axelModels && axel.config.framework.axelModels.multilang && axel.i18n && locale) {
       const options = {
         fields: ['title', 'description']
@@ -389,6 +391,22 @@ class AxelModelsService {
           return ErrorUtils.errorCallback(err, res);
         }
         throw err;
+      });
+  }
+
+  /**
+   * loads a model for a given identity
+   * @param {string} identity
+   * @param {string} locale
+   *
+   * @returns {Promise}
+   */
+  serveModel(identity, locale) {
+    return this.mergeDbModelsWithInMemory({}, { identity })
+      .then(models => this.translateModels(models, locale))
+      .then(models => models[0])
+      .catch((err) => {
+        throw new ExtendedError(ErrorUtils.errorCallback(err));
       });
   }
 }

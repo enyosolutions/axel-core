@@ -13,6 +13,7 @@ const ExcelService = require('../services/ExcelService.js'); // adjust path as n
 const SchemaValidator = require('../services/SchemaValidator.js');
 const { saveModel } = require('../services/ws/utils');
 const axel = require('../axel.js');
+const AxelAdminController = require('./AxelAdminController.js');
 /*
 Uncomment if you need the following features:
 - Create import template for users
@@ -29,6 +30,7 @@ const primaryKey = axel.models[entity] && axel.models[entity].primaryKeyField
   : axel.config.framework.primaryKey;
 
 class AxelModelConfigController {
+  /*
   list(req, resp) {
     let items = [];
 
@@ -36,12 +38,13 @@ class AxelModelConfigController {
       listOfValues, startPage, limit, offset, order
     } = Utils.injectPaginationQuery(req);
     let query = Utils.injectQueryParams(req);
+    resp.json({})
     const repository = Utils.getEntityManager(entity, resp);
     if (!repository) {
       return;
     }
     if (req.query.search) {
-      query = Utils.injectSqlSearchParams(req, query, {
+      query = Utils.injectSqlSearchParams(req.query.search, query, {
         modelName: req.params.entity || entity
       });
     }
@@ -153,6 +156,10 @@ class AxelModelConfigController {
       ],
       message: 'item_not_found'
     });
+  }
+*/
+  get(...args) {
+    AxelAdminController.getModel(...args);
   }
 
   /**

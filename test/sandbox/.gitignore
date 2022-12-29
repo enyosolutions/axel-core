@@ -2,7 +2,7 @@ api/dist
 dist
 node_modules
 *node_modules
-public/axel-manager.html
+public/admin-panel.html
 public/admin-panel.html
 
 ################################################

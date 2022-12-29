@@ -32,5 +32,7 @@ module.exports.SchemaValidator = require('./services/SchemaValidator.js');
 module.exports.AxelModelsService = require('./services/AxelModelsService.js');
 // legacy service that was renamed to avoid confusion
 module.exports.AxelAdmin = require('./services/AxelModelsService.js');
-module.exports.AxelManager = require('./services/AxelManager.js');
+module.exports.AxelAdminPanelManager = require('./services/AxelAdminPanelManager.js');
+
+module.exports.AxelManager = module.exports.AxelAdminPanelManager;
 module.exports.DocumentManager = require('./services/DocumentManager.js');

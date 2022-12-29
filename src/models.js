@@ -257,7 +257,6 @@ const loadSchemaModels = () => {
         return loadSchemaModel(filePath);
       })))
       .then(() => {
-        logger.debug('[ORM] schema final callback');
         debug('[ORM] schema final callback');
         return resolve();
       })
@@ -429,11 +428,11 @@ const findModelsDifferences = () => new Promise((resolve, reject) => {
       }
     });
     if (diffTable1.length) {
-      logger.warn('[ORM] Fields present in sql but not in json');
+      console.log('[ORM] Fields present in sql but not in json');
       console.table(diffTable1);
     }
     if (diffTable2.length) {
-      logger.warn('[ORM] Fields present in json but not in sql');
+      console.log('[ORM] Fields present in json but not in sql');
       console.table(diffTable2);
     }
     /* eslint-enable */

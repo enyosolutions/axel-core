@@ -78,12 +78,7 @@ module.exports = {
       hasConfirmedEmail: {
         type: 'DataTypes.BOOLEAN',
         allowNull: true,
-        defaultValue: 0,
-      },
-      hasCompletedRegistration: {
-        type: 'DataTypes.BOOLEAN',
-        allowNull: true,
-        defaultValue: 0,
+        defaultValue: false,
       },
       passwordResetToken: {
         type: 'DataTypes.STRING(200)',

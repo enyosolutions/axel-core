@@ -414,6 +414,7 @@ module.exports = {
                         'checkbox',
                         'relation',
                         'object',
+                        'component',
                       ],
                       type: 'vSelect'
                     }
@@ -526,7 +527,7 @@ module.exports = {
     name: 'Field config',
     namePlural: 'Fields configs',
     listOptions: {
-      titleField: 'title',
+      titleField: '{{ currentItem.title || currentItem.name }}',
       subtitleField: 'field.type',
       perPage: 50,
       perRow: 1

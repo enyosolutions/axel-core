@@ -11,6 +11,7 @@ const { fileURLToPath } = require('url');
 const path = require('path');
 const serialize = require('serialize-javascript');
 const { flatMap } = require('lodash');
+const axel = require('./axel');
 // type VerbTypes = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options' | 'head' | 'all';
 const debug = d('axel:router');
 
@@ -301,9 +302,6 @@ function injectAxelAdminConfig() {
     return;
   }
 
-  axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
-  // axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelAdminController.getModel';
-  axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelModelConfigController.get';
 
   // if admin is enabled then we create the routes for managing axel users
   if (pluginEnabled && axel.sqldb) {
@@ -322,12 +320,11 @@ function injectAxelAdminConfig() {
       action: 'login',
       secure: false,
     };
-    axel.config.routes['/api/axel-admin/status'] = async (req, res) => {
-      const userExists = await axel.models.user.em.findOne();
-      res.json({ env: process.env.NODE_ENV, firstUser: !userExists });
-    };
   }
-  axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelModelConfigController.list';
+  axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
+  // axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelAdminController.getModel';
+  axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelModelConfigController.get';
+  axel.config.routes['GET /api/axel-admin/axel-model-config'] = '@axel/controllers/AxelAdminController.listModels';
   axel.config.routes['GET /api/axel-admin/axel-model-config/:id'] = '@axel/controllers/AxelModelConfigController.get';
   axel.config.routes['GET /api/axel-admin/axel-model-field-config'] = '@axel/controllers/AxelModelFieldConfigController.list';
   axel.config.routes['GET /api/axel-admin/axel-model-field-config/:id'] = '@axel/controllers/AxelModelFieldConfigController.get';

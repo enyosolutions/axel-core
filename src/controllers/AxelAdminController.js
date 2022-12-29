@@ -16,9 +16,31 @@ class AxelAdminController {
   async listModels(req, res, next) {
     try {
       await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {}, response: res });
-      const models = await AxelModelsService.serveModels(req); // req is needed to get the locale
+      let models = [];
+      // if list of values is requested, we only return the identity, name, namePlural, title, primaryKeyField and displayField
+      if (req.query.listOfValues) {
+        models = Object.values(axel.models).map(model => ({
+          identity: model.identity,
+          name: model.admin && model.admin.name,
+          namePlural: model.admin && model.admin.namePlural,
+          title: model.admin && model.admin.title,
+          primaryKeyField: model.primaryKeyField,
+          displayField: model.displayField,
+        }));
+      } else {
+        models = await AxelModelsService.serveModels(req); // req is needed to get the locale
+      }
+      const totalCount = models.length;
+      // use pagnination to limit the number of results
+      if (req.query.perPage) {
+        let page = req.query.page ? parseInt(req.query.page) : 1;
+        page = page < 1 ? 1 : page;
+        const perPage = req.query.perPage ? parseInt(req.query.perPage) : 1000;
+        models = models.slice(perPage * (page - 1), perPage * page);
+      }
       const results = {
-        body: models
+        body: models,
+        totalCount,
       };
       await execHook('axelModelConfig', 'afterApiFind', results, { request: req, sequelizeQuery: {}, response: res });
       return res.json(results);
@@ -42,7 +64,7 @@ class AxelAdminController {
     }
     try {
       await execHook('axelModelConfig', 'beforeApiFindOne', { request: req, sequelizeQuery: {} });
-      const body = AxelModelsService.mergeModel(req.params.id, false);
+      const body = await AxelModelsService.serveModel(req.params.id, req.locale);
       await execHook('axelModelConfig', 'afterApiFindOne', { request: req, sequelizeQuery: {} });
       resp.json({
         body

@@ -55,7 +55,7 @@ describe('axel.renderView', () => {
   test('renderview requires an app', async () => {
     try {
       const axel = require('../../src/axel');
-      await axel.renderView('axel-manager', {});
+      await axel.renderView('admin-panel', {});
     } catch (error) {
       expect(error).toBeDefined();
       expect(error.message).toBe('axel.app is not defined');
@@ -69,7 +69,7 @@ describe('axel.renderView', () => {
       const server = new Server();
       // await server.start();
       // server.listen(3333);
-      await axel.renderView('axel-manager', {});
+      await axel.renderView('admin-panel', {});
     } catch (error) {
       expect(error).toBeDefined();
       expect(error.message).toBe('axel.app is not defined');

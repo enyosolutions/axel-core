@@ -54,6 +54,25 @@ module.exports = {
           readonly: true
         }
       },
+      icon: {
+        type: 'string'
+      },
+      name: {
+        type: 'string',
+        field: {
+          required: true
+        }
+      },
+      namePlural: {
+        type: 'string'
+      },
+      primaryKeyField: {
+        type: 'string'
+      },
+
+      displayField: {
+        type: 'string'
+      },
       pageTitle: {
         type: 'string',
         title: 'Custom title for this page'
@@ -74,24 +93,13 @@ module.exports = {
           type: 'BooleanExpressionEditor'
         }
       },
-      icon: {
-        type: 'string'
-      },
-      name: {
-        type: 'string',
+      menuIsVisible: {
+        type: ['string', 'boolean'],
+        title: 'Display condition for this model when displayed in a menu',
+        description: 'Templated rules for displaying this field',
         field: {
-          required: true
+          type: 'BooleanExpressionEditor'
         }
-      },
-      namePlural: {
-        type: 'string'
-      },
-      primaryKeyField: {
-        type: 'string'
-      },
-
-      displayField: {
-        type: 'string'
       },
       apiUrl: { type: 'string', default: '' },
       segmentField: {
@@ -348,6 +356,7 @@ module.exports = {
     primaryKey: 'identity',
     options: {
       initialDisplayMode: 'table',
+      columnsDisplayed: 5,
     },
     actions: {
       create: false,

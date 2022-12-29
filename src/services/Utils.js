@@ -427,7 +427,7 @@ const Utils = {
   },
 
   injectSqlSearchParams(
-    req,
+    searchParam,
     query = {},
     options = {
       modelName: '',
@@ -437,7 +437,13 @@ const Utils = {
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
       throw new Error('search_params_injections_missing_model_name');
     }
-    if (req.query.search) {
+    const search = searchParam;
+    if (typeof search === 'object') {
+      console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.');
+      searchParam = search.query.search;
+    }
+    const isPg = axel.sqldb.options.dialect === 'postgres';
+    if (search) {
       const params = {};
       if (!query[Op.or]) {
         query[Op.or] = [];
@@ -446,12 +452,30 @@ const Utils = {
       if (options.modelName) {
         const dataModel = axel.models[options.modelName].entity;
         fields = Object.keys(dataModel.attributes);
-      } else {
+      }
+      // if we have a searchable fields list, we use it
+      if (axel.models[options.modelName].searchableFields
+        && Array.isArray(axel.models[options.modelName].searchableFields)
+        && axel.models[options.modelName].searchableFields.length > 0) {
+        fields = axel.models[options.modelName].searchableFields;
+      }
+      if (options.fields) {
         fields = options.fields;
       }
       if (fields) {
         fields.forEach((i) => {
-          query[Op.or].push({ [i]: { [Op.like]: `%${req.query.search}%` } });
+          query[Op.or].push(
+            isPg
+              ? Sequelize.where(
+                Sequelize.cast(Sequelize.col(i), 'text'),
+                { [Op.iLike]: `%${search}%` }
+              )
+              : {
+                [i]: {
+                  [Op.iLike]: `%${search}%`
+                }
+              }
+          );
         });
       }
     }

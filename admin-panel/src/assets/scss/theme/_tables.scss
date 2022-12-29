@@ -1,0 +1,75 @@
+.axel-admin-panel {
+  table.vgt-table {
+    border-collapse: collapse;
+    background-color: #fff;
+    border: none;
+    border-radius: 15px;
+    font-size: 13px;
+
+    th,
+    tr,
+    td,
+    th,
+    tr,
+    .vgt-checkbox-col,
+    td,
+    thead th {
+      border: none;
+    }
+    .vgt-checkbox-col {
+      background: transparent;
+      vertical-align: middle;
+    }
+
+    thead th {
+      vertical-align: bottom;
+      border-bottom: none;
+      background: var(--primary) !important;
+      // color: var(--theme-info);
+      color: white;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .badge {
+      font-size: inherit;
+    }
+  }
+
+  .vgt-table.striped tbody tr {
+    transition: all 0.2s ease-in-out;
+    background-color: transparent;
+
+    border-left: 1px solid transparent;
+  }
+  .vgt-table.striped tbody tr:hover {
+    background-color: rgba(51, 68, 109, 0.02);
+    border-left: 1px solid var(--primary);
+    z-index: 1;
+  }
+  .vgt-table.striped tbody tr:nth-of-type(odd) {
+    // background-color: transparent;
+
+    background-color: rgba(51, 68, 109, 0.02);
+  }
+
+  .vgt-wrap__footer {
+    font-size: 0.9rem;
+
+    .footer__row-count__label,
+    .footer__row-count__select,
+    .footer__navigation__info {
+      font-size: 0.9rem;
+    }
+    .footer__navigation__page-btn {
+      span {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .aw-table h3.aw-table-title,
+  .aw-list h3.aw-list-title,
+  .aw-kanban h3.aw-kanban-title {
+    font-size: 1.5em;
+  }
+}

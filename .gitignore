@@ -5,9 +5,9 @@ api/.env
 api/.env.local
 api/src/config/local.*
 api/src/config/local.ts
-!axel-manager/dist/axel-manager.html
-!axel-manager/dist/admin-panel.html
-!axel-manager/dist
+!admin-panel/dist/admin-panel.html
+!admin-panel/dist/admin-panel.html
+!admin-panel/dist
 
 ################################################
 # axel.js / Waterline / Grunt
@@ -72,5 +72,5 @@ yarn-error.log*
 test/unit/coverage
 .yarn/
 .yarnrc.yml
-axel-manager/.yarn/
-axel-manager/.yarnrc.yml
+admin-panel/.yarn/
+admin-panel/.yarnrc.yml

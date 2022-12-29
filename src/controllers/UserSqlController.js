@@ -341,7 +341,7 @@ module.exports = {
     let query = Utils.injectQueryParams(req);
 
     if (req.query.search) {
-      query = Utils.injectSqlSearchParams(req, query, {
+      query = Utils.injectSqlSearchParams(req.query.search, query, {
         modelName: 'user'
       });
     }

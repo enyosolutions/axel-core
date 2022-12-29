@@ -7,8 +7,7 @@
 const { get, has } = require('lodash');
 const d = require('debug');
 const path = require('path');
-
-const { response } = require('express');
+const _ = require('lodash');
 const Utils = require('../services/Utils.js');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const ExtendedError = require('../services/ExtendedError.js');
@@ -31,6 +30,13 @@ const CrudSqlController = {
       });
     }
     const { repository, tableName } = axel.models[endpoint];
+    const createdOnField = _.get(axel, 'models[endpoint].em.options.createdAt');
+    if (!createdOnField) {
+      return resp.status(400).json({
+        errors: ['created_on_field_not_found'],
+        message: 'created_on_field_not_found'
+      });
+    }
     repository
       .count({})
       .then((data) => {
@@ -42,7 +48,7 @@ const CrudSqlController = {
           `SELECT COUNT(*)  as month
         FROM ${tableName}
         WHERE
-        createdOn >= SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())-1)`,
+        ${createdOnField} >= SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())-1)`,
           {
             type: axel.sqldb.QueryTypes.SELECT
           }
@@ -60,7 +66,7 @@ const CrudSqlController = {
           `SELECT COUNT(*) as week
         FROM ${tableName}
         WHERE
-        YEARWEEK(createdOn) = YEARWEEK(CURRENT_TIMESTAMP)`,
+        YEARWEEK(${createdOnField}) = YEARWEEK(CURRENT_TIMESTAMP)`,
           {
             type: axel.sqldb.QueryTypes.SELECT
           }
@@ -78,7 +84,7 @@ const CrudSqlController = {
           `SELECT COUNT(*) as today
         FROM ${tableName}
         WHERE
-        DATE(createdOn) = DATE(NOW())`,
+        DATE(${createdOnField}) = DATE(NOW())`,
           {
             type: axel.sqldb.QueryTypes.SELECT
           }
@@ -114,7 +120,7 @@ const CrudSqlController = {
         });
       }
       if (req.query.search) {
-        query = Utils.injectSqlSearchParams(req, query, {
+        query = Utils.injectSqlSearchParams(req.query.search, query, {
           modelName: endpoint
         });
       }
@@ -135,7 +141,7 @@ const CrudSqlController = {
         return;
       }
 
-      items = rows.map(item => (item.get ? item.get() : item));
+      items = rows.map(item => (item.toJSON ? item.toJSON() : item));
       const result = {
         body: items,
         page: startPage,
@@ -184,7 +190,7 @@ const CrudSqlController = {
       }
 
       const result = {
-        body: item.get ? item.get() : item
+        body: item.toJSON ? item.toJSON() : item
       };
       await execHook(endpoint, 'afterApiFindOne', result, { request: req, response: resp });
       resp.set('X-axel-core-endpoint', endpoint);
@@ -264,8 +270,8 @@ const CrudSqlController = {
 
       const result = {};
       result.body = output && output.length ? output[0] : await repository.findOne(sequelizeQuery);
-      if (result.body && result.body.get) {
-        result.body = result.body.get();
+      if (result.body && result.body.toJSON) {
+        result.body = result.body.toJSON();
       }
       await execHook(endpoint, 'afterApiUpdate', result, { request: req, response: resp });
       resp.set('X-axel-core-endpoint', endpoint);

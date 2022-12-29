@@ -1,5 +1,5 @@
 {
   "src/**/*gs.js": "eslint --fix",
-  "axel-manager/**": "cd axel-manager && npm run lint:fix",
+  "admin-panel/**": "cd admin-panel && npm run lint:fix",
   "*.{json,md}": "prettier --write"
 }

@@ -16,7 +16,7 @@ const defaultModelsLoader = require('./models.js').modelsLoader;
 const l = require('./services/logger.js');
 const defaultErrorHandler = require('./middlewares/error-handler');
 const pagination = require('./middlewares/pagination');
-const AxelManager = require('./services/AxelManager.js');
+const AxelAdminPanelManager = require('./services/AxelAdminPanelManager.js');
 const AxelPlugin = require('./services/AxelPlugin.js');
 
 console.time('[axel] STARTUP TIME');
@@ -56,7 +56,7 @@ class Server {
 
         app.disable('x-powered-by');
 
-        app.set('view engine', 'ejs');
+        app.set('view engine', _.get(axel, 'config.views.engine', 'ejs'));
         app.use(
           bodyParser.json({
             limit: process.env.REQUEST_LIMIT || '100mb',
@@ -82,7 +82,7 @@ class Server {
           this.after((theApp) => {
             if (adminConfig && adminConfig.enabled) {
               debugPlugin('starting admin panel');
-              AxelManager.init(theApp);
+              AxelAdminPanelManager.init(theApp);
             } else {
               debugPlugin('admin panel is disabled');
             }
