@@ -60,7 +60,7 @@
                   </form>
                   <hr />
                   <div class="text-center">
-                    <a class="small" href="#">Forgot Password?</a>
+                    <PasswordReset></PasswordReset>
                   </div>
                   <div class="text-center">
                     <router-link
@@ -84,11 +84,12 @@
 import Swal2 from 'sweetalert2';
 import { has, get } from 'lodash';
 import { apiErrorsMixin } from 'vue-aw-components';
+import PasswordReset from '../components/PasswordReset.vue';
 
 export default {
   name: 'Login',
   mixins: [apiErrorsMixin],
-  components: {},
+  components: { PasswordReset },
   computed: {
     appEnv() {
       return this.$store.state.appEnv;

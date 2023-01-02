@@ -158,12 +158,12 @@
           </template>
           <template v-if="!isProduction">
             <hr />
-            <div class="collapse-item">
+            <div class="collapse-item d-none">
               <router-link :to="`/app/configurator/axelModelConfig`"
                 ><i class="fa fa-edit"></i>Models config
               </router-link>
             </div>
-            <div class="collapse-item">
+            <div class="collapse-item d-none">
               <router-link :to="`/app/configurator/axelModelFieldConfig`"
                 ><i class="fa fa-edit"></i>Field config
               </router-link>
@@ -309,8 +309,8 @@ export default {
     ...mapGetters(['isProduction', 'viewableModels']),
     searchResultIsEmpty() {
       return (
-        !this.menuItems.length
-        && !Object.values(this.apiSearchResults).reduce(
+        !this.menuItems.length &&
+        !Object.values(this.apiSearchResults).reduce(
           (prev, next) => next.count + prev,
           0
         )
@@ -320,12 +320,12 @@ export default {
     filteredModels(state) {
       return this.viewableModels.filter(
         (m) =>
-          !this.modelFilterInput
-          || (m.title && m.title.toLowerCase().includes(this.modelFilterInput))
-          || (m.identity
-            && m.identity.toLowerCase().includes(this.modelFilterInput))
-          || (m.tabTitle
-            && m.tabTitle.toLowerCase().includes(this.modelFilterInput))
+          !this.modelFilterInput ||
+          (m.title && m.title.toLowerCase().includes(this.modelFilterInput)) ||
+          (m.identity &&
+            m.identity.toLowerCase().includes(this.modelFilterInput)) ||
+          (m.tabTitle &&
+            m.tabTitle.toLowerCase().includes(this.modelFilterInput))
       );
     },
   },
@@ -356,7 +356,8 @@ export default {
           })
           .then((data) => {
             this.apiSearchResults[type] = data;
-          }));
+          })
+      );
     },
     logout() {
       this.$store.dispatch('logout');

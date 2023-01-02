@@ -234,7 +234,9 @@ class Server {
           AxelPlugin.init(app, axel);
         }
 
-        app.use(this.errorHandler);
+        if (this.errorHandler) {
+          app.use(this.errorHandler);
+        }
         app.emit('app-ready', { axel });
         console.timeEnd('[axel] STARTUP TIME');
         return app;

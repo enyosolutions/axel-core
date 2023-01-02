@@ -302,7 +302,7 @@ function injectAxelAdminConfig() {
     return;
   }
 
-
+  console.warn('pluginEnabled', pluginEnabled);
   // if admin is enabled then we create the routes for managing axel users
   if (pluginEnabled && axel.sqldb) {
     axel.config.routes['GET /api/axel-admin/axel-user'] = '@axel/controllers/UserSqlController.findAll';
@@ -320,7 +320,23 @@ function injectAxelAdminConfig() {
       action: 'login',
       secure: false,
     };
+    axel.config.routes['POST /api/axel-admin/auth/forgot'] = {
+      controller: '@axel/controllers/AuthController',
+      action: 'forgot',
+      secure: false,
+    };
+    axel.config.routes['POST /api/axel-admin/auth/reset'] = {
+      controller: '@axel/controllers/AuthController',
+      action: 'reset',
+      secure: false,
+    };
+    axel.config.routes['GET /api/auth/token/:resetToken'] = {
+      controller: '@axel/controllers/AuthController',
+      action: 'getByResetToken',
+      secure: false,
+    };
   }
+
   axel.config.routes['GET /api/axel-admin/models'] = '@axel/controllers/AxelAdminController.listModels';
   // axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelAdminController.getModel';
   axel.config.routes['GET /api/axel-admin/models/:id'] = '@axel/controllers/AxelModelConfigController.get';

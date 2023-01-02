@@ -16,19 +16,21 @@ class AxelAdminController {
   async listModels(req, res, next) {
     try {
       await execHook('axelModelConfig', 'beforeApiFind', { request: req, sequelizeQuery: {}, response: res });
-      let models = [];
+      let models = await AxelModelsService.serveModels(req);
       // if list of values is requested, we only return the identity, name, namePlural, title, primaryKeyField and displayField
-      if (req.query.listOfValues) {
-        models = Object.values(axel.models).map(model => ({
+      if (req.query.listOfValues || req.query._vac_source === 'vselect') {
+        models = Object.values(models).map(model => ({
           identity: model.identity,
-          name: model.admin && model.admin.name,
-          namePlural: model.admin && model.admin.namePlural,
-          title: model.admin && model.admin.title,
+          name: model.name,
+          namePlural: model.namePlural,
+          title: model.title,
           primaryKeyField: model.primaryKeyField,
           displayField: model.displayField,
         }));
-      } else {
-        models = await AxelModelsService.serveModels(req); // req is needed to get the locale
+        // req is needed to get the locale
+      }
+      if (req.query.search) {
+        models = models.filter(model => JSON.stringify(model).toLowerCase().includes(req.query.search));
       }
       const totalCount = models.length;
       // use pagnination to limit the number of results

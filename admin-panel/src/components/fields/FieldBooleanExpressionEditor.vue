@@ -26,6 +26,9 @@
         {{ context.mode !== 'create' }}<br />
         {{ userHasRole('ADMIN') }}<br />
       </small>
+      <small>
+        > The expression must resolve to a boolean. use !! if needed. <
+      </small>
     </div>
   </div>
 </template>

@@ -7,7 +7,7 @@ const layoutConfig = {
     properties: {
       legend: { type: 'string' },
       cols: {
-        type: 'number', minimum: 0, maximum: 12
+        type: ['number', 'string'], minimum: 0, maximum: 12, default: 12, nullable: true
       },
       fields: {
         type: 'array',
@@ -59,31 +59,64 @@ module.exports = {
       },
       name: {
         type: 'string',
+        default: '',
         field: {
-          required: true
+          required: true,
+          default: '',
         }
       },
       namePlural: {
-        type: 'string'
+        type: 'string',
+        default: '',
       },
       primaryKeyField: {
-        type: 'string'
+        type: 'string',
+        default: '',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/axel-model-field-config?filters%5B%5D=&filters%5BparentIdentity%5D={{ currentItem.identity }}',
+            label: 'name',
+            trackBy: 'name',
+          }
+        }
       },
 
       displayField: {
-        type: 'string'
-      },
-      pageTitle: {
         type: 'string',
-        title: 'Custom title for this page'
+        default: '',
+        field: {
+          type: 'vSelect',
+          fieldOptions: {
+            taggable: true,
+            url: '/api/axel-admin/axel-model-field-config?filters%5B%5D=&filters%5BparentIdentity%5D={{ currentItem.identity }}',
+            label: 'name',
+            trackBy: 'name',
+          }
+        }
       },
       title: {
         type: 'string',
-        title: 'Custom title for this page'
+        title: 'Title of the page',
+        field: {
+          cols: 12
+        }
+      },
+      // @deprecated
+      pageTitle: {
+        type: 'string',
+        title: 'Custom title for page'
       },
       tabTitle: {
         type: 'string',
-        title: 'Custom title for this model when displayed in a tab'
+        title: 'Title to use in tabs',
+        description: 'Title to use when displayed in a nested tab'
+      },
+      menuTitle: {
+        type: 'string',
+        title: 'Title to use in menus',
+        description: 'Title to use when displayed in a menu'
       },
       tabIsVisible: {
         type: ['string', 'boolean'],
@@ -150,6 +183,7 @@ module.exports = {
       detailPageLayout: {
         ...layoutConfig,
         title: 'layout of the detail page',
+        description: 'layout of the detail page',
       },
       options: {
         type: 'object',
@@ -176,7 +210,13 @@ module.exports = {
           createPath: { type: 'string', default: '' },
           viewPath: { type: 'string', default: '' },
           editPath: { type: 'string', default: '' },
-          stats: { type: 'boolean', default: false },
+          stats: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
           autoRefresh: { type: 'boolean', field: { disabled: true } }, // or integer in seconds
           initialDisplayMode: { type: 'string', default: 'table' },
           modalMode: { type: 'string', default: 'slide' }, // fade | slide | full
@@ -187,37 +227,177 @@ module.exports = {
         type: 'object',
         title: 'Possible actions',
         nullable: true,
+        field: {
+          collapsible: true,
+        },
         column: {
           type: 'string',
           title: 'Possible actions'
         },
         default: {},
         properties: {
-          create: { type: 'boolean', default: true },
-          edit: { type: 'boolean', default: true },
-          view: { type: 'boolean', default: true },
-          delete: { type: 'boolean', default: true },
+          noActions: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          create: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          edit: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          view: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          delete: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          search: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          filter: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          export: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          import: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          dateFilter: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          refresh: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
 
-          noActions: { type: 'boolean', default: false },
-          search: { type: 'boolean', default: true },
-          filter: { type: 'boolean', default: true },
-          export: { type: 'boolean', default: false },
-          import: { type: 'boolean', default: false },
-          dateFilter: { type: 'boolean', default: false },
-          refresh: { type: 'boolean', default: true },
-
-          automaticRefresh: { type: 'boolean', default: false },
-          advancedFiltering: { type: 'boolean', default: true },
-          columnsFilters: { type: 'boolean', default: true },
-          bulkDelete: { type: 'boolean', default: true },
-          bulkEdit: { type: 'boolean', default: true },
-          changeItemsPerRow: { type: 'boolean', default: true },
-          editLayout: { type: 'boolean', default: true },
-          changeDisplayMode: { type: 'boolean', default: true },
-          pagination: { type: 'boolean', default: true },
-          collapse: { type: 'boolean', default: true },
-          formPagination: { type: 'boolean', default: true },
-          tableConfiguration: { type: 'boolean', default: true },
+          automaticRefresh: {
+            type: 'boolean',
+            default: false,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          advancedFiltering: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          columnsFilters: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          bulkDelete: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          bulkEdit: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          changeItemsPerRow: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          editLayout: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          changeDisplayMode: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          pagination: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          collapse: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          formPagination: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
+          tableConfiguration: {
+            type: 'boolean',
+            default: true,
+            field: {
+              type: 'BooleanExpressionEditor'
+            }
+          },
           addKanbanList: {
             title: 'Add new list in kanban', description: 'show the button to create a new list in the awesome kanban', type: 'boolean', default: true
           },
@@ -252,6 +432,24 @@ module.exports = {
           cols: 12
         },
         properties: {
+          useTabsForUngroupedFields: {
+            type: 'boolean',
+          },
+          generalTabLabel: {
+            type: 'string',
+          },
+          tabsNavType: {
+            title: 'What style for the tabs',
+            type: 'string',
+            enum: ['pills', 'tabs'],
+            nullable: true,
+          },
+          tabsDirection: {
+            title: 'What style for the tabs',
+            type: 'string',
+            enum: ['horizontal', 'vertical'],
+            nullable: true,
+          },
           layout: {
             ...layoutConfig,
             title: 'layout of the form',
@@ -282,7 +480,7 @@ module.exports = {
         default: {},
         additionalProperties: true,
         field: {
-          type: 'JsonTextarea'
+          cols: 12
         },
         properties: {
           displayColumnsInCards: {
@@ -300,7 +498,7 @@ module.exports = {
         additionalProperties: true,
         default: {},
         field: {
-          type: 'JsonTextarea'
+          cols: 12
         }
       },
       tableDataLimit: {
@@ -362,12 +560,15 @@ module.exports = {
       create: false,
       edit: true,
       view: true,
-      delete: true,
-      export: true,
-      import: true,
+      delete: false,
+      export: false,
+      import: false,
     },
     detailPageMode: 'page',
-
+    formOptions: {
+      useTabsForUngroupedFields: true,
+      tabsNavType: 'tabs',
+    },
     layout: [{
       legend: 'Infos', fields: ['id', 'identity', 'pageTitle', 'icon', 'name', 'namePlural'], cols: '6', wrapperClasses: 'card mb-1'
     }, {

@@ -66,32 +66,6 @@ const axel = {
   enabledPlugins: [],
 
   rootPath: path.resolve(process.cwd()),
-  init() {
-    debug('Init started');
-    if (axel.initCompleted && Object.keys(axel.config).length > 0) {
-      return Promise.resolve();
-    }
-    if (axel.initPromise) {
-      return axel.initPromise;
-    }
-    // console.count('Init started');
-    const plugins = loadPlugins(axel);
-    axel.plugins = plugins.reduce((acc, current) => {
-      acc[current.name] = current;
-      return acc;
-    }, {});
-    axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
-      if (config) {
-        axel.config = config;
-      }
-
-      debug('Config Init completed');
-      axel.initCompleted = true;
-      return config;
-    });
-    return axel.initPromise;
-  },
-  // ejs.renderFile(
   renderView: (relPath, data, callback) => new Promise((resolve, reject) => {
     try {
       if (!relPath) {
@@ -135,7 +109,34 @@ const axel = {
       }
       reject(err);
     }
-  })
+  }),
+
+  init() {
+    debug('Init started');
+    if (axel.initCompleted && Object.keys(axel.config).length > 0) {
+      return Promise.resolve();
+    }
+    if (axel.initPromise) {
+      return axel.initPromise;
+    }
+    // console.count('Init started');
+    const plugins = loadPlugins(axel);
+    axel.plugins = plugins.reduce((acc, current) => {
+      acc[current.name] = current;
+      return acc;
+    }, {});
+    axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
+      if (config) {
+        axel.config = config;
+      }
+
+      debug('Config Init completed');
+      axel.initCompleted = true;
+      return config;
+    });
+    return axel.initPromise;
+  },
+
 };
 
 global.axel = axel;

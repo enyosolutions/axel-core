@@ -105,7 +105,6 @@ function init() {
     render: h => h(App),
 
   }).$mount('#app');
-  store.dispatch('getEnv');
   if (!isProduction) {
     if (!window.myApp) {
       window.myApp = {};

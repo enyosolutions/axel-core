@@ -8,7 +8,7 @@ const { identity } = require('lodash');
 const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
-const AxelModelsService = require('../services/AxelModelsService.js'); // adjust path as needed
+const { jsonSchemaToFrontModel } = require('../services/AxelModelsService.js'); // adjust path as needed
 const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 const { saveModel } = require('../services/ws/utils');
@@ -171,6 +171,70 @@ class AxelModelConfigController {
   * @return {[type]}      [description]
   */
   put(req, resp) {
+    try {
+      const id = req.params.id;
+      let data = req.body;
+
+      const repository = Utils.getEntityManager(id, resp);
+      if (!repository) {
+        return;
+      }
+      const pKey = typeof id === 'string' && Number.isNaN(parseInt(id)) ? 'identity' : primaryKey;
+
+      const model = jsonSchemaToFrontModel(axel.models[id]);
+      if (!model) {
+        throw new ExtendedError({
+          code: 404,
+          message: 'item_not_found',
+          errors: ['item_not_found']
+        });
+      }
+
+      data = {
+        ...model,
+        ...data,
+      };
+
+      const validation = SchemaValidator.validate(data, entity, { strict: true });
+      if (!validation.isValid) {
+        console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', validation, axel.models.axelModelConfig.schema);
+        throw new ExtendedError({
+          code: 400,
+          message: 'data_validation_error',
+          errors: validation.formatedErrors
+        });
+      }
+
+
+      saveModel(data);
+      return resp.status(200).json({
+        body: data
+      });
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        axel.logger.warn(err);
+      }
+      if (err && err.name === 'SequelizeValidationError') {
+        resp.status(400).json({
+          // @ts-ignore
+          errors: err.errors && err.errors.map(e => e.message),
+          message: 'sql_validation_error'
+        });
+        return false;
+      }
+      ErrorUtils.errorCallback(err, resp);
+    }
+  }
+
+  /**
+  * [put description]
+  * [description]
+  * @method
+  * @param  {[type]} req  [description]
+  * @param  {[type]} resp [description]
+  * @return {[type]}      [description]
+  */
+  oldPut(req, resp) {
     const id = req.params.id;
     const data = req.body;
 
@@ -293,49 +357,6 @@ class AxelModelConfigController {
         }
         ErrorUtils.errorCallback(err, resp);
       });
-  }
-
-
-  export(req, resp, next) {
-    const schema = axel.models[entity].schema;
-    let data = [];
-
-    const url = `${entity}_export`;
-    const options = {};
-    const query = {};
-    const repository = Utils.getEntityManager(req, resp);
-    if (!repository) {
-      resp.status(400).json({ message: 'error_model_not_found_for_this_url' });
-      return;
-    }
-    Promise.resolve()
-      .then(() => repository.findAll({
-        where: query
-      }))
-      .then((result) => {
-        data = result;
-        return ExcelService.export(data, url, options);
-      })
-      .then((result) => {
-        if (result) {
-          if (result.errno) {
-            return resp.status(500).json({
-              errors: ['export_failed'],
-              message: 'export_failed'
-            });
-          }
-
-          return resp.status(200).json({
-            status: 'OK',
-            url: result
-          });
-        }
-        return resp.status(404).json({
-          errors: ['item_not_found'],
-          message: 'item_not_found'
-        });
-      })
-      .catch(next);
   }
 }
 

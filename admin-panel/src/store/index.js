@@ -36,13 +36,16 @@ const modelDefaultActions = {
 Vue.use(Vuex);
 const primaryColor = localStorage.getItem(`${config.appKey}_primaryColor`);
 const secondaryColor = localStorage.getItem(`${config.appKey}_secondaryColor`);
-const appConfig = localStorage.getItem(`${config.appKey}_appCOnfig`);
+
 if (primaryColor) {
   document.documentElement.style.setProperty('--primary', primaryColor);
 }
 if (secondaryColor) {
-  document.documentElement.style.setProperty('--primary', secondaryColor);
+  document.documentElement.style.setProperty('--secondary', secondaryColor);
 }
+
+const appConfig = localStorage.getItem(`${config.appKey}_appCOnfig`);
+
 export default new Vuex.Store({
   state: {
     currentLocale:
@@ -87,15 +90,19 @@ export default new Vuex.Store({
       state.models = appModels;
     },
     auth(state, auth) {
-      state.token = auth;
+      if (auth) {
+        state.token = auth;
+      }
     },
     token(state, auth) {
-      state.token = auth;
-      this._vm.$http.defaults.headers.common.Authorization = `Bearer ${auth}`;
-      this._vm.$http.defaults.headers.Authorization = `Bearer ${auth}`;
-      this._vm.$awApi.defaults.headers.common.Authorization = `Bearer ${auth}`;
-      this._vm.$awApi.defaults.headers.Authorization = `Bearer ${auth}`;
-      localStorage.setItem(`${config.appKey}_token`, auth);
+      if (auth) {
+        state.token = auth;
+        this._vm.$http.defaults.headers.common.Authorization = `Bearer ${auth}`;
+        this._vm.$http.defaults.headers.Authorization = `Bearer ${auth}`;
+        this._vm.$awApi.defaults.headers.common.Authorization = `Bearer ${auth}`;
+        this._vm.$awApi.defaults.headers.Authorization = `Bearer ${auth}`;
+        localStorage.setItem(`${config.appKey}_token`, auth);
+      }
     },
     currentUser(state, currentUser) {
       state.currentUser = currentUser;
@@ -181,7 +188,11 @@ export default new Vuex.Store({
         });
     },
     refreshUser({ commit, dispatch, state }) {
-      const q = this._vm.$http.get('/api/axel-admin/auth/user');
+      if (!state.token || state.token === 'null') {
+        throw new Error('missing_token');
+      }
+      const q = this._vm.$http.get('/api/axel-admin/auth/user', {
+      });
       return q
         .then((res) => {
           // eslint-disable-next-line

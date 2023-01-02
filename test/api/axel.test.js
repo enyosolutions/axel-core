@@ -12,7 +12,7 @@ process.cwd = () => path.resolve(__dirname, '../sandbox');
 
 describe('axel.js :: ', () => {
   it('axel structure', () => {
-    const axel = require('../../src/axel');
+    const axel = require('../../src/axel.js');
     expect(axel.port).toBeDefined();
     expect(axel.config).toBeDefined();
     expect(axel.config.framework).toBeDefined();

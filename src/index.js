@@ -7,6 +7,7 @@
 const axel = require('./axel');
 
 const AuthService = require('./services/AuthService');
+const MailService = require('./services/MailService.js');
 
 if (!axel.initCompleted) {
   axel.init();
@@ -35,4 +36,6 @@ module.exports.AxelAdmin = require('./services/AxelModelsService.js');
 module.exports.AxelAdminPanelManager = require('./services/AxelAdminPanelManager.js');
 
 module.exports.AxelManager = module.exports.AxelAdminPanelManager;
+
+module.exports.MailService = MailService;
 module.exports.DocumentManager = require('./services/DocumentManager.js');

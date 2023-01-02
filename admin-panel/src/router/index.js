@@ -10,6 +10,7 @@ import ModelEditor from '@/pages/ModelEditor.vue';
 import NotFound from '@/pages/NotFound.vue';
 import Login from '@/pages/Login.vue';
 import Register from '@/pages/Register.vue';
+import PasswordReset from '@/pages/PasswordReset.vue';
 import Body from '../components/layout/Body.vue';
 
 const authGuard = (to, from, next) => {
@@ -32,6 +33,22 @@ const routes = [
   { path: '', redirect: { name: 'Dashboard' } },
   { path: '/login', component: Login },
   { path: '/register', component: Register },
+  {
+    path: '/auth/google/callback',
+    name: 'Google',
+    component: Login,
+  },
+  {
+    path: '/api/auth/google/callback',
+    name: 'Google api',
+    component: Login,
+  },
+  {
+    path: '/reset-password/:token',
+    name: 'PasswordReset',
+    component: PasswordReset,
+    props: true,
+  },
   {
     path: '/app',
     component: Body,
@@ -75,18 +92,18 @@ const routes = [
         }),
         children: [
           {
-            name: 'CrudWrapper-view',
-            path: ':id',
-            component: CrudWrapper,
+            name: 'configurator-view',
+            path: ':tab',
+            component: ModelEditor,
             meta: {
             },
             props: {
             },
           },
           {
-            name: 'CrudWrapper-edit',
-            path: ':id/edit',
-            component: CrudWrapper,
+            name: 'configurator-edit',
+            path: 'fields/:field',
+            component: ModelEditor,
             meta: {
             },
             props: {
@@ -139,7 +156,7 @@ const routes = [
 const router = new Router({
   routes,
   base: '/admin-panel',
-  // mode: 'history',
+  mode: 'history',
   linkActiveClass: 'active',
   parseQuery(query) {
     return qs.parse(query);
@@ -154,8 +171,11 @@ const router = new Router({
 });
 
 store.subscribeAction((action, state) => {
-  console.warn('action event', action, router.currentRoute.path);
-  if (action.type === 'logout' && router.currentRoute && !['/login', '/register'].includes(router.currentRoute.path)) {
+  if (action.type === 'logout' && router.currentRoute && ![
+    '/login',
+    '/register',
+  ].includes(router.currentRoute.path)) {
+    console.info('action event', action.type, router.currentRoute.path);
     router.push('/login');
   }
 });

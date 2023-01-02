@@ -6,7 +6,7 @@ api/.env.local
 api/src/config/local.*
 api/src/config/local.ts
 !admin-panel/dist/admin-panel.html
-!admin-panel/dist/admin-panel.html
+!admin-panel/dist/index.html
 !admin-panel/dist
 
 ################################################

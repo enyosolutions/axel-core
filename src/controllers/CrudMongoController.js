@@ -18,7 +18,7 @@ const primaryKey = axel.config.framework.primaryKey;
 module.exports = {
   stats(req, resp) {
     const output = {};
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     const collection = axel.mongodb.get(endpoint);
 
     const currentDate = new Date();
@@ -86,7 +86,7 @@ module.exports = {
   },
 
   list(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     const collection = axel.mongodb.get(endpoint);
 
     let query = {};
@@ -151,8 +151,8 @@ module.exports = {
   },
 
   get(req, resp) {
-    const endpoint = req.param('endpoint');
-    const id = req.param('id');
+    const endpoint = req.params.endpoint;
+    const id = req.params.id;
     if (!Utils.checkIsMongoId(id, resp)) {
       return false;
     }
@@ -189,7 +189,7 @@ module.exports = {
   },
 
   post(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     axel.logger.info('CRUD :: post request:', endpoint);
     const data = Utils.injectUserId(req.body, req.user);
     const collection = axel.mongodb.get(endpoint);
@@ -216,9 +216,9 @@ module.exports = {
    * @return {[type]}      [description]
    */
   put(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     axel.logger.info('CRUD: PUT request:', endpoint);
-    const id = req.param('id');
+    const id = req.params.id;
     let original;
     let updatee;
     if (!Utils.checkIsMongoId(id, resp)) {
@@ -284,12 +284,12 @@ module.exports = {
    * @return {[type]}
    */
   patch(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     axel.logger.info('CRUD :: PATCH request:', endpoint);
     const collection = axel.mongodb.get(endpoint);
     collection
       .findOne({
-        [primaryKey]: req.param('id')
+        [primaryKey]: req.params.id
       })
       .then((o) => {
         if (o) {
@@ -334,10 +334,10 @@ module.exports = {
    * @return {[type]}      [description]
    */
   delete(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
 
     axel.logger.info('CRUD :: DELETE request:', endpoint);
-    const id = req.param('id');
+    const id = req.params.id;
     if (!Utils.checkIsMongoId(id, resp)) {
       return false;
     }
@@ -357,7 +357,7 @@ module.exports = {
   },
 
   import(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     const repository = axel.models[endpoint].em;
     if (!repository) {
       return;
@@ -448,7 +448,7 @@ module.exports = {
   },
 
   importTemplate(req, resp) {
-    const endpoint = req.param('endpoint');
+    const endpoint = req.params.endpoint;
     const repository = axel.models[endpoint].em;
     if (!repository) {
       return;

@@ -1,8 +1,6 @@
 {
   "AwesomeCrud": {
-    "messages": {
-      "user_roles_have_changed": "Les permissions de l'utilisateur ont changé. Il lui faudra se déconnecter pour bénéficier des nouvelles permissions."
-    },
+    "messages": {},
     "labels": {
       "404NotFound": "404 Not found",
       "add_a": "Add:",
@@ -335,19 +333,16 @@
       "error_missing_credentials": "Informations de connexion manquantes",
       "error_missing_email": "Renseigner votre mail",
       "error_missing_id": "Renseigner votre identifiant",
-      "error_missing_location": "Renseigner la localisation",
-      "error_missing_minimumPoint": "Points gagnés pour l'ajout de ce produit",
-      "error_missing_name": "Renseigner le nom du distributeur",
       "error_missing_password": "Please fill in your password",
-      "error_missing_title": "Titre manquant",
-      "error_missing_url": "Renseigner l'url",
-      "error_missing_username": "Renseigner votre identifiant",
+      "error_missing_title": "The title is required",
+      "error_missing_url": "The url is required",
+      "error_missing_username": "The user name is required",
       "error_no_authorization_header": "Aucun en-tête d'autorisation trouvé",
       "error_no_token": "Vous ne pouvez pas accéder à cette page",
-      "error_unknown_email": "Identifiant de connexion inconnu",
+      "error_unknown_email": "This email does not exists on our platform",
       "error_no_mailbox": "Please, select a mailbox",
       "error_recurring_task_already_completed": "The next instance of this recurring task is already marked as completed",
-      "expired_token": "Lien périmé",
+      "expired_token": "The password reset request has expired, please try again.",
       "global_error": "Oups, une erreur est survenue",
       "goodie_not_found": "Cadeau non trouvé",
       "invalid_token": "Lien invalide",
@@ -372,7 +367,6 @@
       "successfullyModified": "{title} Modifié avec succès",
       "successfullyReset": "Réinitialisé avec succès",
       "successfullyUpdated": "Mis à jour avec succès",
-      "update_error": "Échec de la mise à jour",
       "wont_be_able_recover": "Vous ne pourrez pas revenir en arrière!",
       "optoutLoadingMessage": "You are about to opt out of this alert...",
       "optoutSuccessMessage": "You successfully opted out of this alert",
@@ -403,5 +397,6 @@
       "tasks-input-placeholder": "Add a task..."
     },
     "yes": "Oui"
-  }
+  },
+  "error_forbidden_access_to_bo": "Your account is not allowed to connect to the backoffice. Please contact an admin."
 }

@@ -1,0 +1,11 @@
+.vue-form-generator {
+  .form-control,
+  .vs__dropdown-toggle {
+    height: calc(2em + 0.75rem + 2px);
+  }
+
+  .aw-form-group-tab-header.position-inline ul {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+  }
+}

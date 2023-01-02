@@ -193,7 +193,11 @@
         <div class="topbar-divider d-none d-sm-block"></div>
 
         <!-- Nav Item - User Information -->
-        <li class="nav-item dropdown no-arrow" v-if="$store.state.currentUser">
+        <li
+          class="nav-item dropdown no-arrow"
+          v-if="$store.state.currentUser"
+          v-click-outside="() => (userDropdownVisible = false)"
+        >
           <a
             class="nav-link dropdown-toggle text-primary"
             href="#"
@@ -202,6 +206,7 @@
             data-toggle="dropdown"
             aria-haspopup="true"
             aria-expanded="false"
+            @click="userDropdownVisible = !userDropdownVisible"
           >
             <i class="fa fa-user fa-sm fa-fw mr-2 text-primary"></i>
             <span class="mr-2 d-none d-lg-inline text-primary small"
@@ -212,16 +217,17 @@
           <div
             class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
             aria-labelledby="userDropdown"
+            :class="userDropdownVisible ? 'show' : ''"
           >
-            <a class="dropdown-item" href="#">
+            <a class="dropdown-item d-none" href="#">
               <i class="fa fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
               Profile
             </a>
-            <a class="dropdown-item" href="#">
+            <a class="dropdown-item d-none" href="#">
               <i class="fa fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
               Settings
             </a>
-            <a class="dropdown-item" href="#">
+            <a class="dropdown-item d-none" href="#">
               <i class="fa fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
               Activity Log
             </a>
@@ -231,6 +237,7 @@
               href="#"
               data-toggle="modal"
               data-target="#logoutModal"
+              @click.prevent="logout()"
             >
               <i class="fa fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
               Logout
@@ -247,6 +254,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Swal2 from 'sweetalert2';
 import { mapGetters, mapState } from 'vuex';
+import ClickOutside from 'vue-click-outside';
 import { DisconnectedConfig } from '@/components/swal/Disconnected';
 
 dayjs.extend(relativeTime);
@@ -254,6 +262,8 @@ dayjs.extend(relativeTime);
 const body = document.getElementsByTagName('body')[0];
 export default {
   name: 'Header',
+  components: {},
+  directives: { ClickOutside },
   data() {
     return {
       terms: '',
@@ -271,9 +281,9 @@ export default {
       apiSearchResults: {},
       notifications: [],
       socket: this.$socket,
+      userDropdownVisible: false,
     };
   },
-  components: {},
   mounted() {
     setTimeout(() => {
       this.getNotifications();
@@ -293,15 +303,15 @@ export default {
       return this.socket && this.socket.connected;
     },
     userRoles() {
-      return this.$store.state.user.user.roles
-        && Array.isArray(this.$store.state.user.user.roles)
+      return this.$store.state.user.user.roles &&
+        Array.isArray(this.$store.state.user.user.roles)
         ? this.$store.state.user.user.roles.join('x')
         : '';
     },
     searchResultIsEmpty() {
       return (
-        !this.menuItems.length
-        && !Object.values(this.apiSearchResults).reduce(
+        !this.menuItems.length &&
+        !Object.values(this.apiSearchResults).reduce(
           (prev, next) => next.count + prev,
           0
         )
@@ -348,7 +358,8 @@ export default {
           })
           .then((data) => {
             this.apiSearchResults[type] = data;
-          }));
+          })
+      );
     },
     changeLocale(locale) {
       this.setLang(locale);
@@ -356,7 +367,6 @@ export default {
     mobileaccordian() {
       this.mobile_accordian = !this.mobile_accordian;
     },
-    logout() {},
     addFix() {
       body.classList.add('offcanvas');
       this.searchResult = true;
@@ -368,8 +378,8 @@ export default {
     },
     toggle_fullscreen() {
       if (
-        (document.fullScreenElement && document.fullScreenElement !== null)
-        || (!document.mozFullScreen && !document.webkitIsFullScreen)
+        (document.fullScreenElement && document.fullScreenElement !== null) ||
+        (!document.mozFullScreen && !document.webkitIsFullScreen)
       ) {
         if (document.documentElement.requestFullScreen) {
           document.documentElement.requestFullScreen();
@@ -407,6 +417,11 @@ export default {
             this.notifications = notifs;
           });
       }
+    },
+
+    logout() {
+      this.$store.dispatch('logout');
+      this.$router.push('/login');
     },
   },
   watch: {

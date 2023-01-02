@@ -5,21 +5,13 @@ module.exports = {
   additionalProperties: false,
   automaticApi: true,
   autoValidate: true,
+  primaryKeyField: 'name',
   displayField: 'name',
   schema: {
     $id: 'http://enyosolutions.com/schemas/axel-model-field-config.json',
     type: 'object',
     required: ['parentIdentity', 'name'],
     properties: {
-      id: {
-        $id: 'id',
-        type: 'number',
-        title: 'Config id', // serves for front form fields
-        description: 'The id of this item', // serves for front form hint
-        field: {
-          required: false
-        }
-      },
       parentIdentity: {
         type: 'string',
         relation: 'axelModelConfig',
@@ -31,6 +23,7 @@ module.exports = {
       },
       name: {
         type: 'string',
+        title: 'The identifier of this field',
         field: {
           required: true
         }
@@ -45,13 +38,14 @@ module.exports = {
       },
       type: {
         title: 'The type of the field',
-        description: 'expect a json schema type',
+        description: 'The type of field',
         type: ['string', 'array'],
         default: 'string',
         enum: ['string', 'number', 'array', 'object', 'integer', 'boolean', 'date', 'null', 'any'],
         column: {
         },
         field: {
+          hint: 'expect a json schema type',
         },
         items: {
           type: 'string'
@@ -102,7 +96,7 @@ module.exports = {
           fieldOptions: {
             taggable: true,
             url: '/api/axel-admin/models',
-            label: 'name',
+            label: 'identity',
             trackBy: 'identity',
           }
         }
@@ -148,7 +142,12 @@ module.exports = {
       },
       field: {
         type: 'object',
-        title: 'Configuration of the behavior of the property in forms',
+        title: 'Display and Edit settings',
+        description: 'Configuration of the behavior of the property in forms',
+        field: {
+          type: 'tab',
+          tabsNavType: 'tabs'
+        },
         properties: {
           title: {
             type: 'string',
@@ -169,18 +168,21 @@ module.exports = {
               'vSelect',
               'dateTime',
 
-              'datetime', 'date',
+              'datetime',
+              'date',
               'time',
               'DateRange',
               'textArea',
               'JsonTextarea',
+              'json',
 
               'ImagePicker',
               'FilePicker',
               'FileInput',
               'Base64Upload',
               'array',
-              'EnyoSelect',
+              'richtext',
+              'switch',
             ],
             field: {
               type: 'vSelect',
@@ -287,7 +289,7 @@ module.exports = {
             }
           },
           cols: {
-            type: 'number',
+            type: ['number', 'string'],
             title: 'Width of the field (cols)',
             description: 'the number of grid columns the item takes (1 - 12)',
             enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -297,9 +299,14 @@ module.exports = {
             }
           },
           fieldOptions: {
-            title: 'Field options',
+            title: 'Edit options',
             description: 'Options to be used on custom forms fields like multiselect, toggle etc',
             type: 'object',
+            field: {
+              type: 'group',
+              collapsible: true,
+              collapsed: true,
+            },
             properties: {
               multiple: {
                 type: 'boolean',
@@ -391,59 +398,63 @@ module.exports = {
                 description:
                   'the validators used to validate fields https://vue-generators.gitbook.io/vue-generators/validation/built-in-validators'
               },
-
-              displayOptions: {
-                title: 'Display options',
-                type: 'object',
-                description: 'Options to be used specifically on view mode',
-                properties: {
-                  type: {
-                    type: 'string',
-                    title: 'Field type',
-                    description:
-                      'The type that links to the display',
-                    field: {
-                      enum: [
-                        'string',
-                        'number',
-                        'boolean',
-                        'url',
-                        'image',
-                        'date',
-                        'datetime',
-                        'checkbox',
-                        'relation',
-                        'object',
-                        'component',
-                      ],
-                      type: 'vSelect'
-                    }
-                  },
-                  prefix: {
-                    type: 'string',
-                    title: 'Prefix',
-                    description: 'Text displayed before the value. example : £',
-                    examples: ['username']
-                  },
-
-                  suffix: {
-                    type: 'string',
-                    title: 'Suffix',
-                    description: 'Text displayed after the value. example : cm | €',
-                    examples: ['username']
-                  },
-                  format: {
-                    title: 'Format',
-                    description: 'The format to use for custom rendering this field (for objects, dates and text)',
-                    examples: ['example :  {{ currentItem.firstname + " " + currentItem.lastname }} | "DD / MM / YYYY"'],
-                  },
-                  component: {
-                    title: 'The component to use to display this field (for objects, dates and text)',
-                    type: ['string', 'object'],
-                    description: 'example : "MapDisplay" | "GalleryComponent"',
-                    examples: ['MapDisplay', 'GalleryComponent']
-                  }
+            },
+          },
+          displayOptions: {
+            title: 'Display options',
+            type: 'object',
+            description: 'Options to be used specifically on view mode',
+            field: {
+              type: 'group',
+              collapsible: true,
+              collapsed: true,
+            },
+            properties: {
+              type: {
+                type: 'string',
+                title: 'Field type',
+                description:
+                  'The component to use for the display',
+                field: {
+                  enum: [
+                    'string',
+                    'number',
+                    'boolean',
+                    'url',
+                    'image',
+                    'date',
+                    'datetime',
+                    'checkbox',
+                    'relation',
+                    'object',
+                    'component',
+                  ],
+                  type: 'vSelect'
                 }
+              },
+              prefix: {
+                type: 'string',
+                title: 'Prefix',
+                description: 'Text displayed before the value. example : £',
+                examples: ['username']
+              },
+
+              suffix: {
+                type: 'string',
+                title: 'Suffix',
+                description: 'Text displayed after the value. example : cm | €',
+                examples: ['username']
+              },
+              format: {
+                title: 'Format',
+                description: 'The format to use for custom rendering this field (for objects, dates and text)',
+                examples: ['example :  {{ currentItem.firstname + " " + currentItem.lastname }} | "DD / MM / YYYY"'],
+              },
+              component: {
+                title: 'The component to use to display this field (for objects, dates and text)',
+                type: ['string', 'object'],
+                description: 'example : "MapDisplay" | "GalleryComponent"',
+                examples: ['MapDisplay', 'GalleryComponent']
               }
             }
           }
@@ -452,8 +463,8 @@ module.exports = {
 
       column: {
         type: 'object',
-        title: 'Column configuration',
-        description: 'Configuration of the behavior of the property in lists',
+        title: 'Listing settings',
+        description: 'Configuration of the behavior of the property in lists (table / lists / kanban)',
         properties: {
           title: {
             type: 'string',
@@ -464,7 +475,7 @@ module.exports = {
             description:
               'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
             type: 'string',
-            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url'],
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url', 'component'],
             field: {
               type: 'vSelect',
               fieldOptions: {
@@ -472,11 +483,20 @@ module.exports = {
               }
             },
           },
-          hidden: {
-            title: 'Hide this column',
+          visible: {
+            title: 'This column is visible',
             type: 'boolean',
-            description: 'If the form field is displayed',
-            default: false
+            description: 'If the column field is displayed',
+            default: true
+          },
+          hidden: {
+            title: 'This column is hidden',
+            description: '@deprecated',
+            type: 'boolean',
+            nullable: true,
+            field: {
+              visible: false,
+            }
           },
           prefix: {
             title: 'Text displayed before the value',
@@ -502,8 +522,12 @@ module.exports = {
             description: 'example : "MapDisplay" | "GalleryComponent"',
             examples: ['MapDisplay', 'GalleryComponent']
           }
-        }
+        },
+        field: {
+          type: 'tab',
+        },
       },
+      /*
       createdOn: {
         type: ['string', 'object'],
         format: 'date-time',
@@ -520,6 +544,7 @@ module.exports = {
           type: 'datetime'
         }
       }
+      */
     },
   },
   admin: {
@@ -531,6 +556,10 @@ module.exports = {
       subtitleField: 'field.type',
       perPage: 50,
       perRow: 1
+    },
+    formOptions: {
+      useTabsForUngroupedFields: true,
+      tabsNavType: 'tabs',
     },
     actions: {
       create: false,

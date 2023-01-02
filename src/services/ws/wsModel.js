@@ -49,6 +49,23 @@ const getMergedModel = modelName => Promise.all([
 
 
 module.exports = (socket) => {
+  /** Get models definition */
+  socket.on('/admin-panel/admin-models', (req = { method: 'GET', query: {}, body: {} }, cb) => {
+    if (typeof req === 'function') {
+      cb = req;
+    }
+    switch (req.method) {
+      case 'GET':
+        AxelModelsService.serveModels(req).then((models) => {
+          cb(null, { body: models });
+        })
+          .catch(err => cb(err.message));
+        break;
+      default:
+        break;
+    }
+  });
+
   socket.on('/admin-panel/models', async (req = { method: 'GET', query: {}, body: {} }, cb) => {
     if (typeof req === 'function') {
       cb = req;
@@ -239,23 +256,6 @@ module.exports = (socket) => {
             process.kill(process.pid, 'SIGUSR2');
           })
           .catch(cb);
-    }
-  });
-
-  /** Get models definition */
-  socket.on('/admin-panel/admin-models', (req = { method: 'GET', query: {}, body: {} }, cb) => {
-    if (typeof req === 'function') {
-      cb = req;
-    }
-    switch (req.method) {
-      case 'GET':
-        AxelModelsService.serveModels(req).then((models) => {
-          cb(null, { body: models });
-        })
-          .catch(err => cb(err.message));
-        break;
-      default:
-        break;
     }
   });
 };

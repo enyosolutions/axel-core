@@ -16,6 +16,7 @@ import FieldTinyMce from '../components/fields/FieldTinyMce.vue';
 const GlobalComponents = {
   install(Vue) {
     Vue.component('fieldTinyMce', FieldTinyMce);
+    Vue.component('field-richtext', FieldTinyMce);
     Vue.component('fieldLayoutEditor', FieldLayoutEditor);
     Vue.component('fieldBooleanExpressionEditor', FieldBooleanExpressionEditor);
     Vue.filter('formatDate', (date, format = 'DD.MM.YYYY à h:mm') => {

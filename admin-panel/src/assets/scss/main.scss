@@ -8,7 +8,10 @@
 
 @import 'theme/variables';
 @import 'theme/tables';
+@import 'theme/transitions';
 @import 'theme/awesomecrud';
+@import 'theme/vac';
+@import 'theme/layout';
 
 .swal2-container.swal2-center > .swal2-popup {
   flex-direction: column;

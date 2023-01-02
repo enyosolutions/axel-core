@@ -25,6 +25,7 @@
     "tinymce": "^6.3.1",
     "vue": "2.7.14",
     "vue-aw-components": "^1.56.2",
+    "vue-click-outside": "^1.1.0",
     "vue-datetime": "^1.0.0-beta.14",
     "vue-good-table": "^2.21.11",
     "vue-i18n": "^8.26.7",

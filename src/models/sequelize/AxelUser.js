@@ -91,7 +91,7 @@ module.exports = {
         type: 'DataTypes.STRING(200)',
         allowNull: true,
       },
-      passwordResetRequestedAt: {
+      passwordResetRequestedOn: {
         type: 'DataTypes.DATE',
         allowNull: true,
       },

@@ -113,7 +113,6 @@ function tokenDecryptMiddleware(req, res, next) {
   if (
     req.headers
     && req.headers.authorization
-    && req.headers.authorization.indexOf('Bearer') > -1
   ) {
     const parts = req.headers.authorization.split(' ');
     if (parts.length === 2) {
@@ -122,7 +121,7 @@ function tokenDecryptMiddleware(req, res, next) {
       if (/^Bearer$/i.test(scheme)) {
         const token = credentials;
         hasHeader = true;
-        verify(token, (err, decryptedToken) => {
+        return verify(token, (err, decryptedToken) => {
           if (err) {
             debug('[warn]', err.message);
           }
@@ -141,11 +140,8 @@ function tokenDecryptMiddleware(req, res, next) {
     }
   }
   // TODO add support for api_key in the query params
-
   // if there is no token
-  if (!hasHeader) {
-    next();
-  }
+  next();
 }
 
 function getExtendedRoles(role) {

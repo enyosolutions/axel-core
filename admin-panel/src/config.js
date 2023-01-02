@@ -12,8 +12,8 @@ export default {
   env: process.env.VUE_APP_ENV || 'development', // production / test
   defaultLocale: 'fr',
   /* eslint-disable */
-  apiUrl: process.env.VUE_APP_API_URL || '/',
-  googleAuthClient: process.env.VUE_APP_GOOGLE_AUTH_CLIENT,
+  apiUrl: process.env.VUE_APP_API_URL || process.env.VITE_API_URL || '/',
+  googleAuthClient: process.env.VUE_APP_GOOGLE_AUTH_CLIENT || process.env.VITE_GOOGLE_AUTH_CLIENT,
   buildDate: process.env.BUILDDATE || 'now',
   version: '',
   defaultTitle: 'Axel admin dashboard',

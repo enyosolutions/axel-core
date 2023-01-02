@@ -34,8 +34,8 @@ const serializeSchema = (name, schema) => {
     `
     /* eslint max-len: "warn" */
     module.exports = ${serialize({
-    ...schema, em: undefined, entity: undefined, hooks: undefined
-  }, { space: 2, unsafe: true })}`,
+      ...schema,
+    }, { space: 2, unsafe: true })}`,
     { encoding: 'utf8' }
   );
 };
@@ -46,7 +46,7 @@ module.exports.serializeModel = (name, model) => {
   fs.writeFileSync(
     modelPath,
     `module.exports = ${serialize(_.merge(model, {
-      em: undefined, entity: undefined, hooks: undefined
+
     }), { space: 2, unsafe: true })}`,
     { encoding: 'utf8' }
   );
@@ -68,6 +68,10 @@ module.exports.saveModel = (frontModel) => {
   const inMemoryModel = _.cloneDeep({
     ...axel.models[modelName], em: undefined, repository: undefined, entity: undefined, hooks: undefined
   });
+  delete inMemoryModel.em;
+  delete inMemoryModel.repository;
+  delete inMemoryModel.entity;
+  delete inMemoryModel.hooks;
   // front model data
   const {
     primaryKeyField,

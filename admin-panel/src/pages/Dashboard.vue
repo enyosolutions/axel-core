@@ -117,8 +117,7 @@ export default {
               },
             })
             .then(({ data }) =>
-              this.$set(this.modelsCount, model.identity, data.totalCount)
-            );
+              this.$set(this.modelsCount, model.identity, data.totalCount));
         })
       ).catch(console.warn);
     },

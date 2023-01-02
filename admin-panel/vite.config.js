@@ -1,4 +1,4 @@
-import eslint from 'vite-plugin-eslint';
+const eslint = require('vite-plugin-eslint');
 
 const { createVuePlugin } = require('vite-plugin-vue2');
 const { viteSingleFile } = require('vite-plugin-singlefile');
@@ -16,12 +16,7 @@ module.exports = {
   },
   plugins: [
     createVuePlugin(),
-    eslint({
-      cache: true,
-      fix: true,
-      lintOnStart: false,
 
-    }),
     viteSingleFile(),
   ],
   resolve: {
@@ -35,6 +30,11 @@ module.exports = {
   server: {
     proxy: {
       '^/(api|data|socket|axel-admin-ws)': {
+        target: API_URL,
+        ws: false,
+        changeOrigin: true
+      },
+      '^/(socket|axel-admin-ws)': {
         target: API_URL,
         ws: true,
         changeOrigin: true

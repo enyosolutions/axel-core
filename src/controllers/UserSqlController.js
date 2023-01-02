@@ -9,29 +9,26 @@ const dayjs = require('dayjs');
 const _ = require('lodash');
 const Utils = require('../services/Utils');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
-const { ExtendedError } = require('../index');
+const { ExtendedError, axel } = require('../index');
 const AuthService = require('../services/AuthService');
 // const MailService = require('../services/MailService');
 
-const primaryKey = axel.models.axelUser && axel.models.user.em && axel.models.user.em.primaryKeyField
-  ? axel.models.user.em.primaryKeyField
-  : axel.config.framework.primaryKey;
+const userModelName = _.get(axel, 'config.plugins.admin.config.userModelName', 'user');
+const rolesWithAccessToBackoffice = _.get(axel, 'config.plugins.admin.config.rolesWithAccessToBackoffice',
+  _.get(axel, 'config.framework.rolesWithAccessToBackoffice', []));
 
-module.exports = {
-  initDefaultUser(req, res) {
-    if (['PROD', 'prod', 'production'].indexOf(axel.config.env) > -1) {
-      res.json('NOPE');
-      return;
+
+let primaryKey = axel.config.framework.primaryKey;
+
+
+class UserSqlController {
+  constructor() {
+    this.userModel = axel.models[userModelName];
+    if (this.userModel && this.userModel && this.userModel.em && this.userModel.em.primaryKeyField) {
+      primaryKey = this.userModel.em.primaryKeyField;
     }
-    req.body = {};
-    req.body.email = 'dev@enyosolutions.com';
-    req.body.firstName = 'Tony';
-    req.body.lastName = 'Stark';
-    req.body.username = 'enyosolutions';
-    req.body.password = 'Test1234';
-    req.body.roles = ['USER', 'ADMIN', 'DEVELOPER'];
-    axel.getActions()['user/create'](req, res);
-  },
+  }
+
 
   /**
    * @swagger
@@ -84,8 +81,9 @@ module.exports = {
     let newUser = req.body;
     newUser.email = newUser.email.toLowerCase();
     newUser.username = newUser.username.toLowerCase();
+    const userModel = this.userModel;
 
-    axel.models.user.em
+    userModel.em
       .findOne({
         where: {
           email: newUser.email
@@ -111,7 +109,7 @@ module.exports = {
       })
       .then((data) => {
         if (data) {
-          return axel.models.user.em.create(newUser, {
+          return userModel.em.create(newUser, {
             raw: true
           });
         }
@@ -143,7 +141,7 @@ module.exports = {
             delete newUser.activationToken;
           }
 
-          return axel.models.user.em.update(newUser, {
+          return userModel.em.update(newUser, {
             where: {
               [primaryKey]: newUser[primaryKey]
             }
@@ -187,148 +185,8 @@ module.exports = {
         axel.logger.warn(err && err.message ? err.message : err);
         ErrorUtils.errorCallback(err, res);
       });
-  },
+  }
 
-  /**
-   *
-   */
-  getByResetToken(req, res) {
-    const resetToken = req.param('resetToken');
-
-    if (!resetToken) {
-      return res.status(404).json({
-        errors: ['missing_argument'],
-        message: 'missing_argument'
-      });
-    }
-
-    axel.models.user.em
-      .findOne({
-        where: {
-          resetToken
-        }
-      })
-      .then((data) => {
-        if (!data) {
-          throw new ExtendedError({
-            code: 401,
-            stack: 'invalid_token',
-            message: 'invalid_token',
-            errors: ['invalid_token']
-          });
-        }
-        if (
-          !data.passwordResetRequestedOn
-          || dayjs(data.passwordResetRequestedOn)
-            .add(10, 'm')
-            .isBefore(new Date())
-        ) {
-          throw new ExtendedError({
-            code: 401,
-            stack: 'expired_token',
-            message: 'The password reset request has expired, please try again.',
-            errors: ['expired_token']
-          });
-        }
-        return res.json({
-          resetToken: data.resetToken,
-          [primaryKey]: data[primaryKey]
-        });
-      })
-      .catch((err) => {
-        res.status(err.code ? parseInt(err.code) : 400).json({
-          errors: [err.message || 'global_error'],
-          message: err.message || 'global_error'
-        });
-      });
-  },
-
-  reset(req, res) {
-    const resetToken = req.param('resetToken');
-
-    if (!resetToken) {
-      return res.status(404).json({
-        errors: ['missing_argument'],
-        message: 'missing_argument'
-      });
-    }
-
-    if (!req.body.password) {
-      return res.status(404).json({
-        errors: ['error_missing_password'],
-        message: 'error_missing_password'
-      });
-    }
-
-    let user;
-    axel.models.user.em
-      .findOne({
-        where: {
-          resetToken
-        }
-      })
-      .then((u) => {
-        if (!u || u.length < 1) {
-          throw new ExtendedError({
-            code: 401,
-            message: 'invalid_token',
-            errors: ['invalid_token']
-          });
-        }
-        user = u.get();
-        if (
-          !user.passwordResetRequestedOn
-          || dayjs(user.passwordResetRequestedOn)
-            .add(20, 'm')
-            .isBefore(new Date())
-        ) {
-          throw new ExtendedError({
-            code: 401,
-            message: 'The password reset request has expired, please try again.',
-            errors: ['expired_token']
-          });
-        }
-        user.password = req.body.password;
-        return AuthService.beforeUpdate(user);
-      })
-      .catch((err) => {
-        res.status(err.code ? parseInt(err.code) : 400).json({
-          errors: [err.message || 'not_found'],
-          message: err.message || 'not_found'
-        });
-      })
-      .then((result) => {
-        if (result) {
-          user.resetToken = '';
-          return axel.models.user.em.update(user, {
-            where: {
-              [primaryKey]: user[primaryKey]
-            }
-          });
-        }
-        return null;
-      })
-      .catch((err) => {
-        res.status(err.code ? parseInt(err.code) : 400).json({
-          errors: [err.message || 'update_error'],
-          message: err.message || 'update_error'
-        });
-      })
-      .then((success) => {
-        if (success) {
-          res.status(200).json({
-            body: 'password_reset_success'
-          });
-        }
-        return null;
-      })
-      .catch((err) => {
-        res.status(400).json({
-          message: 'global_error',
-          errors: [err.message]
-        });
-      });
-  },
 
   findAll(req, resp) {
     const { listOfValues, startPage, limit } = Utils.injectPaginationQuery(req);
@@ -351,8 +209,9 @@ module.exports = {
       };
     }
     query = Utils.cleanSqlQuery(query);
+    const userModel = this.userModel;
 
-    axel.models.user.em
+    userModel.em
       .findAndCountAll({ where: query, raw: false, nested: true }, options)
       .then((result) => {
         let data;
@@ -366,7 +225,7 @@ module.exports = {
                 axel.logger.warn(e);
               }
             }
-            return user;
+            return Utils.sanitizeUser(user);
           });
 
           if (listOfValues) {
@@ -392,17 +251,13 @@ module.exports = {
           message: err.message
         });
       });
-  },
+  }
 
   findOne(req, resp) {
-    const id = req.param('userId');
-    if (axel.mongodb) {
-      if (!Utils.checkIsMongoId(id, resp)) {
-        return false;
-      }
-    }
+    const id = req.params.userId;
     const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
-    axel.models.user.em
+    const userModel = this.userModel;
+    userModel.em
       .findByPk({
         [primaryKey]: id
       })
@@ -426,7 +281,7 @@ module.exports = {
           return resp.status(200).json({
             body: {
               [primaryKey]: doc[primaryKey].toString(),
-              label: Utils.formatName(doc.firstname, doc.lastname, doc.username, true)
+              label: Utils.formatName(doc.firstName, doc.lastName, doc.username, true)
             }
           });
         }
@@ -434,7 +289,7 @@ module.exports = {
         delete doc.password;
         delete doc.encryptedPassword;
         return resp.status(200).json({
-          body: doc
+          body: Utils.sanitizeUser(doc)
         });
       })
       .catch((err) => {
@@ -443,7 +298,7 @@ module.exports = {
           message: err.message
         });
       });
-  },
+  }
 
   exists(req, resp) {
     const username = req.query.username;
@@ -454,7 +309,10 @@ module.exports = {
         message: 'missing_argument'
       });
     }
-    axel.models.user.em
+
+    const userModel = this.userModel;
+
+    userModel.em
       .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
       .then((doc) => {
         if (doc) {
@@ -469,18 +327,13 @@ module.exports = {
       .catch((err) => {
         ErrorUtils.errorCallback(err, resp);
       });
-  },
+  }
 
   update(req, res) {
     let user;
     const newUser = req.body;
     let data;
     const id = req.params.userId;
-    if (axel.mongodb) {
-      if (!Utils.checkIsMongoId(id, res)) {
-        return false;
-      }
-    }
 
     if (req.body.email === null) {
       if (axel.config.framework.user.email) {
@@ -501,7 +354,9 @@ module.exports = {
       req.body.username = req.body.email;
     }
 
-    axel.models.user.em
+    const userModel = this.userModel;
+
+    userModel.em
       .findByPk(id)
       .then((u) => {
         user = u;
@@ -535,12 +390,6 @@ module.exports = {
 
         data = _.merge({}, user, newUser);
         data.roles = newUser.roles;
-        // Delete if not required
-        // data.lastModifiedOn = new Date();
-
-        if (!axel.mongodb) {
-          data.roles = JSON.stringify(data.roles);
-        }
 
         if (data.password) {
           return AuthService.beforeUpdate(data);
@@ -549,7 +398,7 @@ module.exports = {
       })
       .then(() => {
         if (data) {
-          return axel.models.user.em.update(data, {
+          return userModel.em.update(data, {
             where: {
               [primaryKey]: id
             }
@@ -569,27 +418,28 @@ module.exports = {
         }
         return null;
       })
-      .then(() => axel.models.user.em.findByPk(parseInt(id)))
-      .then((userModel) => {
+      .then(() => userModel.em.findByPk(parseInt(id)))
+      .then((userData) => {
         delete userModel.encryptedPassword;
-        userModel = userModel.get();
+        userData = userData.toJSON ? userData.toJSON() : userData;
         res.json({
-          user: userModel
+          user: userData
         });
         return null;
       })
       .catch((err) => {
         ErrorUtils.errorCallback(err, res);
       });
-  },
+  }
 
   delete(req, resp) {
-    const id = req.param('userId');
+    const id = req.params.userId;
     if (!Utils.checkIsMongoId(id, resp)) {
       return false;
     }
 
-    const collection = axel.models.user.em;
+    const userModel = this.userModel;
+    const collection = userModel.em;
     collection
       .findByPk(id)
       .then((user) => {
@@ -634,4 +484,6 @@ module.exports = {
         ErrorUtils.errorCallback(err, resp);
       });
   }
-};
+}
+
+module.exports = new UserSqlController();

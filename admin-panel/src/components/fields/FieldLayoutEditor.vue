@@ -31,100 +31,101 @@
       >
         <div
           v-for="(obj, index) in internalValue"
-          class="group-item row"
           :class="obj ? `col-${obj.cols}` : ''"
           :key="index"
         >
-          <template v-if="obj">
-            <button
-              type="button"
-              class="btn btn-danger btn-sm btn-delete pull-right"
-              @click="removeItem(index)"
-            >
-              <i class="fa fa-trash"></i>
-            </button>
-            <div class="form-group col-12">
-              <i class="fa fa-bars handle cursor-grab mr-2"></i>
-              <label for=""> Group Name </label>
-              <input
-                type="text"
-                v-model="obj.legend"
-                class="form-control"
-                @blur="saveItem()"
-              />
-            </div>
+          <div class="group-item row card">
+            <template v-if="obj">
+              <button
+                type="button"
+                class="btn btn-danger btn-sm btn-delete pull-right"
+                @click="removeItem(index)"
+              >
+                <i class="fa fa-trash"></i>
+              </button>
+              <div class="form-group col-12">
+                <i class="fa fa-bars handle cursor-grab mr-2"></i>
+                <label for=""> Group Name </label>
+                <input
+                  type="text"
+                  v-model="obj.legend"
+                  class="form-control"
+                  @blur="saveItem()"
+                />
+              </div>
 
-            <div class="form-group col-12">
-              <label for="">fields</label>
-              <Draggable
-                v-model="obj.fields"
-                class="card p-2"
-                dragClass="card"
-                ghostClass="dragged-item"
-                :group="{ name: 'fields' }"
-                :data-id="index"
-              >
-                <div
-                  v-for="(field, index) in obj.fields"
-                  class="mh-10 cursor-grab"
-                  :key="index"
+              <div class="form-group col-12">
+                <label for="">fields</label>
+                <Draggable
+                  v-model="obj.fields"
+                  class="card p-2"
+                  dragClass="card"
+                  ghostClass="dragged-item"
+                  :group="{ name: 'fields' }"
+                  :data-id="index"
                 >
-                  <i class="fa fa-bars mr-2"></i> {{ field }}
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm btn-delete pull-right mr-1"
-                    @click="removeField(obj.fields, index)"
+                  <div
+                    v-for="(field, index) in obj.fields"
+                    class="mh-10 cursor-grab"
+                    :key="index"
                   >
-                    <i class="fa fa-times"></i>
-                  </button>
-                </div>
-              </Draggable>
-            </div>
-            <div class="form-group col-4 pr-0">
-              <label for="">cols</label>
-              <select
-                type="text"
-                v-model="obj.cols"
-                class="form-control"
-                placeholder="value"
-                @blur="saveItem()"
-              >
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-                <option>6</option>
-                <option>7</option>
-                <option>8</option>
-                <option>9</option>
-                <option>10</option>
-                <option>11</option>
-                <option selected>12</option>
-              </select>
-            </div>
-            <div class="form-group col-4 pr-0 text-truncate">
-              <label for="">Wrapper classes</label>
-              <input
-                type="text"
-                v-model="obj.wrapperClasses"
-                class="form-control"
-                @blur="saveItem()"
-              />
-            </div>
-            <div class="form-group col-4">
-              <label for="">Classes</label>
-              <input
-                type="text"
-                v-model="obj.styleClasses"
-                class="form-control"
-                @blur="saveItem()"
-              />
-            </div>
-            <div class="form-group col-12">
-              <hr />
-            </div>
-          </template>
+                    <i class="fa fa-bars mr-2"></i> {{ field }}
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm btn-delete pull-right mr-1"
+                      @click="removeField(obj.fields, index)"
+                    >
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                </Draggable>
+              </div>
+              <div class="form-group col-4 pr-0">
+                <label for="">cols</label>
+                <select
+                  type="text"
+                  v-model="obj.cols"
+                  class="form-control"
+                  placeholder="value"
+                  @blur="saveItem()"
+                >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+                  <option>11</option>
+                  <option selected>12</option>
+                </select>
+              </div>
+              <div class="form-group col-4 pr-0 text-truncate">
+                <label for="">Wrapper classes</label>
+                <input
+                  type="text"
+                  v-model="obj.wrapperClasses"
+                  class="form-control"
+                  @blur="saveItem()"
+                />
+              </div>
+              <div class="form-group col-4">
+                <label for="">Classes</label>
+                <input
+                  type="text"
+                  v-model="obj.styleClasses"
+                  class="form-control"
+                  @blur="saveItem()"
+                />
+              </div>
+              <div class="form-group col-12">
+                <hr />
+              </div>
+            </template>
+          </div>
         </div>
       </Draggable>
       <button

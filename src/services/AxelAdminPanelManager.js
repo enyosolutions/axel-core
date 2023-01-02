@@ -74,10 +74,11 @@ class AxelAdminPanelManager {
    * @memberof AxelAdminPanelManager
    */
   injectExpressRoutes(app) {
-    app.get(['/admin-panel'],
+    const adminConfig = _.get(axel, 'config.plugins.admin.config');
+    app.use(['/admin-panel'],
       (req, res) => {
         try {
-          res.sendFile(resolve(__dirname, '../../admin-panel/dist/index.html'));
+          res.sendFile(adminConfig && adminConfig.location ? adminConfig.location : resolve(__dirname, '../../admin-panel/dist/index.html'));
         } catch (e) {
           console.error(e.message);
           res.status(500).json({
@@ -91,11 +92,12 @@ class AxelAdminPanelManager {
       (req, res) => {
         res.json({ user: req.user });
       });
-    app.get('/api/axel-admin/crud/:endpoint', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware, CrudSqlController.findAll);
-    app.post('/api/axel-admin/crud/:endpoint', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware, CrudSqlController.create);
-    app.get('/api/axel-admin/crud/:endpoint/:id', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware, CrudSqlController.findOne);
-    app.put('/api/axel-admin/crud/:endpoint/:id', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware, CrudSqlController.update);
-    app.delete('/api/axel-admin/crud/:endpoint/:id', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware, CrudSqlController.deleteOne);
+    app.use('/api/axel-admin/crud', AuthService.tokenDecryptMiddleware, this.checkUserMiddleware);
+    app.get('/api/axel-admin/crud/:endpoint', CrudSqlController.findAll);
+    app.post('/api/axel-admin/crud/:endpoint', CrudSqlController.create);
+    app.get('/api/axel-admin/crud/:endpoint/:id', CrudSqlController.findOne);
+    app.put('/api/axel-admin/crud/:endpoint/:id', CrudSqlController.update);
+    app.delete('/api/axel-admin/crud/:endpoint/:id', CrudSqlController.deleteOne);
 
 
     app.get('/api/axel-admin/status',
@@ -118,14 +120,14 @@ class AxelAdminPanelManager {
 
   async checkUserMiddleware(req, res, next) {
     if (!req.user) {
-      return next('user_not_set');
+      return res.status(401).json({ code: 401, message: 'user_not_set' });
     }
     const user = await axel.models.user.em.findOne({
       where: { id: req.user.id, email: req.user.email },
       attributes: ['id', 'email', 'firstName', 'lastName']
     });
     if (!user) {
-      return next('user_not_found');
+      return res.status(404).json({ message: 'user_not_found' });
     }
     req.user = user;
     next();

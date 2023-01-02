@@ -26,7 +26,7 @@ module.exports = {
     'no-underscore-dangle': [
       2,
       {
-        allow: ['_id', '_sails', '_global'],
+        allow: ['_id', '_sails', '_global', '_vac_source', '_vac'],
       },
     ],
     'prefer-destructuring': 0,

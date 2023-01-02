@@ -184,19 +184,12 @@
       "openLayoutEditor": "Modifier la structure",
       "closeLayoutEditor": "Fermer l'editeur de structure",
       "testConnection": "Tester la Connexion",
-      "contactCandidate": "Contacter le candidat"
+      "contactCandidate": "Contacter le candidat",
+      "closeEditor": "Fermer l'éditeur"
     },
     "currency": "€",
     "currencyFa": "fa-eur",
     "currencytext": "Euros",
-    "distances": {
-      "km": "km",
-      "long": "longue",
-      "medium": "intermédiaire",
-      "miles": "miles",
-      "short": "courte",
-      "title": "Distance"
-    },
     "deadline": "Date limite",
     "error": {
       "button": "Retour à la page d'accueil",
@@ -381,10 +374,9 @@
       "error_unknown_email": "Identifiant de connexion inconnu",
       "error_recurring_task_already_completed": "La prochaine instance de cette tâche récurrente est déjà marquée comme terminée",
       "error_no_mailbox": "Veuillez sélectionner une boîte aux lettres",
-      "expired_token": "Lien périmé",
+      "expired_token": "Le lien de réinitialisation n'est plus valide",
       "global_error": "Oups, une erreur est survenue",
-      "goodie_not_found": "Cadeau non trouvé",
-      "invalid_token": "Lien invalide",
+      "invalid_token": "Le lien de réinitialisation est invalide",
       "loginWelcome": "Ravi de vous revoir {name}",
       "missing_argument": "Merci de renseigner tous les champs",
       "more_points_required": "Vous n'avez pas assez de point",
@@ -502,6 +494,21 @@
       "update_error": "Échec de la mise à jour",
       "wont_be_able_recover": "Vous ne pourrez pas revenir en arrière!",
       "invalid_json": "Le json est invalide"
+    }
+  },
+  "error_forbidden_access_to_bo": "Votre compte n'a pas les droits pour se connecter au backoffice. Contactez votre administrateur.",
+  "ModelEditor": {
+    "tabs": {
+      "general": "General",
+      "tabs": "Onglets",
+      "menus": "Menus",
+      "listingView": "Vue listes",
+      "detailView": "Vue détail",
+      "fields": "Configuration des champs",
+      "dataFetching": "Gestion des données",
+      "relations": "Relations",
+      "actions": "Actions",
+      "rest": "Autres.."
     }
   }
 }

@@ -15,7 +15,7 @@
           <!-- End of Topbar -->
 
           <!-- Begin Page Content -->
-          <div class="container-fluid mt-2">
+          <div class="container-fluid mt-2 page-content">
             <transition name="fadeIn" enter-active-class="animated fadeIn">
               <router-view class="view" :key="$route.fullPath"></router-view>
             </transition>
@@ -88,7 +88,9 @@ export default {
         this.$store.dispatch('getEnv');
       })
       .then(() => {
-        window.docmuent.title = `${this.appConfig.appName} admin panel`;
+        if (this.appConfig) {
+          window.docmuent.title = `${this.appConfig.appName} admin panel`;
+        }
       })
       .catch((err) => {
         console.warn(
@@ -97,9 +99,8 @@ export default {
         );
         if (err.response) {
           switch (err.response.status) {
-          case 404:
+          case 403:
           case 401:
-          case 500:
             this.$router.push('/login');
             break;
           default:
