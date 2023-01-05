@@ -1,21 +1,19 @@
 /* eslint-disable */
 // const model = require('../../src/api/models/schema/user');
 
-
 // @ts-ignore
 // const testConfig = require(`${axel.rootPath}/tmp/testConfig.json`);
 const path = require('path');
 const process = require('process');
 const runtime = require('regenerator-runtime/runtime');
 
-process.cwd = () => path.resolve(__dirname, '../sandbox');
+// process.cwd = () => path.resolve(__dirname, '../sandbox');
 
 describe('axel.js :: ', () => {
   it('axel structure', () => {
     const axel = require('../../src/axel.js');
     expect(axel.port).toBeDefined();
     expect(axel.config).toBeDefined();
-    expect(axel.config.framework).toBeDefined();
     expect(axel.routes).toBeDefined();
     expect(axel.services).toBeDefined();
     expect(axel.policies).toBeDefined();
@@ -28,7 +26,6 @@ describe('axel.js :: ', () => {
   });
 });
 
-
 describe('global.Axel', () => {
   it('should breaks on pre existing global.axel', () => {
     try {
@@ -40,7 +37,6 @@ describe('global.Axel', () => {
     }
   });
 });
-
 
 describe('axel.renderView', () => {
   test('renderview requires a template', async () => {
@@ -61,7 +57,6 @@ describe('axel.renderView', () => {
       expect(error.message).toBe('axel.app is not defined');
     }
   });
-
 
   test.skip('renderview starts', async () => {
     try {

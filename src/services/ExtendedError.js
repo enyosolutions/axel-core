@@ -24,7 +24,9 @@ class ExtendedError extends Error {
   }
 
   toString() {
-    return _.isString(this.message) ? this.message : JSON.stringify(this.message);
+    return _.isString(this.message)
+      ? this.message
+      : JSON.stringify(this.message);
   }
 }
 

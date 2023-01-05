@@ -104,7 +104,7 @@ function normaliseErrorMessages(errors) {
   });
 
   return {
-    fields
+    fields,
   };
 }
 
@@ -138,7 +138,20 @@ class SchemaValidator {
     addFormats(this.ajv);
     addFormats(this.ajvEditValidator);
     addFormats(this.ajvStrict);
-    ['relation', 'relationKey', 'foreignKey', 'relationLabel', 'relationUrl', 'field', 'column'].forEach((keyword) => {
+    // extra keywords that we accept in the validation system
+    [
+      'relation',
+      'relationKey',
+      'foreignKey',
+      'relationLabel',
+      'relationUrl',
+      'field',
+      'column',
+      'displayInServedSchema',
+      'displayDataInServedSchema',
+      'sequelizeDefinition',
+      'mongooseDefinition',
+    ].forEach((keyword) => {
       this.ajv.addKeyword(keyword);
       this.ajvEditValidator.addKeyword(keyword);
       this.ajvStrict.addKeyword(keyword);
@@ -160,14 +173,17 @@ class SchemaValidator {
   loadSchemas() {
     /* eslint-disable */
 
-    let existingSchemas = Object.keys(axel.models).filter(i => axel.models[i].schema)
-      .length;
+    let existingSchemas = Object.keys(axel.models).filter(
+      (i) => axel.models[i].schema
+    ).length;
     debug('VALIDATOR :: loading schemas', existingSchemas);
     if (!this.ajv) {
       throw new Error('error_missing_ajv_validator');
     }
     while (existingSchemas > Object.keys(this.validators).length) {
-      Object.keys(axel.models).forEach((key) => this.loadSchema(axel.models[key]));
+      Object.keys(axel.models).forEach((key) =>
+        this.loadSchema(axel.models[key])
+      );
     }
   }
 
@@ -183,10 +199,16 @@ class SchemaValidator {
       debug('loading schema for %s', identity);
       try {
         // @ts-ignore
-        this.validators[identity] = this.ajv.compile(axel.models[identity].schema);
-        this.editValidators[identity] = this.ajvEditValidator.compile(axel.models[identity].schema);
+        this.validators[identity] = this.ajv.compile(
+          axel.models[identity].schema
+        );
+        this.editValidators[identity] = this.ajvEditValidator.compile(
+          axel.models[identity].schema
+        );
         if (this.ajvStrict) {
-          this.strictValidators[identity] = this.ajvStrict.compile(axel.models[identity].schema);
+          this.strictValidators[identity] = this.ajvStrict.compile(
+            axel.models[identity].schema
+          );
         }
       } catch (e) {
         axel.logger.warn('Error on schema %s', identity);
@@ -218,7 +240,7 @@ class SchemaValidator {
         {
           axel.logger.warn(
             'VALIDATOR :: ' + ' validator for model ' + model + ' is missing',
-            typeof validator,
+            typeof validator
           );
           result.isValid = false;
           return result;
@@ -229,7 +251,7 @@ class SchemaValidator {
       } else {
         axel.logger.warn(
           'VALIDATOR :: ' + model + ' validator is not a function',
-          typeof validator,
+          typeof validator
         );
         result.isValid = false;
         return result;
@@ -241,7 +263,9 @@ class SchemaValidator {
       // result = normalize(this.validators[model.toLowerCase()].errors);
       result.errors = normaliseErrorMessages(validator.errors);
       result.formatedErrors = _.flattenDeep([
-        Object.keys(result.errors.fields).map(index => result.errors.fields[index]),
+        Object.keys(result.errors.fields).map(
+          (index) => result.errors.fields[index]
+        ),
       ]);
       result.rawErrors = validator.errors;
     }
@@ -249,14 +273,21 @@ class SchemaValidator {
   }
 
   validateAsync(data, modelName) {
-    if (axel.config.framework
-      && axel.config.framework.validateDataWithJsonSchema
-      && axel.models[modelName]
-      && axel.models[modelName].autoValidate
+    if (
+      axel.config.framework &&
+      axel.config.framework.validateDataWithJsonSchema &&
+      axel.models[modelName] &&
+      axel.models[modelName].autoValidate
     ) {
       const validation = this.validate(data, modelName);
       if (!validation.isValid) {
-        debug('[SCHEMA VALIDATION ERROR]', modelName, validation, 'data to validate =>', data);
+        debug(
+          '[SCHEMA VALIDATION ERROR]',
+          modelName,
+          validation,
+          'data to validate =>',
+          data
+        );
         throw new ExtendedError({
           code: 400,
           message: 'data_validation_error',
@@ -264,8 +295,7 @@ class SchemaValidator {
           validation,
         });
       }
-    }
-    else {
+    } else {
       debug('Validation disabled for model', modelName);
     }
   }
