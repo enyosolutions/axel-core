@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 const _ = require('lodash');
 const socketIO = require('socket.io');
 const { resolve } = require('path');
@@ -34,7 +35,7 @@ class AxelAdminPanelManager {
    * @returns {Promise<any>}
    * @memberof AxelAdminPanelManager
    */
-  init(app) {
+  async init(app) {
     try {
       if (!axel.sqldb) {
         return 'missing_sqldb';
@@ -66,6 +67,9 @@ class AxelAdminPanelManager {
 
       // SchemaValidator.loadSchema(axelUser);
       // axel.models.axelUser.em.sync();
+      if (axel.models[userModelName] && axel.models[userModelName].em) {
+        await axel.models[userModelName].em.sync();
+      }
     } catch (err) {
       console.warn('[ADMIN PANEL][WARNING]', err.message);
     }
@@ -277,7 +281,6 @@ class AxelAdminPanelManager {
    */
   wsProtectedRouting(socket) {
     debug('[ADMIN PANEL] WS protected routes', socket.id, socket.user.username);
-
     wsModel(socket);
     wsController(socket);
 
