@@ -1,20 +1,20 @@
-const _ = require("lodash");
-const socketIO = require("socket.io");
-const { resolve } = require("path");
-const debug = require("debug")("axel:manager");
-const AuthService = require("./AuthService");
-const axel = require("../axel");
-const wsModel = require("./ws/wsModel");
-const wsController = require("./ws/wsController");
-const { loadSqlModel, loadSchemaModel } = require("../models");
-const AuthController = require("../controllers/AuthController");
-const CrudSqlController = require("../controllers/CrudSqlController");
-const SchemaValidator = require("./SchemaValidator");
+const _ = require('lodash');
+const socketIO = require('socket.io');
+const { resolve } = require('path');
+const debug = require('debug')('axel:manager');
+const AuthService = require('./AuthService');
+const axel = require('../axel');
+const wsModel = require('./ws/wsModel');
+const wsController = require('./ws/wsController');
+const { loadSqlModel, loadSchemaModel } = require('../models');
+const AuthController = require('../controllers/AuthController');
+const CrudSqlController = require('../controllers/CrudSqlController');
+const SchemaValidator = require('./SchemaValidator');
 
 const userModelName = _.get(
   axel,
-  "config.plugins.admin.config.userModelName",
-  "user"
+  'config.plugins.admin.config.userModelName',
+  'user'
 );
 
 /**
@@ -37,11 +37,11 @@ class AxelAdminPanelManager {
   init(app) {
     try {
       if (!axel.sqldb) {
-        return "missing_sqldb";
+        return 'missing_sqldb';
       }
       if (this.initialized) {
         console.warn(
-          "AxelAdminPanelManager already initialized. Please remove initialization from your bootstrap.js"
+          'AxelAdminPanelManager already initialized. Please remove initialization from your bootstrap.js'
         );
         return;
       }
@@ -67,14 +67,14 @@ class AxelAdminPanelManager {
       // SchemaValidator.loadSchema(axelUser);
       // axel.models.axelUser.em.sync();
     } catch (err) {
-      console.warn("[ADMIN PANEL][WARNING]", err.message);
+      console.warn('[ADMIN PANEL][WARNING]', err.message);
     }
-    debug("\n\n\n");
-    debug("[ADMIN PANEL] WS is opening");
-    const io = socketIO(app.locals.server, { path: "/axel-admin-ws" });
+    debug('\n\n\n');
+    debug('[ADMIN PANEL] WS is opening');
+    const io = socketIO(app.locals.server, { path: '/axel-admin-ws' });
     app.locals.io = io;
     // https://socket.io/docs/v4/listening-to-events/#socketonanylistener
-    io.on("connect", this.wsPublicRouting.bind(this));
+    io.on('connect', this.wsPublicRouting.bind(this));
   }
 
   /**
@@ -84,24 +84,24 @@ class AxelAdminPanelManager {
    * @memberof AxelAdminPanelManager
    */
   injectExpressRoutes(app) {
-    const adminConfig = _.get(axel, "config.plugins.admin.config");
-    app.use(["/admin-panel"], (req, res) => {
+    const adminConfig = _.get(axel, 'config.plugins.admin.config');
+    app.use(['/admin-panel'], (req, res) => {
       try {
         res.sendFile(
           adminConfig && adminConfig.location
             ? adminConfig.location
-            : resolve(__dirname, "../../admin-panel/dist/index.html")
+            : resolve(__dirname, '../../admin-panel/dist/index.html')
         );
       } catch (e) {
         console.error(e.message);
         res.status(500).json({
-          errors: ["not_found"],
-          message: "not_found",
+          errors: ['not_found'],
+          message: 'not_found',
         });
       }
     });
     app.get(
-      "/api/axel-admin/auth/user",
+      '/api/axel-admin/auth/user',
       AuthService.tokenDecryptMiddleware,
       this.checkUserMiddleware,
       (req, res) => {
@@ -109,21 +109,21 @@ class AxelAdminPanelManager {
       }
     );
     app.use(
-      "/api/axel-admin/crud",
+      '/api/axel-admin/crud',
       AuthService.tokenDecryptMiddleware,
       this.checkUserMiddleware
     );
-    app.get("/api/axel-admin/crud/:endpoint", CrudSqlController.findAll);
-    app.post("/api/axel-admin/crud/:endpoint", CrudSqlController.create);
-    app.get("/api/axel-admin/crud/:endpoint/:id", CrudSqlController.findOne);
-    app.put("/api/axel-admin/crud/:endpoint/:id", CrudSqlController.update);
+    app.get('/api/axel-admin/crud/:endpoint', CrudSqlController.findAll);
+    app.post('/api/axel-admin/crud/:endpoint', CrudSqlController.create);
+    app.get('/api/axel-admin/crud/:endpoint/:id', CrudSqlController.findOne);
+    app.put('/api/axel-admin/crud/:endpoint/:id', CrudSqlController.update);
     app.delete(
-      "/api/axel-admin/crud/:endpoint/:id",
+      '/api/axel-admin/crud/:endpoint/:id',
       CrudSqlController.deleteOne
     );
 
     app.get(
-      "/api/axel-admin/status",
+      '/api/axel-admin/status',
       AuthService.tokenDecryptMiddleware,
       async (req, res) => {
         const userExists = await axel.models[userModelName].em.count();
@@ -136,7 +136,7 @@ class AxelAdminPanelManager {
           secondaryColor: axel.config.framework.secondaryColor,
           app: axel.config.app,
           framework: axel.config.framework,
-          adminConfig: _.get(axel, "config.plugins.admin.config", {}),
+          adminConfig: _.get(axel, 'config.plugins.admin.config', {}),
         });
       }
     );
@@ -144,14 +144,14 @@ class AxelAdminPanelManager {
 
   async checkUserMiddleware(req, res, next) {
     if (!req.user) {
-      return res.status(401).json({ code: 401, message: "user_not_set" });
+      return res.status(401).json({ code: 401, message: 'user_not_set' });
     }
     const user = await axel.models[userModelName].em.findOne({
       where: { id: req.user.id, email: req.user.email },
-      attributes: ["id", "email", "firstName", "lastName"],
+      attributes: ['id', 'email', 'firstName', 'lastName'],
     });
     if (!user) {
-      return res.status(404).json({ message: "user_not_found" });
+      return res.status(404).json({ message: 'user_not_found' });
     }
     req.user = user;
     next();
@@ -159,7 +159,7 @@ class AxelAdminPanelManager {
 
   getModelFromUrl(url) {
     // todo remove id
-    const model = Object.values(axel.models).find((m) => m.apiUrl === url);
+    const model = Object.values(axel.models).find(m => m.apiUrl === url);
 
     return model;
   }
@@ -171,18 +171,18 @@ class AxelAdminPanelManager {
    * @memberof AxelAdminPanelManager
    */
   wsPublicRouting(socket) {
-    debug("[ADMIN PANEL] WS client connected", socket.id);
+    debug('[ADMIN PANEL] WS client connected', socket.id);
     const self = this;
-    socket.on("Authorization", (data, cb) => {
+    socket.on('Authorization', (data, cb) => {
       if (!data) {
         if (cb) {
-          return cb("no_authorization_header_found");
+          return cb('no_authorization_header_found');
         }
         return;
       }
       socket.Authorization = data;
       if (!socket.Authorization) {
-        console.warn("socket.Authorization", socket.Authorization);
+        console.warn('socket.Authorization', socket.Authorization);
       }
       AuthService.verify(
         socket.Authorization.token,
@@ -193,17 +193,17 @@ class AxelAdminPanelManager {
             });
 
             if (!user) {
-              return cb("No user found");
+              return cb('No user found');
             }
 
             socket.user = _.pick(user, [
-              "id",
-              "firstName",
-              "lastName",
-              "username",
-              "role",
+              'id',
+              'firstName',
+              'lastName',
+              'username',
+              'role',
             ]);
-            debug("joining", `user:${user.id}`);
+            debug('joining', `user:${user.id}`);
             socket.join(`user:${user.id}`);
             self.wsProtectedRouting(socket);
           }
@@ -216,13 +216,13 @@ class AxelAdminPanelManager {
 
     /** Get models definition */
     socket.on(
-      "/axel-admin/auth/user",
-      (req = { method: "GET", query: {}, body: {} }, cb) => {
-        if (typeof req === "function") {
+      '/axel-admin/auth/user',
+      (req = { method: 'GET', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
           cb = req;
         }
         switch (req.method) {
-          case "GET":
+          case 'GET':
             AuthService.verify(
               req.headers.authorization,
               async (err, decryptedToken) => {
@@ -235,23 +235,23 @@ class AxelAdminPanelManager {
                     decryptedToken.id
                   );
                   if (!user) {
-                    return cb("user_not_found");
+                    return cb('user_not_found');
                   }
                   socket.user = _.pick(user, [
-                    "id",
-                    "firstName",
-                    "lastName",
-                    "username",
-                    "role",
+                    'id',
+                    'firstName',
+                    'lastName',
+                    'username',
+                    'role',
                   ]);
                   req.user = socket.user;
-                  debug("joining", `user:${user.id}`, socket.user);
-                  debug("joining", `user:${user.id}`);
+                  debug('joining', `user:${user.id}`, socket.user);
+                  debug('joining', `user:${user.id}`);
                   socket.join(`user:${user.id}`);
                   self.wsProtectedRouting(socket);
                   cb(null, { user: socket.user });
                   debug(
-                    "[ADMIN PANEL] WS client connected",
+                    '[ADMIN PANEL] WS client connected',
                     socket.id,
                     socket.user.username
                   );
@@ -276,25 +276,25 @@ class AxelAdminPanelManager {
    * @memberof AxelAdminPanelManager
    */
   wsProtectedRouting(socket) {
-    debug("[ADMIN PANEL] WS protected routes", socket.id, socket.user.username);
+    debug('[ADMIN PANEL] WS protected routes', socket.id, socket.user.username);
 
     wsModel(socket);
     wsController(socket);
 
     /** Get models definition */
     socket.onAny(
-      async (eventName, req = { method: "GET", query: {}, body: {} }, cb) => {
-        if (typeof req === "function") {
+      async (eventName, req = { method: 'GET', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
           cb = req;
         }
         const model = Object.values(axel.models).find(
-          (m) => m.apiUrl === eventName
+          m => m.apiUrl === eventName
         );
         if (!model) {
           return;
         }
         switch (req.method) {
-          case "GET":
+          case 'GET':
             try {
               const data = await model.em.findAll({ limit: 10 });
               cb(null, { data: { body: data } });
@@ -309,21 +309,21 @@ class AxelAdminPanelManager {
     );
 
     socket.on(
-      "/admin-panel/restart-app",
-      (req = { method: "GET", query: {}, body: {} }, cb) => {
-        if (typeof req === "function") {
+      '/admin-panel/restart-app',
+      (req = { method: 'GET', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
           cb = req;
         }
         switch (req.method) {
           default:
-          case "POST":
+          case 'POST':
             try {
-              process.kill(process.pid, "SIGUSR2");
+              process.kill(process.pid, 'SIGUSR2');
               cb(null, {
-                body: "ok",
+                body: 'ok',
               });
             } catch (err) {
-              process.kill(process.pid, "SIGTERM");
+              process.kill(process.pid, 'SIGTERM');
               cb(err);
             }
             break;
@@ -333,17 +333,15 @@ class AxelAdminPanelManager {
 
     /** Get models definition */
     socket.on(
-      "/admin-panel/auth",
-      (req = { method: "POST", query: {}, body: {} }, cb) => {
-        if (typeof req === "function") {
+      '/admin-panel/auth',
+      (req = { method: 'POST', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
           cb = req;
         }
         switch (req.method) {
-          case "POST":
+          case 'POST':
             try {
-              AuthService.verify(req.body.token, (err, result) =>
-                cb(err, { body: result })
-              );
+              AuthService.verify(req.body.token, (err, result) => cb(err, { body: result }));
             } catch (err) {
               cb(err.message);
             }
@@ -355,13 +353,13 @@ class AxelAdminPanelManager {
     );
     /** Get models definition */
     socket.on(
-      "/admin-panel/config",
-      (req = { method: "GET", query: {}, body: {} }, cb) => {
-        if (typeof req === "function") {
+      '/admin-panel/config',
+      (req = { method: 'GET', query: {}, body: {} }, cb) => {
+        if (typeof req === 'function') {
           cb = req;
         }
         switch (req.method) {
-          case "GET":
+          case 'GET':
             try {
               cb(null, {
                 body: {
@@ -374,7 +372,7 @@ class AxelAdminPanelManager {
                   app: process.env.app,
                   appName: process.env.appName,
                   framework: axel.config.framework,
-                  adminConfig: _.get(axel, "config.plugins.admin.config"),
+                  adminConfig: _.get(axel, 'config.plugins.admin.config'),
                 },
               });
             } catch (err) {
