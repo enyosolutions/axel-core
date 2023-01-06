@@ -61,7 +61,7 @@ const routes = [
         beforeEnter: authGuard,
         meta: {
           title: 'Dashboard | axel',
-        }
+        },
       },
       {
         path: 'api-list',
@@ -70,7 +70,7 @@ const routes = [
         beforeEnter: authGuard,
         meta: {
           title: 'Api Lists | axel',
-        }
+        },
       },
       {
         path: '404',
@@ -78,7 +78,7 @@ const routes = [
         component: NotFound,
         meta: {
           title: 'NotFOund | axel',
-        }
+        },
       },
       {
         path: 'configurator/:identity',
@@ -88,24 +88,20 @@ const routes = [
         meta: {
           title: 'Default Dashboard | axel',
         },
-        props: () => ({
-        }),
+        props: () => ({}),
         children: [
           {
             name: 'configurator-view',
             path: ':tab',
             component: ModelEditor,
-            meta: {
-            },
-            props: {
-            },
+            meta: {},
+            props: {},
           },
           {
             name: 'configurator-edit',
             path: 'fields/:field',
             component: ModelEditor,
-            meta: {
-            },
+            meta: {},
             props: {
               nestedDisplayMode: 'object',
             },
@@ -120,36 +116,31 @@ const routes = [
         meta: {
           title: 'Default Dashboard | axel',
         },
-        props: () => ({
-        }),
+        props: () => ({}),
         children: [
           {
             name: 'CrudWrapper-view',
             path: ':id',
             component: CrudWrapper,
-            meta: {
-            },
-            props: {
-            },
+            meta: {},
+            props: {},
           },
           {
             name: 'CrudWrapper-edit',
             path: ':id/edit',
             component: CrudWrapper,
-            meta: {
-            },
+            meta: {},
             props: {
               nestedDisplayMode: 'object',
             },
           },
         ],
       },
-
-    ]
+    ],
   },
   {
     path: '*',
-    redirect: { name: 'NotFound' }
+    redirect: { name: 'NotFound' },
   },
 ];
 
@@ -167,15 +158,15 @@ const router = new Router({
   },
   scrollBehavior() {
     return { x: 0, y: 0 };
-  }
+  },
 });
 
 store.subscribeAction((action, state) => {
-  if (action.type === 'logout' && router.currentRoute && ![
-    '/login',
-    '/register',
-  ].includes(router.currentRoute.path)) {
-    console.info('action event', action.type, router.currentRoute.path);
+  if (
+    action.type === 'logout'
+    && router.currentRoute
+    && !['/login', '/register'].includes(router.currentRoute.path)
+  ) {
     router.push('/login');
   }
 });

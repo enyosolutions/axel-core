@@ -8,7 +8,7 @@ class MailService {
   constructor(nodemailer) {
     this.defaultData = {
       title: '',
-      layout: 'email-template'
+      layout: 'email-template',
     };
     if (nodemailer) {
       this.nodemailer = nodemailer;
@@ -46,7 +46,6 @@ class MailService {
     });
   }
 
-
   getTransport() {
     if (this.transport) {
       return this.transport;
@@ -63,11 +62,11 @@ class MailService {
       case 'mailjet':
         // eslint-disable-next-line no-case-declarations, import/no-dynamic-require, global-require
         const transporter = require(`nodemailer-${axel.config.mail.transport}-transport`);
-        transport = nodemailer.createTransport(transporter(
-          {
+        transport = nodemailer.createTransport(
+          transporter({
             ...axel.config.mail.config,
-          }
-        ));
+          })
+        );
         break;
       case 'gmail':
         transport = nodemailer.createTransport({
@@ -77,7 +76,7 @@ class MailService {
           auth: {
             type: 'OAuth2',
             ...axel.config.mail.config,
-          }
+          },
         });
         break;
       case 'smtp':
@@ -96,7 +95,10 @@ class MailService {
   async sendMail(email, subject, body, data = {}, options = {}) {
     debug('sendmail', email, subject);
     if (process.env.AXEL_DISABLE_EMAILS) {
-      axel.logger.log('AXEL_DISABLE_EMAILS: disabled. Email [%s] not sent', subject);
+      axel.logger.log(
+        'AXEL_DISABLE_EMAILS: disabled. Email [%s] not sent',
+        subject
+      );
       return Promise.resolve('emails_are_disabled');
     }
     const transport = this.transport || this.getTransport();
@@ -106,12 +108,15 @@ class MailService {
       from: axel.config.mail.from,
       subject,
       html: body,
-      status: ''
+      status: '',
     };
     mailOptions = _.merge(mailOptions, {});
 
     if (data && data.layout) {
-      mailOptions.html = await axel.renderView(`emails/${data.layout}`, { ...data, body, });
+      mailOptions.html = await axel.renderView(`emails/${data.layout}`, {
+        ...data,
+        body,
+      });
     }
 
     if (this.beforeSend) {
@@ -141,7 +146,6 @@ class MailService {
         reject(err);
       }
     });
-
 
     if (this.beforeSend) {
       await this.beforeSend(mailOptions, result);

@@ -206,8 +206,8 @@ module.exports = {
           });
         }
         if (
-          !data.passwordResetRequestedOn ||
-          dayjs(data.passwordResetRequestedOn).add(10, 'm').isBefore(new Date())
+          !data.passwordResetRequestedOn
+          || dayjs(data.passwordResetRequestedOn).add(10, 'm').isBefore(new Date())
         ) {
           throw new ExtendedError({
             code: 401,
@@ -271,8 +271,8 @@ module.exports = {
         }
         user = u.get();
         if (
-          !user.passwordResetRequestedOn ||
-          dayjs(user.passwordResetRequestedOn).add(20, 'm').isBefore(new Date())
+          !user.passwordResetRequestedOn
+          || dayjs(user.passwordResetRequestedOn).add(20, 'm').isBefore(new Date())
         ) {
           throw new ExtendedError({
             code: 401,
@@ -404,9 +404,9 @@ module.exports = {
 
         // if the user does not have any of the roles needed for the BO
         if (
-          !user.roles ||
-          user.roles.every(
-            (role) => !rolesWithAccessToBackoffice.includes(role)
+          !user.roles
+          || user.roles.every(
+            role => !rolesWithAccessToBackoffice.includes(role)
           )
         ) {
           throw new ExtendedError({
@@ -439,12 +439,10 @@ module.exports = {
         }
         return null;
       })
-      .then(() =>
-        res.status(200).json({
+      .then(() => res.status(200).json({
           user: Utils.sanitizeUser(user),
           token,
-        })
-      )
+        }))
       .catch((errUpdate) => {
         if (errUpdate.message) {
           return res.status(401).json({

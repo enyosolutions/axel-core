@@ -97,13 +97,17 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import { apiErrorsMixin } from 'vue-aw-components';
+import { apiErrorsMixin } from "vue-aw-components";
 
 export default {
-  name: 'Register',
+  name: "Register",
   mixins: [apiErrorsMixin],
   components: {},
-  computed: {},
+  computed: {
+    appConfig() {
+      return this.$store.state.appConfig;
+    },
+  },
   watch: {},
   data() {
     return {
@@ -119,12 +123,18 @@ export default {
       isRequestInProgress: false,
     };
   },
-  mounted() {
+  async mounted() {
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
-    // if we are not in dev then refuse user creation
-    if (this.$store.state.appEnv !== 'development') {
-      this.$router.push('/login');
+    if (!this.appConfig) {
+      await this.$store.dispatch("getEnv");
     }
+    if (!this.appConfig || !this.appConfig.firstUser) {
+      this.$router.push("/login");
+    }
+    // // if we are not in dev then refuse user creation
+    // if (this.$store.state.appEnv !== "development") {
+    //   this.$router.push("/login");
+    // }
   },
 
   methods: {
@@ -132,7 +142,8 @@ export default {
       string = string
         .toLowerCase()
         .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
-          match.charAt(match.length - 1).toUpperCase());
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
 
@@ -140,24 +151,24 @@ export default {
       // this.$notifications.clear();
       if (this.newUser.password !== this.newUser.cPassword) {
         this.$awNotify({
-          title: this.$t('common.messages.password_not_match'),
-          type: 'warning',
+          title: this.$t("common.messages.password_not_match"),
+          type: "warning",
         });
         return;
       }
-      this.$store.dispatch('logout');
+      this.$store.dispatch("logout");
       this.$http
-        .post('/api/axel-admin/auth/register', {
+        .post("/api/axel-admin/auth/register", {
           ...this.newUser,
         })
         .then(async (res) => {
           const { user, token } = res.data;
-          this.$store.commit('currentUser', user);
-          await this.$store.commit('token', token);
-          this.$store.dispatch('refreshListOfValues');
-          this.$store.dispatch('refreshWsUser');
+          this.$store.commit("currentUser", user);
+          await this.$store.commit("token", token);
+          this.$store.dispatch("refreshListOfValues");
+          this.$store.dispatch("refreshWsUser");
           if (user && token) {
-            this.$router.push('/');
+            this.$router.push("/");
           }
         })
         .catch(this.apiErrorCallback);

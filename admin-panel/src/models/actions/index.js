@@ -4,10 +4,17 @@ export const editLayout = {
   class: 'btn-sm',
   title: 'Edit the layout of this model',
   icon: 'fa fa-edit',
-  action: async ({
-    // eslint-disable-next-line
-    item, action, location, props, id,
-  }, context) => {
+  action: async (
+    {
+      // eslint-disable-next-line
+      item,
+      action,
+      location,
+      props,
+      id,
+    },
+    context
+  ) => {
     context.$router.push(`/app/configurator/${context.identity}`);
   },
 };
@@ -29,6 +36,11 @@ export const writeConfigToFs = {
   title: 'Save the config in the schema file',
   icon: 'fa fa-save',
   action: async (args, context) => {
-    context.$socket.put('/admin-panel/admin-models/save', { body: { modelName: context.identity } }).then(console.warn).catch(console.warn);
+    context.$socket
+      .put('/admin-panel/admin-models/save', {
+        body: { modelName: context.identity },
+      })
+      .then(console.warn)
+      .catch(console.warn);
   },
 };

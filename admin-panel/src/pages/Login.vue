@@ -81,18 +81,21 @@
 </template>
 <script>
 // import { mapState } from 'vuex';
-import Swal2 from 'sweetalert2';
-import { has, get } from 'lodash';
-import { apiErrorsMixin } from 'vue-aw-components';
-import PasswordReset from '../components/PasswordReset.vue';
+import Swal2 from "sweetalert2";
+import { has, get } from "lodash";
+import { apiErrorsMixin } from "vue-aw-components";
+import PasswordReset from "../components/PasswordReset.vue";
 
 export default {
-  name: 'Login',
+  name: "Login",
   mixins: [apiErrorsMixin],
   components: { PasswordReset },
   computed: {
     appEnv() {
       return this.$store.state.appEnv;
+    },
+    appConfig() {
+      return this.$store.state.appConfig;
     },
   },
   watch: {},
@@ -104,18 +107,24 @@ export default {
       isRequestInProgress: false,
     };
   },
-  mounted() {
+  async mounted() {
+    if (!this.appConfig) {
+      await this.$store.dispatch("getEnv");
+    }
+    if (this.appConfig && this.appConfig.firstUser) {
+      this.$router.push("/register");
+    }
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
-    document.body.classList.add('bg-dark');
+    document.body.classList.add("bg-dark");
   },
 
   methods: {
     notify(text, type) {
       return Swal2.fire({
         title: text,
-        icon: type || 'info',
+        icon: type || "info",
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 3000,
       });
@@ -124,11 +133,12 @@ export default {
       string = string
         .toLowerCase()
         .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
-          match.charAt(match.length - 1).toUpperCase());
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
     login() {
-      return this.$http.post('/api/axel-admin/auth/login', {
+      return this.$http.post("/api/axel-admin/auth/login", {
         email: this.email,
         password: this.password,
       });
@@ -146,31 +156,31 @@ export default {
 
     async postLogin(res) {
       this.isRequestInProgress = false;
-      if (has(res, 'data.user')) {
-        await this.$store.commit('currentUser', get(res, 'data.user'));
-        await this.$store.commit('token', get(res, 'data.token'));
-        await this.$store.commit('auth', get(res, 'data.token'));
+      if (has(res, "data.user")) {
+        await this.$store.commit("currentUser", get(res, "data.user"));
+        await this.$store.commit("token", get(res, "data.token"));
+        await this.$store.commit("auth", get(res, "data.token"));
         await this.$socket.connect();
-        this.$store.dispatch('refreshWsUser');
-        this.$store.dispatch('refreshListOfValues');
+        this.$store.dispatch("refreshWsUser");
+        this.$store.dispatch("refreshListOfValues");
       }
       if (this.$store.state.currentUser) {
         const { currentUser } = this.$store.state;
-        this.$router.push('/');
+        this.$router.push("/");
         setTimeout(() => {
           this.$awNotify({
-            title: this.$t('common.messages.loginWelcome', {
+            title: this.$t("common.messages.loginWelcome", {
               name: `${currentUser.firstName}
                 ${currentUser.lastName}`,
             }),
-            type: 'success',
+            type: "success",
           });
         }, 250);
         return;
       }
       this.$awNotify({
-        title: this.$t('common.messages.no_access_account'),
-        type: 'warning',
+        title: this.$t("common.messages.no_access_account"),
+        type: "warning",
       });
     },
   },
