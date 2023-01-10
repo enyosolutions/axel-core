@@ -184,6 +184,10 @@ class AxelAdminPanelManager {
         }
         return;
       }
+      if (typeof cb !== 'function') {
+        console.warn('cb is not a function', cb);
+        cb = () => {};
+      }
       socket.Authorization = data;
       if (!socket.Authorization) {
         console.warn('socket.Authorization', socket.Authorization);

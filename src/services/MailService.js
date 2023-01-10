@@ -27,21 +27,26 @@ class MailService {
     });
   }
 
-  sendUserCreated(user) {
+  sendUserCreated({ user }) {
     const data = _.merge({}, this.defaultData);
     data.title = 'Bienvenue';
     data.user = user;
-
+    if (user.activationUrl) {
+      data.activationUrl = user.activationUrl;
+    }
     return axel.renderView('emails/account-created', data).then((html) => {
       this.sendMail(user.email, data.title, html, data);
     });
   }
 
-  sendEmailConfirmation(user) {
+  sendEmailConfirmation({ user, activationUrl }) {
     const data = _.merge({}, this.defaultData);
-    data.title = 'Email address confirmation';
+    data.title = 'Confirmation de votre addresse email';
     data.user = user;
-    return axel.renderView('emails/password-reset', data).then((html) => {
+    if (activationUrl) {
+      data.activationUrl = activationUrl;
+    }
+    return axel.renderView('emails/account-created', data).then((html) => {
       this.sendMail(user.email, data.title, html, data);
     });
   }

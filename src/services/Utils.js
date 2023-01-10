@@ -472,7 +472,7 @@ const Utils = {
               )
               : {
                 [i]: {
-                  [Op.iLike]: `%${search}%`
+                  [Op.like]: `%${search}%`
                 }
               }
           );

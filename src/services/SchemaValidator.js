@@ -148,7 +148,7 @@ class SchemaValidator {
       'field',
       'column',
       'displayInServedSchema',
-      'displayDataInServedSchema',
+      'displayDataInAutomaticApi',
       'sequelizeDefinition',
       'mongooseDefinition',
     ].forEach((keyword) => {

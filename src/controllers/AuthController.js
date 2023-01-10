@@ -229,6 +229,63 @@ module.exports = {
       });
   },
 
+  /**
+   *
+   */
+  confirm(req, res) {
+    const activationToken = req.query.token;
+    const userId = req.params.userId;
+
+    if (!activationToken) {
+      return res.status(404).json({
+        errors: ['missing_argument'],
+        message: 'missing_argument',
+      });
+    }
+    const userModel = axel.models[userModelName];
+    let user;
+    userModel.em
+      .findOne({
+        where: {
+          [primaryKey]: userId,
+          activationToken,
+        },
+        raw: true,
+      })
+      .then((data) => {
+        if (!data) {
+          throw new ExtendedError({
+            code: 401,
+            message: 'invalid_link',
+            errors: ['invalid_link'],
+          });
+        }
+        user = data;
+        data.activationToken = '';
+        data.isActive = true;
+        data.hasConfirmedEmail = true;
+        return userModel.em.update(data, {
+          where: {
+            activationToken,
+          },
+        });
+      })
+      .then(() => {
+        if (req.xhr) {
+          return res.json({
+            success: true,
+          });
+        }
+        res.redirect(`${axel.config.websiteUrl}/admin-panel/`);
+      })
+      .catch((err) => {
+        res.status(err.code ? parseInt(err.code) : 400).json({
+          errors: [err.message || 'global_error'],
+          message: err.message || 'global_error',
+        });
+      });
+  },
+
   reset(req, res, next) {
     const resetToken = req.body.resetToken || req.params.resetToken;
 
@@ -440,9 +497,9 @@ module.exports = {
         return null;
       })
       .then(() => res.status(200).json({
-          user: Utils.sanitizeUser(user),
-          token,
-        }))
+        user: Utils.sanitizeUser(user),
+        token,
+      }))
       .catch((errUpdate) => {
         if (errUpdate.message) {
           return res.status(401).json({

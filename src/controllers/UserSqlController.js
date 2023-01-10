@@ -5,7 +5,6 @@
  * @help        :: See http://links.axel.s.org/docs/controllers
  */
 
-const dayjs = require('dayjs');
 const _ = require('lodash');
 const Utils = require('../services/Utils');
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
@@ -13,22 +12,28 @@ const { ExtendedError, axel } = require('../index');
 const AuthService = require('../services/AuthService');
 // const MailService = require('../services/MailService');
 
-const userModelName = _.get(axel, 'config.plugins.admin.config.userModelName', 'user');
-const rolesWithAccessToBackoffice = _.get(axel, 'config.plugins.admin.config.rolesWithAccessToBackoffice',
-  _.get(axel, 'config.framework.rolesWithAccessToBackoffice', []));
-
+const adminConfig = _.get(axel, 'config.plugins.admin.config', {});
+const userModelName = _.get(adminConfig, 'userModelName', 'user');
+const rolesWithAccessToBackoffice = _.get(
+  adminConfig,
+  'rolesWithAccessToBackoffice',
+  _.get(axel, 'config.framework.rolesWithAccessToBackoffice', ['ADMIN'])
+);
 
 let primaryKey = axel.config.framework.primaryKey;
-
 
 class UserSqlController {
   constructor() {
     this.userModel = axel.models[userModelName];
-    if (this.userModel && this.userModel && this.userModel.em && this.userModel.em.primaryKeyField) {
+    if (
+      this.userModel
+      && this.userModel
+      && this.userModel.em
+      && this.userModel.em.primaryKeyField
+    ) {
       primaryKey = this.userModel.em.primaryKeyField;
     }
   }
-
 
   /**
    * @swagger
@@ -52,19 +57,20 @@ class UserSqlController {
    *         schema:
    *           $ref: '#/definitions/User_ItemResponse'
    */
-  create(req, res) { // eslint-disable-line max-lines-per-function
+  async create(req, res) {
+    // eslint-disable-line max-lines-per-function
     let token;
     if (!req.body.email) {
       return res.status(400).json({
         errors: ['error_missing_email'],
-        message: 'error_missing_email'
+        message: 'error_missing_email',
       });
     }
 
     if (!req.body.password) {
       return res.status(400).json({
         errors: ['error_missing_password'],
-        message: 'error_missing_password'
+        message: 'error_missing_password',
       });
     }
 
@@ -72,7 +78,7 @@ class UserSqlController {
       if (axel.config.framework.user.username) {
         return res.status(400).json({
           errors: ['error_missing_username'],
-          message: 'error_missing_username'
+          message: 'error_missing_username',
         });
       }
       req.body.username = req.body.email;
@@ -81,14 +87,15 @@ class UserSqlController {
     let newUser = req.body;
     newUser.email = newUser.email.toLowerCase();
     newUser.username = newUser.username.toLowerCase();
+    newUser.isActive = true;
     const userModel = this.userModel;
-
+    const existingUsersCount = await userModel.em.count();
     userModel.em
       .findOne({
         where: {
-          email: newUser.email
+          email: newUser.email,
         },
-        raw: true
+        raw: true,
       })
       .then((user) => {
         if (user) {
@@ -96,21 +103,23 @@ class UserSqlController {
             code: 400,
             stack: 'error_conflict_email',
             message: 'error_conflict_email',
-            errors: ['error_conflict_email']
+            errors: ['error_conflict_email'],
           });
         }
         if (!newUser.roles) {
           newUser.roles = JSON.stringify(['USER']);
         }
-        newUser.isActive = true;
-        // newUser.isActive = !axel.config.framework.emailConfirmationRequired && !axel.config.framework.accountManualVerification;
+        if (existingUsersCount === 0) {
+          newUser.isActive = true;
+          newUser.roles = ['USER', ...rolesWithAccessToBackoffice];
+        }
 
         return AuthService.beforeCreate(newUser);
       })
       .then((data) => {
         if (data) {
           return userModel.em.create(newUser, {
-            raw: true
+            raw: true,
           });
         }
         throw new Error('password_encoding_error');
@@ -131,38 +140,54 @@ class UserSqlController {
           token = AuthService.generateToken(newUser);
 
           if (axel.config.framework.user.emailConfirmationRequired) {
-            newUser.activationToken = Utils.md5(`${Date.now() + Math.random() * 1000}`);
+            newUser.activationToken = Utils.md5(
+              `${Date.now() + Math.random() * 1000}`
+            );
             newUser.isActive = false;
           } else {
             newUser.isActive = true;
-          }
-
-          if (newUser.activationToken) {
             delete newUser.activationToken;
           }
 
           return userModel.em.update(newUser, {
             where: {
-              [primaryKey]: newUser[primaryKey]
-            }
+              [primaryKey]: newUser[primaryKey],
+            },
           });
         }
         throw new Error('user_not_created');
       })
-      .then(() => {
-        if (newUser && newUser[primaryKey] && axel.config.framework.user.emailConfirmationRequired) {
+      .then(async () => {
+        if (
+          newUser
+          && newUser[primaryKey]
+          && axel.config.framework.user.emailConfirmationRequired
+        ) {
           if (!axel.services.mailService) {
-            console.warn('[warn] no mailService registered, please inject the mail service into axel.services.mailService = <your mail service> ');
+            console.warn(
+              '[warn] no mailService registered, please inject the mail service ',
+              'into axel.services.mailService = <your mail service> '
+            );
             return false;
           }
-          return axel.services.mailService.sendEmailConfirmation(
-            Object.assign(
+          const activationToken = newUser.activationToken;
+
+          const activationUrl = `${axel.config.apiUrl
+            || axel.config.frontendUrl
+            || axel.config.websiteUrl
+            }/api/axel-admin/auth/confirm/${newUser.id}?token=${activationToken}`;
+          console.warn('activationUrl', activationUrl);
+          return axel.services.mailService.sendEmailConfirmation({
+            user: Object.assign(
               {
-                activationToken: Utils.md5(`${Date.now() + Math.random() * 1000}`)
+                activationToken,
+                activationUrl,
               },
               newUser
-            )
-          );
+            ),
+            activationToken,
+            activationUrl,
+          });
         }
         return true;
       })
@@ -170,13 +195,13 @@ class UserSqlController {
       .then(() => {
         if (newUser[primaryKey]) {
           res.status(200).json({
-            user: newUser,
-            token
+            user: Utils.sanitizeUser(newUser),
+            token,
           });
         } else {
           res.status(503).json({
             errors: ['user_not_saved'],
-            message: 'user_not_saved'
+            message: 'user_not_saved',
           });
         }
         return null;
@@ -187,25 +212,24 @@ class UserSqlController {
       });
   }
 
-
   findAll(req, resp) {
     const { listOfValues, startPage, limit } = Utils.injectPaginationQuery(req);
 
     const options = {
       limit,
-      skip: startPage * limit
+      skip: startPage * limit,
     };
 
     let query = Utils.injectQueryParams(req);
 
     if (req.query.search) {
       query = Utils.injectSqlSearchParams(req.query.search, query, {
-        modelName: 'user'
+        modelName: 'user',
       });
     }
     if (req.query.roles) {
       query.roles = {
-        [axel.sqldb.Op.like]: axel.sqldb.literal(`'%"${req.query.roles}"%'`)
+        [axel.sqldb.Op.like]: axel.sqldb.literal(`'%"${req.query.roles}"%'`),
       };
     }
     query = Utils.cleanSqlQuery(query);
@@ -231,41 +255,48 @@ class UserSqlController {
           if (listOfValues) {
             data = data.map(item => ({
               [primaryKey]: item[primaryKey].toString(),
-              label: Utils.formatName(item.firstname, item.lastname, item.username, true)
+              label: Utils.formatName(
+                item.firstname,
+                item.lastname,
+                item.username,
+                true
+              ),
             }));
           }
           return resp.status(200).json({
             body: data,
             page: startPage,
             count: limit,
-            totalCount: result.count
+            totalCount: result.count,
           });
         }
         return resp.status(200).json({
-          body: []
+          body: [],
         });
       })
       .catch((err) => {
         resp.status(500).json({
           errors: [err.message],
-          message: err.message
+          message: err.message,
         });
       });
   }
 
   findOne(req, resp) {
     const id = req.params.userId;
-    const listOfValues = req.query.listOfValues ? req.query.listOfValues : false;
+    const listOfValues = req.query.listOfValues
+      ? req.query.listOfValues
+      : false;
     const userModel = this.userModel;
     userModel.em
       .findByPk({
-        [primaryKey]: id
+        [primaryKey]: id,
       })
       .then((doc) => {
         if (!doc) {
           return resp.status(404).json({
             message: 'not_found',
-            errors: ['not_found']
+            errors: ['not_found'],
           });
         }
         doc = doc.get();
@@ -281,21 +312,26 @@ class UserSqlController {
           return resp.status(200).json({
             body: {
               [primaryKey]: doc[primaryKey].toString(),
-              label: Utils.formatName(doc.firstName, doc.lastName, doc.username, true)
-            }
+              label: Utils.formatName(
+                doc.firstName,
+                doc.lastName,
+                doc.username,
+                true
+              ),
+            },
           });
         }
 
         delete doc.password;
         delete doc.encryptedPassword;
         return resp.status(200).json({
-          body: Utils.sanitizeUser(doc)
+          body: Utils.sanitizeUser(doc),
         });
       })
       .catch((err) => {
         resp.status(500).json({
           errors: [err],
-          message: err.message
+          message: err.message,
         });
       });
   }
@@ -306,22 +342,26 @@ class UserSqlController {
     if (!username && !email) {
       return resp.status(400).json({
         errors: ['missing_argument'],
-        message: 'missing_argument'
+        message: 'missing_argument',
       });
     }
 
     const userModel = this.userModel;
 
     userModel.em
-      .findOne(username ? { where: { username: `${username}` } } : { where: { email: `${email}` } })
+      .findOne(
+        username
+          ? { where: { username: `${username}` } }
+          : { where: { email: `${email}` } }
+      )
       .then((doc) => {
         if (doc) {
           return resp.status(200).json({
-            body: true
+            body: true,
           });
         }
         return resp.status(200).json({
-          body: false
+          body: false,
         });
       })
       .catch((err) => {
@@ -339,7 +379,7 @@ class UserSqlController {
       if (axel.config.framework.user.email) {
         return res.status(404).json({
           errors: ['error_missing_email'],
-          message: 'error_missing_email'
+          message: 'error_missing_email',
         });
       }
     }
@@ -348,7 +388,7 @@ class UserSqlController {
       if (axel.config.framework.user.username) {
         return res.status(404).json({
           errors: ['error_missing_username'],
-          message: 'error_missing_username'
+          message: 'error_missing_username',
         });
       }
       req.body.username = req.body.email;
@@ -365,7 +405,7 @@ class UserSqlController {
             code: 404,
             stack: 'not_found',
             message: 'not_found',
-            errors: ['not_found']
+            errors: ['not_found'],
           });
         }
 
@@ -384,7 +424,11 @@ class UserSqlController {
         if (!(req.user && AuthService.hasRole(req.user, 'ADMIN'))) {
           delete newUser.roles;
         }
-        if (user.roles.indexOf('DEVELOPER') > -1 && newUser.roles && newUser.roles.indexOf('DEVELOPER') === -1) {
+        if (
+          user.roles.indexOf('DEVELOPER') > -1
+          && newUser.roles
+          && newUser.roles.indexOf('DEVELOPER') === -1
+        ) {
           newUser.roles.push('DEVELOPER');
         }
 
@@ -400,8 +444,8 @@ class UserSqlController {
         if (data) {
           return userModel.em.update(data, {
             where: {
-              [primaryKey]: id
-            }
+              [primaryKey]: id,
+            },
           });
         }
         return null;
@@ -423,7 +467,7 @@ class UserSqlController {
         delete userModel.encryptedPassword;
         userData = userData.toJSON ? userData.toJSON() : userData;
         res.json({
-          user: userData
+          user: Utils.sanitizeUser(userData),
         });
         return null;
       })
@@ -447,15 +491,17 @@ class UserSqlController {
           throw new ExtendedError({
             code: 404,
             message: `User with id ${id} wasn't found`,
-            errors: [`User with id ${id} wasn't found`]
+            errors: [`User with id ${id} wasn't found`],
           });
         }
 
-        const deletedSuffix = `deleted-${Date.now()}-${Math.floor(Math.random() * 100000 + 1)}`;
+        const deletedSuffix = `deleted-${Date.now()}-${Math.floor(
+          Math.random() * 100000 + 1
+        )}`;
         return collection.destroy({
           where: {
-            [primaryKey]: user[primaryKey]
-          }
+            [primaryKey]: user[primaryKey],
+          },
         });
         /*
         // this section is in case of soft deletion
@@ -478,7 +524,7 @@ class UserSqlController {
           */
       })
       .then(() => resp.status(200).json({
-        body: true
+        body: true,
       }))
       .catch((err) => {
         ErrorUtils.errorCallback(err, resp);
