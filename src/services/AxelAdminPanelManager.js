@@ -185,12 +185,14 @@ class AxelAdminPanelManager {
         return;
       }
       if (typeof cb !== 'function') {
-        console.warn('cb is not a function', cb);
-        cb = () => {};
+        console.warn('cb is not a function', typeof cb);
+        cb = () => { };
+        return;
       }
       socket.Authorization = data;
       if (!socket.Authorization) {
-        console.warn('socket.Authorization', socket.Authorization);
+        console.warn('Missing socket.Authorization', socket.Authorization);
+        return cb && cb('Missing socket.Authorization');
       }
       AuthService.verify(
         socket.Authorization.token,
@@ -198,6 +200,7 @@ class AxelAdminPanelManager {
           if (!err) {
             const user = await axel.models[userModelName].em.findOne({
               where: { id: decryptedToken.id, email: decryptedToken.email },
+              raw: true
             });
 
             if (!user) {

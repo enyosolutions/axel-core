@@ -17,7 +17,7 @@
         />
       </div>
       <div class="sidebar-brand-text mx-3">
-        {{ appConfig ? appConfig.appName || appConfig.app : 'Admin panel' }}
+        {{ appConfig ? appConfig.appName || appConfig.app : "Admin panel" }}
       </div>
     </router-link>
 
@@ -62,10 +62,7 @@
       >
         <div class="bg-white py-2 collapse-inner show rounded">
           <div class="">
-            <router-link
-              class="nav-link p-v-0 text-primary"
-              to="/app/dashboard"
-            >
+            <router-link class="nav-link p-v-0 text-primary" to="/app/api-list">
               Manage db models and api</router-link
             >
           </div>
@@ -253,21 +250,21 @@
   <!-- End of Sidebar -->
 </template>
 <script>
-import { mapGetters, mapState } from 'vuex';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import Swal2 from 'sweetalert2';
-import { startCase } from 'lodash';
+import { mapGetters, mapState } from "vuex";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import Swal2 from "sweetalert2";
+import { startCase } from "lodash";
 
-import config from '@/config';
+import config from "@/config";
 
 dayjs.extend(relativeTime);
 
 export default {
-  name: 'Sidebar',
+  name: "Sidebar",
   data() {
     return {
-      terms: '',
+      terms: "",
       searchOpen: false,
       searchResult: false,
       close_sidebar_var: false,
@@ -278,7 +275,7 @@ export default {
       openLevelmenu: false,
       openlanguage: false,
       mobile_accordian: false,
-      mixLayout: 'light-only',
+      mixLayout: "light-only",
       apiSearchResults: {},
       notifications: [],
       config,
@@ -288,7 +285,7 @@ export default {
         api: false,
         models: true,
       },
-      modelFilterInput: '',
+      modelFilterInput: "",
     };
   },
   components: {},
@@ -305,8 +302,8 @@ export default {
     */
   },
   computed: {
-    ...mapState(['appConfig', 'appEnv']),
-    ...mapGetters(['isProduction', 'viewableModels']),
+    ...mapState(["appConfig", "appEnv"]),
+    ...mapGetters(["isProduction", "viewableModels"]),
     searchResultIsEmpty() {
       return (
         !this.menuItems.length &&
@@ -336,20 +333,20 @@ export default {
         this.openedSubmenus[value] = false;
       });
       if (
-        document.querySelector('body').classList.contains('sidebar-toggled')
+        document.querySelector("body").classList.contains("sidebar-toggled")
       ) {
-        document.querySelector('body').classList.remove('sidebar-toggled');
-        document.querySelector('.sidebar').classList.remove('toggled');
+        document.querySelector("body").classList.remove("sidebar-toggled");
+        document.querySelector(".sidebar").classList.remove("toggled");
       } else {
-        document.querySelector('body').classList.add('sidebar-toggled');
-        document.querySelector('.sidebar').classList.add('toggled');
+        document.querySelector("body").classList.add("sidebar-toggled");
+        document.querySelector(".sidebar").classList.add("toggled");
       }
     },
     searchTerm() {
-      this.$store.dispatch('menu/searchTerm', this.terms);
-      ['client', 'request'].map((type) =>
+      this.$store.dispatch("menu/searchTerm", this.terms);
+      ["client", "request"].map((type) =>
         this.$store
-          .dispatch('menu/searchItems', {
+          .dispatch("menu/searchItems", {
             query: `${this.terms}*`,
             type,
             perPage: 8,
@@ -360,8 +357,8 @@ export default {
       );
     },
     logout() {
-      this.$store.dispatch('logout');
-      this.$router.push('/login');
+      this.$store.dispatch("logout");
+      this.$router.push("/login");
     },
 
     getNotifications() {
@@ -371,7 +368,7 @@ export default {
         }
 
         this.$socket
-          .get('/api/notifications', {
+          .get("/api/notifications", {
             body: { organisationId: this.organisation && this.organisation.id },
           })
           .then((notifs) => {
@@ -382,59 +379,59 @@ export default {
 
     async resetModelsAdminConfig() {
       this.$awConfirm(
-        'are you sure ?  this will delete all your existing modifications'
+        "are you sure ?  this will delete all your existing modifications"
       ).then((confirmed) => {
         if (confirmed) {
           this.$socket
-            .post('/admin-panel/reset-models-config', {
+            .post("/admin-panel/reset-models-config", {
               body: { ...this.newApi },
             })
             .then(() => {
-              this.$store.dispatch('getModels');
+              this.$store.dispatch("getModels");
               return Swal2.fire({
-                title: 'Models successfully resetted',
-                icon: 'success',
+                title: "Models successfully resetted",
+                icon: "success",
                 toast: true,
               });
             })
-            .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
+            .catch((err) => Swal2.fire({ title: err.message, icon: "error" }));
         }
       });
     },
 
     async saveModelsToFile() {
       this.$awConfirm(
-        'are you sure ? this will write all your existing modifications'
+        "are you sure ? this will write all your existing modifications"
       ).then(() => {
         this.$socket
-          .put('/admin-panel/admin-models/save-all', {
+          .put("/admin-panel/admin-models/save-all", {
             body: { ...this.newApi },
           })
           .then(() => {
-            this.$store.dispatch('getModels');
+            this.$store.dispatch("getModels");
             return Swal2.fire({
-              title: 'Models successfully saved',
-              icon: 'success',
+              title: "Models successfully saved",
+              icon: "success",
               toast: true,
             });
           })
-          .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
+          .catch((err) => Swal2.fire({ title: err.message, icon: "error" }));
       });
     },
 
     getModels() {
-      this.$store.dispatch('getModels');
+      this.$store.dispatch("getModels");
     },
     toggleSubmenu(menu) {
       this.openedSubmenus[menu] = !this.openedSubmenus[menu];
     },
     restart() {
-      this.$socket.post('/admin-panel/restart-app', {});
+      this.$socket.post("/admin-panel/restart-app", {});
     },
   },
   watch: {
     // eslint-disable-next-line
-    '$i18n.locale': function (to, from) {
+    "$i18n.locale": function (to, from) {
       if (from !== to) {
         this.$router.go(this.$route.path);
       }

@@ -551,6 +551,7 @@ module.exports = {
     routerPath: 'axel-model-field-config',
     name: 'Field config',
     namePlural: 'Fields configs',
+    menuIsVisible: false,
     listOptions: {
       titleField: '{{ currentItem.title || currentItem.name }}',
       subtitleField: 'field.type',

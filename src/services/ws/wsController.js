@@ -1,5 +1,6 @@
 /* eslint-disable max-lines-per-function */
 const debug = require('debug')('axel:manager');
+const stringify = require('json-stringify-safe');
 const {
   generateController,
   generateModel,
@@ -54,7 +55,7 @@ module.exports = (socket) => {
     switch (req.method) {
       case 'GET':
       default:
-        cb(null, { body: axel.controllers });
+        cb(null, { body: Object.keys(axel.controllers) });
         break;
       case 'POST':
         const { name, type, force } = req.body;

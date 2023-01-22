@@ -64,10 +64,7 @@ export default new Vuex.Store({
       return state.appConfig && state.appConfig.NODE_ENV === 'production';
     },
     useApiEndpoints(state) {
-      return (
-        state.appConfig
-        && state.appConfig.adminConfig
-        && state.appConfig.adminConfig.useApiEndpoints
+      return (state?.appConfig?.adminConfig?.useApiEndpoints
       );
     },
     /**
@@ -79,8 +76,10 @@ export default new Vuex.Store({
       return state.models
         ? state.models.filter(
           (m) =>
-            m.menuIsVisible
-            && (m.identity === 'axelModel' || !m.identity.startsWith('axel'))
+          (state.appConfig?.adminConfig?.showAllModels
+            ? m.menuIsVisible !== false
+            : (m.menuIsVisible
+              && (m.identity === 'axelModel' || !m.identity.startsWith('axel')))) // show axelModel and all models that are not axel* and have menuIsVisible set to true or undefined
         )
         : [];
     },
@@ -175,13 +174,13 @@ export default new Vuex.Store({
           }
           if (err.response) {
             switch (err.response.status) {
-            case 404:
-            case 401:
-            case 500:
-              dispatch('logout');
-              break;
-            default:
-              break;
+              case 404:
+              case 401:
+              case 500:
+                dispatch('logout');
+                break;
+              default:
+                break;
             }
           }
           throw err;
@@ -213,12 +212,12 @@ export default new Vuex.Store({
           }
           if (err.response) {
             switch (err.response.status) {
-            case 404:
-            case 401:
-              dispatch('logout');
-              break;
-            default:
-              break;
+              case 404:
+              case 401:
+                dispatch('logout');
+                break;
+              default:
+                break;
             }
           }
           throw err;

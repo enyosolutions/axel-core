@@ -2,7 +2,7 @@
   <div>
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-1">
-      <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+      <h1 class="h3 mb-0 text-gray-800">Api manager</h1>
       <a
         v-if="!isProduction"
         href="#"
@@ -25,7 +25,14 @@
       >
         <div class="card shadow mb-4">
           <div
-            class="card-header py-2 d-flex flex-row align-items-center justify-content-between"
+            class="
+              card-header
+              py-2
+              d-flex
+              flex-row
+              align-items-center
+              justify-content-between
+            "
           >
             <h6 class="m-0 font-weight-bold text-primary">
               {{ model.menuTitle || model.title || model.identity }}
@@ -47,7 +54,14 @@
       <div class="col-4 col-xs-12" v-if="!isProduction">
         <div class="card shadow mb-4">
           <div
-            class="card-header py-2 d-flex flex-row align-items-center justify-content-between"
+            class="
+              card-header
+              py-2
+              d-flex
+              flex-row
+              align-items-center
+              justify-content-between
+            "
           >
             <h6 class="m-0 font-weight-bold text-primary">
               Models
@@ -145,13 +159,18 @@
       <div class="col-4 col-xs-12" v-if="!isProduction">
         <div class="card shadow mb-4">
           <div
-            class="card-header py-2 d-flex flex-row align-items-center justify-content-between"
+            class="
+              card-header
+              py-2
+              d-flex
+              flex-row
+              align-items-center
+              justify-content-between
+            "
           >
             <h6 class="m-0 font-weight-bold text-primary">
               Controllers
-              <span class="badge badge-primary">{{
-                Object.keys(controllers).length
-              }}</span>
+              <span class="badge badge-primary">{{ controllers.length }}</span>
             </h6>
             <div class="btn-group float-right">
               <button class="btn btn-link mr-2" @click="listControllers()">
@@ -169,7 +188,7 @@
               </thead>
 
               <tbody>
-                <tr v-for="(controller, id) in controllers" :key="id">
+                <tr v-for="id in controllers" :key="id">
                   <td>{{ id }}</td>
                 </tr>
               </tbody>
@@ -181,12 +200,19 @@
       <div class="col-4" v-if="!isProduction">
         <div class="card shadow mb-4">
           <div
-            class="card-header py-2 d-flex flex-row align-items-center justify-content-between"
+            class="
+              card-header
+              py-2
+              d-flex
+              flex-row
+              align-items-center
+              justify-content-between
+            "
           >
             <h6 class="m-0 font-weight-bold text-primary">
               Routes
               <span class="badge badge-primary">{{
-                Object.keys(controllers).length
+                Object.keys(routes).length
               }}</span>
             </h6>
             <div class="float-right">
@@ -214,24 +240,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row" v-if="!isProduction">
-      <!-- Content Row -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card shadow mb-4">
-            <div
-              class="card-header py-2 d-flex flex-row align-items-center justify-content-between"
-            >
-              <h6 class="m-0 font-weight-bold text-primary">Raw</h6>
-            </div>
-            <div class="card-body">
-              <pre id="jstree"></pre>
-            </div>
           </div>
         </div>
       </div>
@@ -468,16 +476,16 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
-import Swal2 from 'sweetalert2';
-import { openModal, closeModal } from '@/services/modal';
+import { mapGetters } from "vuex";
+import Swal2 from "sweetalert2";
+import { openModal, closeModal } from "@/services/modal";
 
 /* eslint-disable func-names */
 export default {
-  name: 'ApiList',
+  name: "ApiList",
   components: {},
   computed: {
-    ...mapGetters(['isProduction', 'viewableModels']),
+    ...mapGetters(["isProduction", "viewableModels"]),
     isConnected() {
       return this.$socket && this.$socket.connected;
     },
@@ -490,38 +498,38 @@ export default {
     },
   },
   watch: {
-    '$socket.connected': function (newVal) {
+    "$socket.connected": function (newVal) {
       // eslint-disable-line
       // eslint-disable-line func-names
       if (newVal) {
         this.refreshLists();
       }
     },
-    '$store.state.currentUser': function () {
+    "$store.state.currentUser": function () {
       this.refreshLists();
     },
   },
   data() {
     return {
-      message: 'Hello Vue !',
+      message: "Hello Vue !",
       controllers: [],
       models: [],
       routes: null,
       blockingModal: null,
       newApi: {
-        name: '',
+        name: "",
         type: null,
         withSchema: true,
         fields: [],
       },
       newApiTemplate: {
-        name: '',
+        name: "",
         type: null,
         withSchema: true,
         fields: [{}],
       },
-      fieldTypes: ['string', 'text', 'integer', 'boolean', 'date', 'datetime'],
-      modelEditModalMode: 'api', // api | model || add-field
+      fieldTypes: ["string", "text", "integer", "boolean", "date", "datetime"],
+      modelEditModalMode: "api", // api | model || add-field
       socket: this.$socket,
       syncNewFields: false,
     };
@@ -530,11 +538,11 @@ export default {
     if (this.$socket.connected) {
       this.refreshLists();
     }
-    this.$socket.on('connect', () => {
+    this.$socket.on("connect", () => {
       this.refreshLists();
     });
 
-    this.$socket.on('disconnect', () => {});
+    this.$socket.on("disconnect", () => {});
 
     //    $.fn.modal.Constructor.prototype._enforceFocus = function() {};
   },
@@ -545,9 +553,9 @@ export default {
     appNotify(text, type) {
       return Swal2.fire({
         title: text,
-        icon: type || 'info',
+        icon: type || "info",
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 3000,
       });
@@ -559,29 +567,29 @@ export default {
     },
 
     addField() {
-      this.newApi.fields.push({ type: 'string' });
+      this.newApi.fields.push({ type: "string" });
     },
 
     importFields() {
       Swal2.fire({
-        title: 'Copy paste the list of fields',
-        input: 'textarea',
+        title: "Copy paste the list of fields",
+        input: "textarea",
       }).then((result) => {
         if (result.value) {
           let fields = result.value
-            .split('\n')
+            .split("\n")
             .map((f) => f.trim())
             .filter((f) => f);
           if (fields.length === 1) {
-            fields = fields[0].split(',').map((f) => f.trim());
+            fields = fields[0].split(",").map((f) => f.trim());
           }
           fields.forEach((fieldName) => {
-            if (fieldName.includes(' ')) {
+            if (fieldName.includes(" ")) {
               fieldName = this.toCamelCase(fieldName);
             }
             this.newApi.fields.push({
               name: fieldName,
-              type: 'string',
+              type: "string",
             });
           });
         }
@@ -593,7 +601,7 @@ export default {
     },
 
     async listControllers() {
-      this.$socket.emit('/admin-panel/controllers', (err, data) => {
+      this.$socket.emit("/admin-panel/controllers", (err, data) => {
         if (err) {
           console.warn(err.message);
           return;
@@ -605,14 +613,14 @@ export default {
     async listModels() {
       this.models = [];
       this.$socket
-        .get('/admin-panel/models', {
+        .get("/admin-panel/models", {
           body: { full: true },
           query: { full: true },
         })
         .then((data) => {
-          this.models
-            = data.body
-            && data.body.models.filter((model) => !model.name.startsWith('axel'));
+          this.models =
+            data.body &&
+            data.body.models.filter((model) => !model.name.startsWith("axel"));
           this.tables = data.body && data.body.tables;
         })
         .catch((err) => {
@@ -623,7 +631,7 @@ export default {
     async listRoutes() {
       this.routes = [];
       this.$socket
-        .get('/admin-panel/routes')
+        .get("/admin-panel/routes")
         .then((data) => {
           this.routes = data.body;
         })
@@ -635,18 +643,18 @@ export default {
     async syncModel(modelName, options = { alter: true }) {
       const { force, alter } = options;
       this.$socket.emit(
-        '/admin-panel/models/sync',
-        { method: 'POST', body: { id: modelName, force, alter } },
+        "/admin-panel/models/sync",
+        { method: "POST", body: { id: modelName, force, alter } },
         (err) => {
           if (err) {
             console.warn(err);
             this.$awNotify(
               `Error while updating Model ${modelName} [${err.message || err}]`,
-              'error'
+              "error"
             );
             return;
           }
-          this.$awNotify(`Model ${modelName} was updated`, 'success');
+          this.$awNotify(`Model ${modelName} was updated`, "success");
           this.listModels();
         }
       );
@@ -654,7 +662,7 @@ export default {
 
     async createController() {
       const values = await Swal2.fire({
-        title: 'Create a new controller',
+        title: "Create a new controller",
         html: `
                  <input id="swal-name" class="swal2-input" placeholder="Name">
                  <select id="swal-type" class="swal2-input" placeholder="type">
@@ -672,25 +680,25 @@ export default {
         reverseButtons: true,
         preConfirm: () => {
           let vals = [
-            document.getElementById('swal-name').value,
-            document.getElementById('swal-type').value,
-            document.getElementById('swal-force').value === 'true',
+            document.getElementById("swal-name").value,
+            document.getElementById("swal-type").value,
+            document.getElementById("swal-force").value === "true",
           ];
           vals = vals.filter((v) => v);
           if (vals.length < 3) {
             return Swal2.fire({
-              title: 'Please fill in all the data',
-              icon: 'error',
+              title: "Please fill in all the data",
+              icon: "error",
             });
           }
-          if (vals[2] === 'true') {
+          if (vals[2] === "true") {
             vals[2] = true;
           }
           return vals;
         },
       });
       this.$socket
-        .post('/admin-panel/controllers', {
+        .post("/admin-panel/controllers", {
           body: {
             name: values.value[0],
             type: values.value[1],
@@ -699,15 +707,16 @@ export default {
         })
         .then(() =>
           Swal2.fire({
-            title: 'Controller successfully created',
-            icon: 'success',
-          }))
-        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
+            title: "Controller successfully created",
+            icon: "success",
+          })
+        )
+        .catch((err) => Swal2.fire({ title: err.message, icon: "error" }));
     },
 
     async createRoute() {
       const values = await Swal2.fire({
-        title: 'Create a new route',
+        title: "Create a new route",
         html: `
                  <input id="swal-name" class="swal2-input" placeholder="Name">
                 `,
@@ -715,53 +724,54 @@ export default {
         showCancelButton: true,
         reverseButtons: true,
         preConfirm: () => {
-          let vals = [document.getElementById('swal-name').value];
+          let vals = [document.getElementById("swal-name").value];
           vals = vals.filter((v) => v);
           if (vals.length < 1) {
             return Swal2.fire({
-              title: 'Please fill in all the data',
-              icon: 'error',
+              title: "Please fill in all the data",
+              icon: "error",
             });
           }
-          if (vals[2] === 'true') {
+          if (vals[2] === "true") {
             vals[2] = true;
           }
           return vals;
         },
       });
       this.$socket
-        .post('/admin-panel/routes', { body: { name: values.value[0] } })
+        .post("/admin-panel/routes", { body: { name: values.value[0] } })
         .then(() =>
           Swal2.fire({
-            title: 'Route successfully created',
-            icon: 'success',
+            title: "Route successfully created",
+            icon: "success",
             toast: true,
-          }))
-        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
+          })
+        )
+        .catch((err) => Swal2.fire({ title: err.message, icon: "error" }));
     },
 
     validateCreateModelForm(options = {}) {
       const { context } = options || {};
       this.newApi.fields = this.newApi.fields.filter((f) => f.name);
       if (!this.newApi.name) {
-        Swal2.fire({ title: 'Missing api name' });
+        Swal2.fire({ title: "Missing api name" });
         return false;
       }
       if (!this.newApi.type) {
-        Swal2.fire({ title: '⚠️ Missing api type' });
+        Swal2.fire({ title: "⚠️ Missing api type" });
         return false;
       }
       if (!this.newApi.fields.length) {
         Swal2.fire({
-          title: '⚠️ Missing api fields',
-          type: 'error',
+          title: "⚠️ Missing api fields",
+          type: "error",
         });
         return false;
       }
-      if (context && context === 'create') {
+      if (context && context === "create") {
         if (!this.newApi.fields.filter((f) => f.primaryKey).length) {
           Swal2.fire({
-            title: 'You need to define at least one primary key field',
+            title: "You need to define at least one primary key field",
           });
           return false;
         }
@@ -770,38 +780,39 @@ export default {
     },
 
     async createApi() {
-      if (!this.validateCreateModelForm({ context: 'create' })) {
+      if (!this.validateCreateModelForm({ context: "create" })) {
         return;
       }
       this.$socket
-        .post('/admin-panel/api', { body: { ...this.newApi } })
+        .post("/admin-panel/api", { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
           return Swal2.fire({
-            title: 'Api successfully created',
-            icon: 'success',
+            title: "Api successfully created",
+            icon: "success",
             toast: true,
           });
         })
-        .catch((err) => Swal2.fire({ title: err.message, icon: 'error' }));
+        .catch((err) => Swal2.fire({ title: err.message, icon: "error" }));
     },
 
     async createModel() {
-      if (!this.validateCreateModelForm({ context: 'create' })) {
+      if (!this.validateCreateModelForm({ context: "create" })) {
         return;
       }
       this.$socket
-        .post('/admin-panel/models', { body: { ...this.newApi } })
+        .post("/admin-panel/models", { body: { ...this.newApi } })
         .then(() => {
           this.resetApiForm();
           return Swal2.fire({
-            title: 'MOdel successfully created',
-            icon: 'success',
+            title: "MOdel successfully created",
+            icon: "success",
             toast: true,
           });
         })
         .catch((err) =>
-          Swal2.fire({ title: err.message || err, icon: 'error' }));
+          Swal2.fire({ title: err.message || err, icon: "error" })
+        );
     },
     /**
      * Delete model file
@@ -811,17 +822,18 @@ export default {
         return;
       }
       this.$socket
-        .delete('/admin-panel/models', { body: { name } })
+        .delete("/admin-panel/models", { body: { name } })
         .then(() => {
           this.refreshLists();
           Swal2.fire({
-            title: 'MOdel successfully deleted',
-            icon: 'success',
+            title: "MOdel successfully deleted",
+            icon: "success",
             toast: true,
           });
         })
         .catch((err) =>
-          Swal2.fire({ title: err.message || err, icon: 'error' }));
+          Swal2.fire({ title: err.message || err, icon: "error" })
+        );
     },
 
     async addFieldsToModel() {
@@ -829,7 +841,7 @@ export default {
         return;
       }
       this.$socket
-        .post('/admin-panel/models/add-fields', {
+        .post("/admin-panel/models/add-fields", {
           body: {
             ...this.newApi,
             model: this.newApi.name,
@@ -838,17 +850,17 @@ export default {
           },
         })
         .then(() => {
-          closeModal('newApiModal');
+          closeModal("newApiModal");
           return Swal2.fire({
-            title: 'Model successfully created',
-            icon: 'success',
+            title: "Model successfully created",
+            icon: "success",
             toast: true,
           });
         })
         .catch((err) => {
-          console.warn('err', err);
+          console.warn("err", err);
 
-          return Swal2.fire({ title: err.message || err, icon: 'error' });
+          return Swal2.fire({ title: err.message || err, icon: "error" });
         });
     },
 
@@ -861,7 +873,8 @@ export default {
       string = string
         .toLowerCase()
         .replace(/(?:(^.)|([-_\s]+.))/g, (match) =>
-          match.charAt(match.length - 1).toUpperCase());
+          match.charAt(match.length - 1).toUpperCase()
+        );
       return string.charAt(0).toLowerCase() + string.substring(1);
     },
   },

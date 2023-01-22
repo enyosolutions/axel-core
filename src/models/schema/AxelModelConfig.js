@@ -552,6 +552,7 @@ module.exports = {
     pageTitle: '',
     routerPath: 'axel-model-config',
     primaryKey: 'identity',
+    menuIsVisible: false,
     options: {
       initialDisplayMode: 'table',
       columnsDisplayed: 5,
