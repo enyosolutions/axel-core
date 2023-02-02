@@ -106,22 +106,26 @@ module.exports = {
       // @deprecated
       pageTitle: {
         type: 'string',
-        title: 'Custom title for page'
+        title: 'Custom title for page',
+        nullable: true,
       },
       tabTitle: {
         type: 'string',
         title: 'Title to use in tabs',
-        description: 'Title to use when displayed in a nested tab'
+        description: 'Title to use when displayed in a nested tab',
+        nullable: true,
       },
       menuTitle: {
         type: 'string',
         title: 'Title to use in menus',
-        description: 'Title to use when displayed in a menu'
+        description: 'Title to use when displayed in a menu',
+        nullable: true,
       },
       tabIsVisible: {
         type: ['string', 'boolean'],
         title: 'Display condition for this model when displayed in a tab',
         description: 'Templated rules for displaying this field',
+        nullable: true,
         field: {
           type: 'BooleanExpressionEditor'
         }
@@ -130,6 +134,7 @@ module.exports = {
         type: ['string', 'boolean'],
         title: 'Display condition for this model when displayed in a menu',
         description: 'Templated rules for displaying this field',
+        nullable: true,
         field: {
           type: 'BooleanExpressionEditor'
         }
@@ -150,7 +155,7 @@ module.exports = {
       detailPageMode: {
         type: 'string',
         default: 'sidebar',
-        enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform', 'bottomform']
+        enum: ['modal', 'fullscreen', 'sidebar', 'page', 'sideform', 'bottomform'],
       }, // fade | slide | full
       nestedLayoutMode: {
         type: 'string',

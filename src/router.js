@@ -188,9 +188,8 @@ function connectRoute(app, source, _target) {
   } else {
     target = _target;
     if (target.controller) {
-      target.controller = `${target.controller}${
-        _.endsWith(target.controller, 'Controller') ? '' : 'Controller'
-      }`;
+      target.controller = `${target.controller}${_.endsWith(target.controller, 'Controller') ? '' : 'Controller'
+        }`;
     }
   }
   if (sourceArray.length === 2) {
@@ -225,8 +224,8 @@ function connectRoute(app, source, _target) {
       routePolicies,
       wrapRoute(
         (req, res) => res.render(target.view, {
-            axel,
-          }),
+          axel,
+        }),
         target
       )
     );
@@ -234,10 +233,10 @@ function connectRoute(app, source, _target) {
   }
   // Replace aliased routes
   const controllerRoute = target.controller && target.controller[0] === '@'
-      ? `${__dirname}${target.controller
-          .replace('@axel', '')
-          .replace('@app', '..')}.js`
-      : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
+    ? `${__dirname}${target.controller
+      .replace('@axel', '')
+      .replace('@app', '..')}.js`
+    : `${process.cwd()}/src/api/controllers/${target.controller}.js`;
   axel.logger.trace('[ROUTING] connecting route', route, verb.toUpperCase(), {
     ...target,
     controllerRoute,
@@ -358,8 +357,8 @@ function injectAxelAdminConfig() {
   if (pluginEnabled && axel.sqldb) {
     axel.config.routes['GET /api/axel-admin/axel-user'] = '@axel/controllers/UserSqlController.findAll';
     axel.config.routes['GET /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.findOne';
-    axel.config.routes['PUT /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.update';
-    axel.config.routes['DELETE /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.delete';
+    axel.config.routes['PUT /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.updateOne';
+    axel.config.routes['DELETE /api/axel-admin/axel-user/:id'] = '@axel/controllers/UserSqlController.deleteOne';
 
     axel.config.routes['POST /api/axel-admin/auth/register'] = {
       controller: '@axel/controllers/UserSqlController',
@@ -451,7 +450,7 @@ function injectCrudRoutesConfig() {
     },
     'PUT {routeUrl}/:id': {
       controller: '@axel/controllers/CrudSqlController',
-      action: 'update',
+      action: 'updateOne',
     },
     'DELETE {routeUrl}/:id': {
       controller: '@axel/controllers/CrudSqlController',
@@ -463,9 +462,8 @@ function injectCrudRoutesConfig() {
     let routeUrl = model.apiUrl;
 
     if (!routeUrl) {
-      routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${
-        model.identity
-      }`;
+      routeUrl = `${axel.config.framework.automaticApiPrefix || ''}/${model.identity
+        }`;
       routeUrl = routeUrl.replace(/\/\//g, '/');
     }
     axel.logger.trace('[ROUTING] WIRING', model.identity, routeUrl);

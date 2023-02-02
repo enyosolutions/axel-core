@@ -145,10 +145,6 @@ module.exports = {
         type: 'boolean',
         default: false,
       },
-      hasCompletedRegistration: {
-        type: 'boolean',
-        default: false,
-      },
 
       lastConnexionOn: {
         type: 'string',

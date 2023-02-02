@@ -239,6 +239,8 @@ const Utils = {
         return { [Op[filter.replace('$', '')]]: `${value}%` };
       case '$endsWith':
         return { [Op[filter.replace('$', '')]]: `%${value}` };
+      case '$like':
+      case '$notLike':
       case '$substring':
         return { [Op[filter.replace('$', '')]]: `%${value}%` };
       case '$eq':
@@ -247,8 +249,6 @@ const Utils = {
       case '$gte':
       case '$lt':
       case '$lte':
-      case '$like':
-      case '$notLike':
       case '$in':
       case '$notIn':
         return { [Op[filter.replace('$', '')]]: value };

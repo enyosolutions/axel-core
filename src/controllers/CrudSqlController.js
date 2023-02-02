@@ -236,7 +236,7 @@ const CrudSqlController = {
   * @param  {[type]} resp [description]
   * @return {[type]}      [description]
   */
-  async update(req, resp, next) {
+  async updateOne(req, resp, next) {
     const id = req.params.id;
     const data = req.body;
 
@@ -511,7 +511,11 @@ const CrudSqlController = {
   },
 
   put(req, resp, next) {
-    return this.update(req, resp, next);
+    return this.updateOne(req, resp, next);
+  },
+
+  update(req, resp, next) {
+    return this.updateOne(req, resp, next);
   },
 
   import(req, resp, next) {

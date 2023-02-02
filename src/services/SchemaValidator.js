@@ -147,8 +147,8 @@ class SchemaValidator {
       'relationUrl',
       'field',
       'column',
-      'displayInServedSchema',
-      'displayDataInAutomaticApi',
+      'includeInFrontSchema',
+      'includeInAutomaticApiData',
       'sequelizeDefinition',
       'mongooseDefinition',
     ].forEach((keyword) => {

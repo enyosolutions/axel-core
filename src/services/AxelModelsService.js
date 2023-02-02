@@ -276,6 +276,8 @@ class AxelModelsService {
       .filter(
         key => axel.models[key] && axel.models[key].schema
           && (!options || !options.identity || options.identity === key)
+          && (axel.models[key].includeInServedModels
+            || axel.models[key].includeInServedModels === undefined)
       )
       .map((modelId) => {
         const model = axel.models[modelId];
