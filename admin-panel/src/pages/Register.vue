@@ -128,7 +128,10 @@ export default {
     if (!this.appConfig) {
       await this.$store.dispatch("getEnv");
     }
-    if (!this.appConfig || !this.appConfig.firstUser) {
+    if (
+      this.appEnv !== "development" &&
+      (!this.appConfig || !this.appConfig.firstUser)
+    ) {
       this.$router.push("/login");
     }
     // // if we are not in dev then refuse user creation

@@ -185,7 +185,7 @@ class AxelAdminPanelManager {
         return;
       }
       if (typeof cb !== 'function') {
-        console.warn('cb is not a function', typeof cb);
+        // console.warn('cb is not a function', typeof cb);
         cb = () => { };
         return;
       }

@@ -175,6 +175,14 @@ function loadDefaultSecurityPolicIES(target, policies) {
   return policies;
 }
 
+/**
+ * Connect a route config to a controller
+ *
+ * @param {*} app
+ * @param {*} source
+ * @param {*} _target
+ * @returns
+ */
 function connectRoute(app, source, _target) {
   let verb = 'all';
   let route;
@@ -208,6 +216,7 @@ function connectRoute(app, source, _target) {
     app[verb](source, injectTargetRouteMiddleware({}), wrapRoute(target));
     return Promise.resolve();
   }
+  // if the target has a middleware defiend, we use it as a middleware
   if (target && target.use && typeof target.use === 'function') {
     app.use(
       source,
@@ -217,6 +226,7 @@ function connectRoute(app, source, _target) {
     );
     return Promise.resolve(app);
   }
+  // if the target has a view defined, we use it as a view
   if (target.view) {
     app[verb](
       route,
@@ -231,6 +241,7 @@ function connectRoute(app, source, _target) {
     );
     return Promise.resolve();
   }
+
   // Replace aliased routes
   const controllerRoute = target.controller && target.controller[0] === '@'
     ? `${__dirname}${target.controller
@@ -245,6 +256,8 @@ function connectRoute(app, source, _target) {
   const controller = axel.controllers[target.controller]
     ? axel.controllers[target.controller]
     : require(`${path.resolve(controllerRoute)}`);
+
+
   // connect controllers to express router
   Promise.resolve(controller)
     .then((c) => {

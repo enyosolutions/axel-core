@@ -95,6 +95,7 @@ const loadSqlAttributes = (model) => {
       const resolvedType = _.get(DataTypes, type);
       if (resolvedType) {
         attr.type = resolvedType;
+        // if the type has arguments (like an enum for ex), we need to parse them
         if (args && args[0]) {
           attr.type = attr.type(
             ...args[0]

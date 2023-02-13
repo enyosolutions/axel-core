@@ -476,6 +476,10 @@ class UserSqlController {
       });
   }
 
+  updateOne(req, res, next) {
+    return this.update(req, res, next);
+  }
+
   delete(req, resp) {
     const id = req.params.userId;
     if (!Utils.checkIsMongoId(id, resp)) {
@@ -529,6 +533,11 @@ class UserSqlController {
       .catch((err) => {
         ErrorUtils.errorCallback(err, resp);
       });
+  }
+
+
+  deleteOne(req, res, next) {
+    return this.delete(req, res, next);
   }
 }
 

@@ -499,31 +499,31 @@ const CrudSqlController = {
 
 
   list(req, resp, next) {
-    return this.findAll(req, resp, next);
+    return CrudSqlController.findAll(req, resp, next);
   },
 
   get(req, resp, next) {
-    return this.findOne(req, resp, next);
+    return CrudSqlController.findOne(req, resp, next);
   },
 
   post(req, resp, next) {
-    return this.create(req, resp, next);
+    return CrudSqlController.create(req, resp, next);
   },
 
   put(req, resp, next) {
-    return this.updateOne(req, resp, next);
+    return CrudSqlController.updateOne(req, resp, next);
   },
 
   update(req, resp, next) {
-    return this.updateOne(req, resp, next);
+    return CrudSqlController.updateOne(req, resp, next);
   },
 
   import(req, resp, next) {
-    this.importData(req, resp, next);
+    CrudSqlController.importData(req, resp, next);
   },
 
   export(req, resp, next) {
-    this.exportData(req, resp, next);
+    CrudSqlController.exportData(req, resp, next);
   },
 
   async delete(req, resp, next) {

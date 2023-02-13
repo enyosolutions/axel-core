@@ -9,7 +9,6 @@ const Utils = require('../services/Utils.js'); // adjust path as needed
 const ErrorUtils = require('../services/ErrorUtils.js'); // adjust path as needed
 const { ExtendedError } = require('../services/ExtendedError.js'); // adjust path as needed
 const { jsonSchemaToFrontModel } = require('../services/AxelModelsService.js'); // adjust path as needed
-const ExcelService = require('../services/ExcelService.js'); // adjust path as needed
 const SchemaValidator = require('../services/SchemaValidator.js');
 const { saveModel } = require('../services/ws/utils');
 const axel = require('../axel.js');
