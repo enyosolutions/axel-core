@@ -62,6 +62,7 @@ export type Axel = {
 };
 
 export default Axel;
+export type{ Axel as default};
 
 export type ServerInitFunction = (app: Application) => Promise<any>;
 
@@ -75,6 +76,7 @@ declare namespace Express {
     };
     token?: string | { [key: string]: string };
     file: any;
+    modelName?: string;
   }
 }
 
@@ -87,7 +89,7 @@ declare namespace NodeJS {
   }
 }
 
-declare const axel: Axel;
+//declare const axel: Axel;
 
 declare type Obj = { [key: string]: any };
 

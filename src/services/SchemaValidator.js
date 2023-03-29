@@ -226,7 +226,7 @@ class SchemaValidator {
     debug('VALIDATOR :: loading %s complete', identity);
   }
 
-  validate(data, model, options = { strict: false }) {
+  validate(data, model, options = { strict: false, isUpdate: false }) {
     let result = { isValid: true, context: model };
     let validator = this.validators[model];
     try {
@@ -272,14 +272,14 @@ class SchemaValidator {
     return result;
   }
 
-  validateAsync(data, modelName) {
+  async validateAsync(data, modelName, options = { strict: false, isUpdate: false }) {
     if (
       axel.config.framework &&
       axel.config.framework.validateDataWithJsonSchema &&
       axel.models[modelName] &&
       axel.models[modelName].autoValidate
     ) {
-      const validation = this.validate(data, modelName);
+      const validation = this.validate(data, modelName, options);
       if (!validation.isValid) {
         debug(
           '[SCHEMA VALIDATION ERROR]',

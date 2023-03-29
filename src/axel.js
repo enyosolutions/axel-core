@@ -48,6 +48,8 @@ function loadConfig() {
 if (global.axel) {
   throw new Error('axel is already defined globally');
 }
+
+/** @implements {import('../types/main.d.ts').Axel} */
 const axel = {
   port: 3333,
   app: null, /** express app object */

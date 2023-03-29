@@ -437,13 +437,15 @@ const Utils = {
     if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
       throw new Error('search_params_injections_missing_model_name');
     }
-    const search = searchParam;
-    if (typeof search === 'object') {
-      console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.');
-      searchParam = search.query.search;
+    let search = searchParam;
+    if (typeof search === 'object' && !Array.isArray(search)) {
+      console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.', search);
+      searchParam = search && search.query && search.query.search ? search.query.search : JSON.stringify(search);
     }
     const isPg = axel.sqldb.options.dialect === 'postgres';
     if (search) {
+      search = Array.isArray(search) ? search : [search];
+
       const params = {};
       if (!query[Op.or]) {
         query[Op.or] = [];
@@ -463,22 +465,25 @@ const Utils = {
         fields = options.fields;
       }
       if (fields) {
-        fields.forEach((i) => {
-          query[Op.or].push(
-            isPg
-              ? Sequelize.where(
-                Sequelize.cast(Sequelize.col(i), 'text'),
-                { [Op.iLike]: `%${search}%` }
-              )
-              : {
-                [i]: {
-                  [Op.like]: `%${search}%`
+        search.forEach((s) => {
+          fields.forEach((i) => {
+            query[Op.or].push(
+              isPg
+                ? Sequelize.where(
+                  Sequelize.cast(Sequelize.col(i), 'text'),
+                  { [Op.iLike]: `%${s}%` }
+                )
+                : {
+                  [i]: {
+                    [Op.like]: `%${s}%`
+                  }
                 }
-              }
-          );
+            );
+          });
         });
       }
     }
+    console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.', query);
 
     return query;
   },
@@ -579,6 +584,7 @@ const Utils = {
   sanitizeUser(user) {
     return _.omitBy(user, (value, field) => field.match(/(password|token|google|facebook|passwd)/gi));
   }
+
 
 };
 

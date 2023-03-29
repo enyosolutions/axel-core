@@ -28,6 +28,7 @@ module.exports.ExtendedError = require('./services/ExtendedError.js');
 module.exports.Utils = require('./services/Utils.js');
 module.exports.ErrorUtils = require('./services/ErrorUtils.js');
 module.exports.ControllerUtils = require('./services/ControllerUtils.js');
+module.exports.MongodbUtils = require('./services/MongodbUtils.js');
 
 module.exports.SchemaValidator = require('./services/SchemaValidator.js');
 module.exports.AxelModelsService = require('./services/AxelModelsService.js');
