@@ -136,12 +136,13 @@ const Utils = {
       Object.keys(filters)
         .filter(f => filters[f])
         .forEach((i) => {
-          // REMOVE INCLUDE $relation FROM query
+          // REMOVE INCLUDE $relation FROM query because it's managed else where
           if (i === '$relation') {
             delete req.query.filters[i];
           }
           if (filters[i]) {
             const myFilters = req.query.filters[i];
+
             if (Array.isArray(myFilters)) {
               query[i] = { [Op.in]: myFilters };
             } else if (_.isObject(myFilters)) {
@@ -156,6 +157,22 @@ const Utils = {
               }
             } else {
               query[i] = this.sqlFormatForSearchMode(myFilters, options.searchMode);
+            }
+
+            if (i.includes('.')) {
+              if (!query[Op.and]) {
+                query[Op.and] = [];
+              }
+              const isMysql = axel.sqldb.options.dialect === 'mysql';
+              if (isMysql) {
+                query[Op.and].push(Sequelize.where(
+                  Sequelize.fn('JSON_EXTRACT',
+                    Sequelize.col(i.split('.')[0]),
+                    Sequelize.literal(`'$.${i.split('.')[1]}'`)), query[i]
+                ));
+              }
+              delete query[i];
+              // i = Sequelize.fn('JSON_EXTRACT', Sequelize.col(i.split('.')[0]), `$.${i.split('.')[1]}`);
             }
           }
         });
@@ -353,7 +370,7 @@ const Utils = {
     return baseInclude;
   },
 
-  injectSortParams(req, options = {}) {
+  injectMongoSortParams(req, options = {}) {
     if (!options.sort) {
       if (req.query.sort && _.isObject(req.query.sort)) {
         const sort = req.query.sort;
@@ -397,10 +414,36 @@ const Utils = {
     }
 
     const sortOptions = req.query.sort || options.sort;
-    const order = sortOptions ? _.toPairs(sortOptions) : [];
+    let order = sortOptions ? _.toPairs(sortOptions) : [];
+
+    // skip nested attributes for sorting.
+    order = order.filter(o => !o[0].includes('.'));
+    /*
+    order = order.map((o) => {
+      if (o[0].includes('.')) {
+        const path = o[0].split('.');
+        const model = axel.models?.[endpoint]?.em;
+        if (model) {
+
+          const attribute = model.rawAttributes[path[0]];
+          if (attribute && attribute.type instanceof Sequelize.DataTypes.JSON) {
+            return [`${path[0]}->'$.${path[1]}'`, o[1]];
+          }
+          return [`${path[0]}.${path[1]}`, o[1]];
+        }
+        else {
+
+          return [
+            Sequelize.fn('JSON_EXTRACT', path[0], '$.${path[1]}'`, o[1]];
+        }
+      }
+      return o;
+    });
+    */
+
     let attributes = req.query.fields;
     if (req.query.excludeFields) {
-      attributes = { exclude: ['some_field'] };
+      attributes = { exclude: attributes };
     }
     return {
       listOfValues: isListOfValues,

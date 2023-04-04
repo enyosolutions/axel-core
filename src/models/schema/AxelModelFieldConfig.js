@@ -473,9 +473,9 @@ module.exports = {
           type: {
             title: 'Column type',
             description:
-              'The type of the column, comming from https://vue-generators.gitbook.io/vue-generators/fields',
+              'The type of the columns',
             type: 'string',
-            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url', 'component'],
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url', 'component', 'nestedColumns'],
             field: {
               type: 'vSelect',
               fieldOptions: {

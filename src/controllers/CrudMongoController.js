@@ -119,7 +119,7 @@ module.exports = {
       }
 
       query = Utils.injectQueryParams(req, query);
-      options = Utils.injectSortParams(req, options);
+      options = Utils.injectMongoSortParams(req, options);
     }
 
     collection
