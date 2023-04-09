@@ -5,7 +5,10 @@ const layoutConfig = {
   items: {
     type: 'object',
     properties: {
+      id: { type: 'string' },
       legend: { type: 'string' },
+      showHeader: { type: ['string', 'boolean'], default: true },
+      visible: { type: ['string', 'boolean'], default: true },
       cols: {
         type: ['number', 'string'], minimum: 0, maximum: 12, default: 12, nullable: true
       },

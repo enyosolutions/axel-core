@@ -475,7 +475,7 @@ module.exports = {
             description:
               'The type of the columns',
             type: 'string',
-            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url', 'component', 'nestedColumns'],
+            enum: ['string', 'number', 'date', 'datetime', 'image', 'html', 'relation', 'object', 'boolean', 'url', 'component', 'nestedColumn'],
             field: {
               type: 'vSelect',
               fieldOptions: {
