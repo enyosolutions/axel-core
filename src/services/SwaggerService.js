@@ -10,8 +10,8 @@ class SwaggerService {
   /**
    *
    *
-   * @param {Obj} swaggerDef
-   * @param {Obj} list
+   * @param {Object} swaggerDef
+   * @param {Object} list
    * @returns {void}
    * @memberof SwaggerService
    */
@@ -84,8 +84,8 @@ class SwaggerService {
   /**
    *
    *
-   * @param {Obj} attributes
-   * @returns {Obj}
+   * @param {Object} attributes
+   * @returns {Object}
    * @memberof SwaggerService
    */
   modelParser(attributes) {

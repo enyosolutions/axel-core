@@ -79,7 +79,7 @@ class AxelModelsService {
   /**
    *
    *
-   * @param {Obj} model
+   * @param {Object} model
    * @returns {Promise<void>}
    * @memberof AxelModelsService
    */
@@ -175,8 +175,8 @@ class AxelModelsService {
   /**
 *
 *
-* @param {Obj} model
-* @returns {Obj}
+* @param {Object} model
+* @returns {Object}
 * @memberof AxelModelsService
 */
   jsonSchemaToFrontModel(model) {

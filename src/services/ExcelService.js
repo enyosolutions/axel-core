@@ -8,9 +8,9 @@ const ExcelService = {
    * [formatJson format a json by switching and filtering columns are required by the option]
    * [description]
    * @method
-   * @param  {[Object]} json    [description]
-   * @param  {[Object]} options [formating rules : columns dictionary and eager filtering or not]
-   * @return {[Object]}         [a formatted json object]
+   * @param  {Object} json    [description]
+   * @param  {Object} options [formating rules : columns dictionary and eager filtering or not]
+   * @return {Object}         [a formatted json object]
    */
   formatJson(json, options = {}) {
     return json.map((item) => {
