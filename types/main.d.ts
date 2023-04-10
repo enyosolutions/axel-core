@@ -27,21 +27,21 @@ export type Identity = keyof AxelModels;
 export type AxelRoute =
   | string
   | {
-      controller: string;
-      action: string;
-      secure?: boolean; // you need this if you defined you api as always secure !
-    }
+    controller: string;
+    action: string;
+    secure?: boolean; // you need this if you defined you api as always secure !
+  }
   | {
-      view: string;
-      secure?: boolean; // you need this if you defined you api as always secure !
-    }
+    view: string;
+    secure?: boolean; // you need this if you defined you api as always secure !
+  }
   | {
-      view: string;
-      secure?: boolean; // you need this if you defined you api as always secure !
-    }
+    view: string;
+    secure?: boolean; // you need this if you defined you api as always secure !
+  }
   | {
-      use: IRoute;
-    }
+    use: IRoute;
+  }
   | IRoute;
 
 export type Axel = {
@@ -62,7 +62,7 @@ export type Axel = {
 };
 
 export default Axel;
-export type{ Axel as default};
+export type { Axel as default };
 
 export type ServerInitFunction = (app: Application) => Promise<any>;
 
@@ -94,9 +94,5 @@ declare namespace NodeJS {
 declare type Obj = { [key: string]: any };
 
 declare global {
-  namespace axel {
-    export interface Global {
-      axel: Axel;
-    }
-  }
+  var axel: Axel;
 }
