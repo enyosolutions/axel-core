@@ -108,7 +108,7 @@ const Utils = {
   /**
    *
    * Inject params from the request into the query object that we'll user to query the database
-   * @param {Request} req
+   * @param {import('express').Request} req
    * @param {*} [query={
    *       userId: undefined,
    *       filters: undefined,

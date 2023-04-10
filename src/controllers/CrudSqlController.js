@@ -232,9 +232,9 @@ const CrudSqlController = {
   * [put description]
   * [description]
   * @method
-  * @param  {[type]} req  [description]
-  * @param  {[type]} resp [description]
-  * @return {[type]}      [description]
+  * @param  {import('express').Request} req  [description]
+  * @param  {import('express').Response} resp [description]
+  * @return {Promise<import('express').Response>}      [description]
   */
   async updateOne(req, resp, next) {
     const id = req.params.id;
@@ -286,9 +286,9 @@ const CrudSqlController = {
   * [delete Item]
   * [description]
   * @method
-  * @param  {[type]} req  [description]
-  * @param  {[type]} resp [description]
-  * @return {[type]}      [description]
+  * @param  {import('express').Request} req
+       * @param  {import('express').Response} resp
+  * @return {Promise<import('express').Response<any, Record<string, any>>>}      [description]
   */
   async deleteOne(req, resp, next) {
     try {

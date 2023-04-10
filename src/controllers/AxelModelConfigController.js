@@ -165,8 +165,8 @@ class AxelModelConfigController {
   * [put description]
   * [description]
   * @method
-  * @param  {[type]} req  [description]
-  * @param  {[type]} resp [description]
+  * @param  {import('express').Request} req
+       * @param  {import('express').Response} resp
   * @return {[type]}      [description]
   */
   put(req, resp) {
@@ -229,8 +229,8 @@ class AxelModelConfigController {
   * [put description]
   * [description]
   * @method
-  * @param  {[type]} req  [description]
-  * @param  {[type]} resp [description]
+  * @param  {import('express').Request} req
+       * @param  {import('express').Response} resp
   * @return {[type]}      [description]
   */
   oldPut(req, resp) {
@@ -317,8 +317,8 @@ class AxelModelConfigController {
   * [delete Item]
   * [description]
   * @method
-  * @param  {[type]} req  [description]
-  * @param  {[type]} resp [description]
+  * @param  {import('express').Request} req
+       * @param  {import('express').Response} resp
   * @return {[type]}      [description]
   */
   delete(req, resp) {

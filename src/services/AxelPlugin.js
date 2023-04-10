@@ -26,7 +26,7 @@ class AxelPlugin {
   /**
    *
    *
-   * @param {Application} app
+   * @param {import('express').Application} app
    * @returns {Promise<any>}
    * @memberof AxelPlugin
    */

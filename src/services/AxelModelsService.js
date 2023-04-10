@@ -31,7 +31,7 @@ class AxelModelsService {
   /**
    *
    *
-   * @param {Application} app
+   * @param {import('express').Application} app
    * @returns {Promise<any>}
    * @memberof AxelModelsService
    */

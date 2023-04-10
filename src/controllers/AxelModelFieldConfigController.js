@@ -281,8 +281,8 @@ class AxelModelFieldConfigController {
      * [put description]
      * [description]
      * @method
-     * @param  {[type]} req  [description]
-     * @param  {[type]} resp [description]
+     * @param  {import('express').Request} req
+          * @param  {import('express').Response} resp
      * @return {[type]}      [description]
      */
   oldput(req, resp) {
@@ -364,8 +364,8 @@ class AxelModelFieldConfigController {
      * [delete Item]
      * [description]
      * @method
-     * @param  {[type]} req  [description]
-     * @param  {[type]} resp [description]
+     * @param  {import('express').Request} req
+     * @param  {import('express').Response} resp
      * @return {[type]}      [description]
      */
   delete(req, resp) {
