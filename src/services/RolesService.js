@@ -1,6 +1,5 @@
 
 const _ = require('lodash');
-const { Request, Response } = require('express');
 
 const RolesService = {
   getExtendedRoles(role) {
