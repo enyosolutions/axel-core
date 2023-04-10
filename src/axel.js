@@ -49,7 +49,7 @@ if (global.axel) {
   throw new Error('axel is already defined globally');
 }
 
-/** @implements {import('../types/main.d.ts').Axel} */
+/** @type {import('../types/main.js').Axel} */
 const axel = {
   port: 3333,
   app: null, /** express app object */
