@@ -20,12 +20,6 @@ const debug = d('axel:router');
  */
 const forbiddenAutoConnectModels = ['axelModelConfig'];
 
-/**
- *  @param {function} middleware function to be wrapped
- *  @param {object} route config from route.js
- *
- *
- */
 function injectTargetRouteMiddleware(targetConfig) {
   return (req, res, next) => {
     if (targetConfig && !req.routeConfig) {

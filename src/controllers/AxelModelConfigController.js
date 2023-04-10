@@ -166,8 +166,7 @@ class AxelModelConfigController {
   * [description]
   * @method
   * @param  {import('express').Request} req
-       * @param  {import('express').Response} resp
-  * @return {[type]}      [description]
+  * @param  {import('express').Response} resp
   */
   put(req, resp) {
     try {
@@ -318,8 +317,7 @@ class AxelModelConfigController {
   * [description]
   * @method
   * @param  {import('express').Request} req
-       * @param  {import('express').Response} resp
-  * @return {[type]}      [description]
+  * @param  {import('express').Response} resp
   */
   delete(req, resp) {
     const id = req.params.id;

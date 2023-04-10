@@ -19,11 +19,12 @@ export type AxelModel = {
   em: any;
   schema: JSONSchemaType;
   tableName?: string;
-  repository?: Record<string, any>
+  repository?: Record<string, any>;
   entity?: AxelModelEntity;
-  properties?: Record<string, any>
+  properties?: Record<string, any>;
   includeInServedModels?: boolean;
   automaticApi?: boolean;
+  _attributes?: Record<string, any>;
 };
 
 export type AxelModelEntity = {

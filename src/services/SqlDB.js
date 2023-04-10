@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize').Sequelize;
 const axel = require('../axel.js');
 
 async function loadSequelize() {

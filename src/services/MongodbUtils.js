@@ -3,6 +3,9 @@ const _ = require('lodash');
 module.exports = {
   /**
    * Inject params from the request into the query object that we'll user to query the database
+   *
+   * @param {import('express').Request} req
+   * @param {Record<string, any>} query
    */
   injectMongodbQueryParams(req, query = {}) {
     if (typeof query !== 'object') {

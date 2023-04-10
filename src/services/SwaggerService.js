@@ -11,7 +11,6 @@ class SwaggerService {
    *
    *
    * @param {Object} swaggerDef
-   * @param {Object} list
    * @returns {void}
    * @memberof SwaggerService
    */

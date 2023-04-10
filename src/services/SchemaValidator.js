@@ -1,7 +1,7 @@
-const Ajv = require('ajv');
+const Ajv = require('ajv').default;
 const _ = require('lodash');
 const debug = require('debug')('axel:schemavalidator');
-const addFormats = require('ajv-formats');
+const addFormats = require('ajv-formats').default;
 
 const axel = require('../axel');
 const ExtendedError = require('./ExtendedError');

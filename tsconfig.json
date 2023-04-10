@@ -112,7 +112,7 @@
     ],
     "include": [
         "./src/**/*.js",
-        "./admin-panel/src/**/*.js",
+        // "./admin-panel/src/**/*.js", /* @todo */
         "./.eslintrc.js",
         "./types"
     ],
