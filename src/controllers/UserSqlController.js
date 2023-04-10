@@ -476,8 +476,8 @@ class UserSqlController {
       });
   }
 
-  updateOne(req, res, next) {
-    return this.update(req, res, next);
+  updateOne(req, res) {
+    return this.update(req, res);
   }
 
   delete(req, resp) {
@@ -536,8 +536,8 @@ class UserSqlController {
   }
 
 
-  deleteOne(req, res, next) {
-    return this.delete(req, res, next);
+  deleteOne(req, res) {
+    return this.delete(req, res);
   }
 }
 

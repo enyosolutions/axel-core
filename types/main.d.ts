@@ -9,19 +9,32 @@ export type ExtendedErrorType = typeof ExtendedError;
 export type SchemaValidatorType = typeof SchemaValidator;
 
 export type AxelModel = {
-  identity: String;
-  apiUrl: String;
+  identity: string;
+  apiUrl: string;
   additionalProperties: Boolean;
   autoValidate: Boolean;
-  primaryKeyField: String;
-  displayField: String;
-  searchableFields: String[];
+  primaryKeyField: string;
+  displayField: string;
+  searchableFields: string[];
   em: any;
   schema: JSONSchemaType;
+  tableName?: string;
+  repository?: Record<string, any>
+  entity?: AxelModelEntity;
+  properties?: Record<string, any>
+  includeInServedModels?: boolean;
+  automaticApi?: boolean;
 };
+
+export type AxelModelEntity = {
+  attributes: Array;
+  options: Record<string, any>;
+}
+
 export type AxelModels = {
   [key: string]: AxelModel;
 };
+
 export type Identity = keyof AxelModels;
 
 export type AxelRoute =
@@ -59,6 +72,13 @@ export type Axel = {
   sqldb?: any;
   rootPath: string;
   renderView: Function;
+  hooks?: Array;
+  initCompleted?: boolean;
+  plugins?: Record<string, any>
+  i18n?: any;
+  enabledPlugins?: Array;
+  init: Function;
+  server?: Server;
 };
 
 export default Axel;
