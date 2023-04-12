@@ -287,7 +287,7 @@ const CrudSqlController = {
   * [description]
   * @method
   * @param  {import('express').Request} req
-       * @param  {import('express').Response} resp
+  * @param  {import('express').Response} resp
   * @return {Promise<import('express').Response<any, Record<string, any>>>}      [description]
   */
   async deleteOne(req, resp, next) {

@@ -283,7 +283,7 @@ class AxelModelFieldConfigController {
      * @method
      * @param  {import('express').Request} req
           * @param  {import('express').Response} resp
-     * @return {[type]}      [description]
+     * @return {void}      [description]
      */
   oldput(req, resp) {
     const id = req.params.id;
@@ -366,7 +366,7 @@ class AxelModelFieldConfigController {
      * @method
      * @param  {import('express').Request} req
      * @param  {import('express').Response} resp
-     * @return {[type]}      [description]
+     * @return {void}      [description]
      */
   delete(req, resp) {
     const id = req.params.id;

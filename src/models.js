@@ -533,7 +533,11 @@ function unifyEntityManagers() {
   });
   return;
 }
-
+/**
+ *
+ *
+ * @param {import('../types/main.js').AxelModel} model
+ */
 function injectUnifiedFunctions(model) {
   model.em = model.collection;
   model.em.unifiedFind = model.em.find;

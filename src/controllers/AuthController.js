@@ -33,7 +33,7 @@ const rolesWithAccessToBackoffice = _.get(
 module.exports = {
   /**
    * @description get the data for the current user
-   * @return {User}
+   * @return {void}
    * @swagger
    * /auth/user:
    *   get:
@@ -272,11 +272,13 @@ module.exports = {
       })
       .then(() => {
         if (req.xhr) {
-          return res.json({
+          res.json({
             success: true,
           });
+          return null;
         }
         res.redirect(`${axel.config.websiteUrl}/admin-panel/`);
+        return null;
       })
       .catch((err) => {
         res.status(err.code ? parseInt(err.code) : 400).json({
@@ -373,7 +375,7 @@ module.exports = {
         return null;
       })
       .catch((err) => {
-        next(err);
+        next(err); // eslint-disable-line
       });
   },
 

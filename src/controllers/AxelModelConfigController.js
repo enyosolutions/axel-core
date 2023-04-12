@@ -157,8 +157,8 @@ class AxelModelConfigController {
     });
   }
 */
-  get(...args) {
-    AxelAdminController.getModel(...args);
+  get(req, resp) {
+    AxelAdminController.getModel(req, resp);
   }
 
   /**
@@ -193,7 +193,7 @@ class AxelModelConfigController {
         ...data,
       };
 
-      const validation = SchemaValidator.validate(data, entity, { strict: true });
+      const validation = SchemaValidator.validate(data, entity, { strict: true, isUpdate: true });
       if (!validation.isValid) {
         console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', validation, axel.models.axelModelConfig.schema);
         throw new ExtendedError({
@@ -230,7 +230,7 @@ class AxelModelConfigController {
   * @method
   * @param  {import('express').Request} req
        * @param  {import('express').Response} resp
-  * @return {[type]}      [description]
+  * @return {void}      [description]
   */
   oldPut(req, resp) {
     const id = req.params.id;
@@ -258,7 +258,7 @@ class AxelModelConfigController {
         });
       })
       .then((result) => {
-        const validation = SchemaValidator.validate(data, entity, { strict: true });
+        const validation = SchemaValidator.validate(data, entity, { strict: true, isUpdate: true });
         if (!validation.isValid) {
           console.warn('[SCHEMA VALIDATION ERROR] ENDPOINT', validation, axel.models.axelModelConfig.schema);
           throw new ExtendedError({
@@ -342,11 +342,13 @@ class AxelModelConfigController {
       })
       .then((a) => {
         if (!a) {
-          return resp.status(404).json();
+          resp.status(404).json();
+          return null;
         }
         resp.status(200).json({
           status: 'OK'
         });
+        return null;
       })
       .catch((err) => {
         if (process.env.NODE_ENV === 'development') {

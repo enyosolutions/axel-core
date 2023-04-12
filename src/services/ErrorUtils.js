@@ -10,26 +10,38 @@ const ErrorUtils = {
     const err = new ExtendedError({ code, message });
     return err;
   },
-
-  sendError(code = 500, message, response) {
-    const err = ErrorUtils.stringToError(code, message, response);
+  /**
+   *
+   *
+   * @param {number} [code=500]
+   * @param {string} message
+   * @param {import('express').Response} response
+   * @returns
+   */
+  sendError(code = 500, message = '', response = undefined) {
+    const err = ErrorUtils.stringToError(code, message);
     if (response) {
       ErrorUtils.errorCallback(err, response);
     }
     return err;
   },
 
+  /**
+   *
+   *
+   * @param {ExtendedError} err
+   * @returns
+   */
   safeError(err) {
     try {
       err = JSON.parse(stringify(err));
       return err;
     } catch (e) {
-      err = {
+      return {
         name: err.name,
         message: err.message,
         code: err ? err.code : undefined
       };
-      return err;
     }
   },
 

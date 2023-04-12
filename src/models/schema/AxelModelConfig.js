@@ -25,7 +25,8 @@ const layoutConfig = {
   }
 };
 
-module.exports = {
+/** @type import('../../../types/main.js').AxelSchema */
+const model = {
   identity: 'axelModelConfig',
   collectionName: 'axel-model-config',
   apiUrl: '/api/axel-admin/axel-model-config', // url for front api
@@ -591,3 +592,5 @@ module.exports = {
     }]
   }
 };
+
+module.exports = model;

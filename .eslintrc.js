@@ -7,7 +7,10 @@ module.exports = {
     'eslint:recommended',
     'plugin:node/recommended',
     'airbnb-base',
-    //    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+    // 'plugin:prettier/recommended',
+    // Enables eslint-plugin-prettier and eslint-config-prettier.
+    // This will display prettier errors as ESLint errors.
+    // Make sure this is always the last configuration in the extends array.
   ],
   plugins: ['promise'],
   globals: {
@@ -26,7 +29,7 @@ module.exports = {
     'no-underscore-dangle': [
       2,
       {
-        allow: ['_id', '_sails', '_global', '_vac_source', '_vac'],
+        allow: ['_id', '_global', '_vac_source', '_vac', '_initPromise'],
       },
     ],
     'prefer-destructuring': 0,

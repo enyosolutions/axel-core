@@ -4,6 +4,7 @@
  * @module axel-core
  */
 
+/** @type {import('../types/main.js').Axel} */
 const axel = require('./axel');
 
 const AuthService = require('./services/AuthService');
@@ -15,7 +16,7 @@ if (!axel.initCompleted) {
 
 module.exports = axel;
 module.exports.axel = axel;
-
+/** @type {import('../types/main.js').ServerType} */
 module.exports.Server = require('./Server').Server;
 module.exports.router = require('./router').router;
 module.exports.modelsLoader = require('./models.js').modelsLoader;

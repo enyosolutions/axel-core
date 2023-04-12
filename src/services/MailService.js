@@ -22,9 +22,7 @@ class MailService {
   sendPasswordReset(email, data) {
     const mergedData = _.merge({}, this.defaultData, data);
     mergedData.title = 'Mot de passe oublié';
-    return axel.renderView('emails/password-reset', mergedData).then((html) => {
-      this.sendMail(email, mergedData.title, html, data);
-    });
+    return axel.renderView('emails/password-reset', mergedData).then(html => this.sendMail(email, mergedData.title, html, data));
   }
 
   sendUserCreated({ user }) {
@@ -34,9 +32,7 @@ class MailService {
     if (user.activationUrl) {
       data.activationUrl = user.activationUrl;
     }
-    return axel.renderView('emails/account-created', data).then((html) => {
-      this.sendMail(user.email, data.title, html, data);
-    });
+    return axel.renderView('emails/account-created', data).then(html => this.sendMail(user.email, data.title, html, data));
   }
 
   sendEmailConfirmation({ user, activationUrl }) {
@@ -46,9 +42,7 @@ class MailService {
     if (activationUrl) {
       data.activationUrl = activationUrl;
     }
-    return axel.renderView('emails/account-created', data).then((html) => {
-      this.sendMail(user.email, data.title, html, data);
-    });
+    return axel.renderView('emails/account-created', data).then(html => this.sendMail(user.email, data.title, html, data));
   }
 
   getTransport() {
@@ -128,6 +122,10 @@ class MailService {
       await this.beforeSend(mailOptions);
     }
 
+    if (this.beforeSend) {
+      await this.beforeSend(mailOptions);
+    }
+
     const result = await new Promise((resolve, reject) => {
       try {
         transport.sendMail(mailOptions, (err, info) => {
@@ -151,10 +149,6 @@ class MailService {
         reject(err);
       }
     });
-
-    if (this.beforeSend) {
-      await this.beforeSend(mailOptions, result);
-    }
 
     return result;
   }

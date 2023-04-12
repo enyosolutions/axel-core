@@ -20,8 +20,8 @@ const {
     // do something like stringifying data...
   };
 */
-
 const jsonFields = ['config'];
+/** @type import('../../../types/main.js').AxelSequelizeModel */
 const AxelModelConfig = {
   identity: 'axelModelConfig',
   entity: {

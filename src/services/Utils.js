@@ -109,13 +109,13 @@ const Utils = {
    *
    * Inject params from the request into the query object that we'll user to query the database
    * @param {import('express').Request} req
-   * @param {*} [query={
-   *       userId: undefined,
-   *       filters: undefined,
-   *       tags: undefined,
-   *       createdOn: undefined,
-   *     }]
-   * @returns
+   * @param {{
+   *       userId: Number;
+   *       filters: Object;
+   *       tags: Array;
+   *       createdOn: Date;
+   *     }} query
+   * @returns {{[key as string]: any}}
    */
   injectQueryParams(
     req,
@@ -469,6 +469,14 @@ const Utils = {
     return query;
   },
 
+  /**
+   *
+   *
+   * @param {*} searchParam
+   * @param {*} [query={}] query
+   * @param {{modelName?:string; fields?:string[]}} options
+   * @returns {Object}
+   */
   injectSqlSearchParams(
     searchParam,
     query = {},
@@ -534,6 +542,7 @@ const Utils = {
   /**
  * Removes undefined fields from the object query since the cause sequelize to crash
  * @param query
+ * @return {Object} query
  */
   cleanSqlQuery(query) {
     if (!query) {

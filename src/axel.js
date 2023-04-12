@@ -66,7 +66,7 @@ const axel = {
   mongodb: null,
   plugins: {},
   enabledPlugins: [],
-
+  _initPromise: null, // the promise of the init function
   rootPath: path.resolve(process.cwd()),
   renderView: (relPath, data, callback) => new Promise((resolve, reject) => {
     try {
@@ -118,8 +118,8 @@ const axel = {
     if (axel.initCompleted && Object.keys(axel.config).length > 0) {
       return Promise.resolve();
     }
-    if (axel.initPromise) {
-      return axel.initPromise;
+    if (axel._initPromise) {
+      return axel._initPromise;
     }
     // console.count('Init started');
     const plugins = loadPlugins(axel);
@@ -127,7 +127,7 @@ const axel = {
       acc[current.name] = current;
       return acc;
     }, {});
-    axel.initPromise = Promise.resolve(loadConfig()).then((config) => {
+    axel._initPromise = Promise.resolve(loadConfig()).then((config) => {
       if (config) {
         axel.config = config;
       }
@@ -136,7 +136,7 @@ const axel = {
       axel.initCompleted = true;
       return config;
     });
-    return axel.initPromise;
+    return axel._initPromise;
   },
 
 };

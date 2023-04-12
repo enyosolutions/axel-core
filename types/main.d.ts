@@ -1,5 +1,6 @@
 import { Application, NextFunction, IRoute } from 'express';
 import { ExtendedError } from '../src/services/ExtendedError';
+import { Server } from '../src/Server';
 import { SchemaValidator } from '../src/services/SchemaValidator';
 import { JSONSchemaType } from 'ajv';
 
@@ -7,29 +8,83 @@ import { Sequelize } from 'sequelize/types';
 
 export type ExtendedErrorType = typeof ExtendedError;
 export type SchemaValidatorType = typeof SchemaValidator;
+export type ServerType = typeof Server;
 
-export type AxelModel = {
-  identity: string;
-  apiUrl: string;
-  additionalProperties: Boolean;
-  autoValidate: Boolean;
-  primaryKeyField: string;
-  displayField: string;
-  searchableFields: string[];
+export type VacModel = {
+    name?: string;
+    namePlural?: string;
+    title?: string;
+    [key as string]: any;
+    pageTitle?: string;
+    routerPath?: string;
+    primaryKey?: string;
+    menuIsVisible?: boolean;
+    options?: {
+      initialDisplayMode?: 'table' | 'list' | 'kanban' | 'component';
+      columnsDisplayed?: number;
+    },
+    actions?: {
+      create: boolean | string;
+      edit: boolean | string;
+      view: boolean | string;
+      delete: boolean | string;
+      export: boolean | string;
+      import: boolean | string;
+    },
+    detailPageMode?: 'page' | 'modal' | 'slide';
+  formOptions?: {
+    useTabsForUngroupedFields?: boolean;
+    tabsNavType?: 'tabs' | 'pills',
+  },
+  layout: {
+    legend: string;
+    fields: string[];
+    cols: string | number;
+    wrapperClasses: string;
+  }[];
+
+}
+export type AxelModel = AxelSequelizeModel & AxelSchema & {
   em: any;
-  schema: JSONSchemaType;
-  tableName?: string;
-  repository?: Record<string, any>;
-  entity?: AxelModelEntity;
-  properties?: Record<string, any>;
-  includeInServedModels?: boolean;
-  automaticApi?: boolean;
-  _attributes?: Record<string, any>;
 };
 
-export type AxelModelEntity = {
+export type AxelSchema = {
+  additionalProperties?: Boolean;
+  apiUrl?: string;
+  automaticApi?: boolean;
+  autoValidate?: Boolean;
+  collectionName?: string;
+  displayField?: string;
+  em?: any;
+  repository?: any;
+  identity: string;
+  includeInServedModels?: boolean;
+  primaryKeyField?: string;
+  primaryKey?: string; /** @deprecated */
+  repository?: Record<string, any>;
+  schema: JSONSchemaType;
+  searchableFields?: string[];
+  tableName?: string;
+  _attributes?: Record<string, any>;
+  hooks?: {
+    [key as string]: function;
+  };
+  admin?: VacModel;
+}
+
+export type AxelSequelizeModel = {
+  em?: any;
+  entity?: AxelModelEntity;
+  identity: string;
+}
+
+export type AxelSequelizeEntity = {
   attributes: Array;
   options: Record<string, any>;
+  associations?: (models: {[key as string]: SequelizeModel}) => void | null;
+  hooks?: {
+    [key as string]: function;
+  }
 }
 
 export type AxelModels = {
@@ -80,6 +135,8 @@ export type Axel = {
   enabledPlugins?: Array;
   init: Function;
   server?: Server;
+  _initPromise?: Promise<any>;
+
 };
 
 export default Axel;
@@ -98,6 +155,19 @@ declare namespace Express {
     token?: string | { [key: string]: string };
     file: any;
     modelName?: string;
+    endpoint?: string;
+
+    query: {
+      [key: string]: any;
+      range?: {
+        startDate?: string | Date;
+        endDate?: string | Date;
+      };
+      options?: {
+        searchMode?: 'contains' | 'startsWith' | 'endsWith';
+        [key: string]: any;
+      };
+    }
   }
 }
 

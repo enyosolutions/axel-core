@@ -375,6 +375,34 @@ module.exports = {
                   visible: "{{ (!currentItem.field || currentItem.field.type === 'vSelect') && !!currentItem.relation  }}"
                 }
               },
+              valueOn: {
+                type: 'string',
+                title: 'The value when the field is on',
+                field: {
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'switch') }}"
+                }
+              },
+              valueOff: {
+                type: 'string',
+                title: 'The value when the field is off',
+                field: {
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'switch') }}"
+                }
+              },
+              textOn: {
+                type: 'string',
+                title: 'The text when the field is on',
+                field: {
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'switch') }}"
+                }
+              },
+              textOff: {
+                type: 'string',
+                title: 'The text when the field is off',
+                field: {
+                  visible: "{{ (!currentItem.field || currentItem.field.type === 'switch') }}"
+                }
+              },
               prefix: {
                 type: 'string',
                 title: 'Prefix',

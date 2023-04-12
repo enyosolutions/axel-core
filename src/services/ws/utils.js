@@ -65,6 +65,7 @@ module.exports.saveModel = (frontModel) => {
   const modelName = frontModel.identity;
   axel.logger.log('[wsModels] Saving', modelName);
   debug('Saving', modelName);
+  /** @type import('../../../types').AxelModel */
   const inMemoryModel = _.cloneDeep({
     ...axel.models[modelName], em: undefined, repository: undefined, entity: undefined, hooks: undefined
   });
@@ -98,7 +99,6 @@ module.exports.saveModel = (frontModel) => {
     'primaryKey',
     'displayField',
     'admin',
-    'entity',
     'entity',
     'url',
     'em',
