@@ -534,7 +534,6 @@ const Utils = {
         });
       }
     }
-    console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.', query);
 
     return query;
   },

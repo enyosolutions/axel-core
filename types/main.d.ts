@@ -1,10 +1,12 @@
 import { Application, NextFunction, IRoute } from 'express';
 import { ExtendedError } from '../src/services/ExtendedError';
-import { Server } from '../src/Server';
-import { SchemaValidator } from '../src/services/SchemaValidator';
-import { JSONSchemaType } from 'ajv';
-
+export { Server } from '../src/Server';
+export * as SchemaValidator from '../src/services/SchemaValidator';
+export * as AuthService from '../src/services/AuthService';
+export * from '../src/index';
+export { JSONSchemaType } from 'ajv';
 import { Sequelize } from 'sequelize/types';
+
 
 export type ExtendedErrorType = typeof ExtendedError;
 export type SchemaValidatorType = typeof SchemaValidator;
