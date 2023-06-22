@@ -332,7 +332,6 @@ const loadSqlModels = (options = { loadHooks: true }) => {
       }
     });
 
-    logger.info('[ORM] found %s sequelize models files', modelFilePaths.length);
     debug('MODELS :: found %s sequelize models files', modelFilePaths.length);
     if (!modelFilePaths.length) {
       logger.warn('[ORM] no sequelize models found in the provided location');

@@ -134,32 +134,33 @@ const Utils = {
     if (req.query.filters && _.isObject(req.query.filters)) {
       const filters = req.query.filters;
       Object.keys(filters)
-        .filter(f => filters[f])
-        .forEach((i) => {
-          // REMOVE INCLUDE $relation FROM query because it's managed else where
-          if (i === '$relation') {
-            delete req.query.filters[i];
+        .filter(f => filters[f]) // remove empty filters
+        .forEach((operator) => {
+          // console.log('operator', operator);
+          // REMOVE INCLUDE $relation FROM query because it's managed elsewhere
+          if (operator === '$relation') {
+            delete req.query.filters[operator];
           }
-          if (filters[i]) {
-            const myFilters = req.query.filters[i];
+          if (filters[operator]) {
+            const myFilterValue = req.query.filters[operator];
 
-            if (Array.isArray(myFilters)) {
-              query[i] = { [Op.in]: myFilters };
-            } else if (_.isObject(myFilters)) {
-              if (Object.keys(myFilters).length > 1) {
-                query[i] = { [Op.and]: [] };
-                Object.keys(myFilters).forEach((filter) => {
-                  query[i][Op.and].push(this.getQueryForFilter(filter, myFilters[filter]));
+            if (Array.isArray(myFilterValue)) {
+              query[operator] = { [Op.in]: myFilterValue };
+            } else if (_.isObject(myFilterValue)) {
+              if (Object.keys(myFilterValue).length > 1) {
+                query[operator] = { [Op.and]: [] };
+                Object.keys(myFilterValue).forEach((filter) => {
+                  query[operator][Op.and].push(this.getQueryForFilter(filter, myFilterValue[filter]));
                 });
               } else {
-                const key = Object.keys(myFilters)[0];
-                query[i] = this.getQueryForFilter(key, myFilters[key], options.searchMode);
+                const key = Object.keys(myFilterValue)[0];
+                query[operator] = this.getQueryForFilter(key, myFilterValue[key], options.searchMode);
               }
             } else {
-              query[i] = this.sqlFormatForSearchMode(myFilters, options.searchMode);
+              query[operator] = this.sqlFormatForSearchMode(myFilterValue, options.searchMode);
             }
 
-            if (i.includes('.')) {
+            if (operator.includes('.')) {
               if (!query[Op.and]) {
                 query[Op.and] = [];
               }
@@ -167,11 +168,11 @@ const Utils = {
               if (isMysql) {
                 query[Op.and].push(Sequelize.where(
                   Sequelize.fn('JSON_EXTRACT',
-                    Sequelize.col(i.split('.')[0]),
-                    Sequelize.literal(`'$.${i.split('.')[1]}'`)), query[i]
+                    Sequelize.col(operator.split('.')[0]),
+                    Sequelize.literal(`'$.${operator.split('.')[1]}'`)), query[operator]
                 ));
               }
-              delete query[i];
+              delete query[operator];
               // i = Sequelize.fn('JSON_EXTRACT', Sequelize.col(i.split('.')[0]), `$.${i.split('.')[1]}`);
             }
           }

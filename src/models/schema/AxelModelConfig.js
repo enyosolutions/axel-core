@@ -478,6 +478,7 @@ const model = {
           titleField: { type: 'string' },
           subtitleField: { type: 'string' },
           descriptionField: { type: 'string' },
+          itemComponent: { type: 'string', description: 'The name of a custom component to use to render the list items' },
           perRow: { type: 'number' },
           perPage: { type: 'number' },
         }
@@ -498,6 +499,9 @@ const model = {
           displayOrphansList: {
             type: 'boolean',
           },
+          itemComponent: {
+            type: 'string', description: 'The name of a custom component to use to render the list items'
+          }
         }
       },
       tableOptions: {
