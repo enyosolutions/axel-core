@@ -1,31 +1,31 @@
 /* eslint-disable no-underscore-dangle */
 // const mongo =  require('mongodb');
-const crypto = require('crypto')
-const stringify = require('json-stringify-safe')
-const Sequelize = require('sequelize')
-const { Op } = require('sequelize')
-const _ = require('lodash')
+const crypto = require('crypto');
+const stringify = require('json-stringify-safe');
+const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
+const _ = require('lodash');
 
-const { ExtendedError } = require('./ExtendedError.js')
-const ErrorUtils = require('./ErrorUtils.js') // adjust path as needed
-const axel = require('../axel.js')
+const { ExtendedError } = require('./ExtendedError.js');
+const ErrorUtils = require('./ErrorUtils.js'); // adjust path as needed
+const axel = require('../axel.js');
 
 // declare const Sequelize;
 
 const Utils = {
-  md5 (str) {
-    return crypto.createHash('md5').update(str).digest('hex')
+  md5(str) {
+    return crypto.createHash('md5').update(str).digest('hex');
   },
-  formUrlEncoded (x) {
+  formUrlEncoded(x) {
     return Object.keys(x).reduce(
       (p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`,
       ''
-    )
+    );
   },
-  slugify (text) {
-    const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;'
-    const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------'
-    const p = new RegExp(a.split('').join('|'), 'g')
+  slugify(text) {
+    const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
+    const b = 'aaaaeeeeiiiioooouuuuncsyoarsnpwgnmuxzh------';
+    const p = new RegExp(a.split('').join('|'), 'g');
 
     return text
       .toString()
@@ -35,7 +35,7 @@ const Utils = {
       .replace(/&/g, '-and-') // Replace & with 'and'
       .replace(/[^\w\-]+/g, '') // Remove all non-word chars`
       .replace(/\-\-+/g, '-') // Replace multiple - with single -
-      .trim()
+      .trim();
   },
 
   safeError: ErrorUtils.safeError,
@@ -50,55 +50,55 @@ const Utils = {
     if (!id) {
       return resp.status(404).json({
         errors: ['missing_id']
-      })
+      });
     }
 
     if (id.length < 24 && Number.isNaN(Number(id))) {
-      axel.logger.warn('WRONG ID :: ', id)
+      axel.logger.warn('WRONG ID :: ', id);
       resp.status(404).json({
         errors: ['wrong_id_format'],
         message: 'wrong_id_format'
-      })
-      return false
+      });
+      return false;
     }
-    return true
+    return true;
   },
 
   /**
    *
    * Inject userId if required£
    */
-  injectUserId (data, user, fields = null) {
+  injectUserId(data, user, fields = null) {
     if (!fields) {
-      fields = ['userId']
+      fields = ['userId'];
     }
     if (typeof fields === 'string') {
-      fields = [fields]
+      fields = [fields];
     }
-    const primaryKey = axel.config.framework.primaryKey
-    fields.forEach(f => {
+    const primaryKey = axel.config.framework.primaryKey;
+    fields.forEach((f) => {
       if (!data[f] && user && user[primaryKey]) {
-        data[f] = user[primaryKey]
+        data[f] = user[primaryKey];
       }
-    })
+    });
 
-    return data
+    return data;
   },
 
   /**
    * Format a string for an sql search, by appending % where needed
    */
-  sqlFormatForSearchMode (str, mode) {
-    mode = mode || axel.config.framework.defaultApiSearchMode
+  sqlFormatForSearchMode(str, mode) {
+    mode = mode || axel.config.framework.defaultApiSearchMode;
     switch (mode) {
       default:
       case 'exact':
-        return { [Op.eq]: str }
+        return { [Op.eq]: str };
       case 'full':
       case 'wildcard':
-        return { [Op.like]: `%${str}%` }
+        return { [Op.like]: `%${str}%` };
       case 'start':
-        return { [Op.like]: `${str}%` }
+        return { [Op.like]: `${str}%` };
     }
   },
 
@@ -117,7 +117,7 @@ const Utils = {
    *     }} query
    * @returns {{[key as string]: any}}
    */
-  injectQueryParams (
+  injectQueryParams(
     req,
     query = {
       userId: undefined,
@@ -128,54 +128,53 @@ const Utils = {
     options = {}
   ) {
     if (req.query.options) {
-      options.searchMode =
-        options.searchMode ||
-        (req.query.options && req.query.options.searchMode)
+      options.searchMode = options.searchMode
+        || (req.query.options && req.query.options.searchMode);
     }
     // filters from the ui. Ex table fields
     if (req.query.filters && _.isObject(req.query.filters)) {
-      const filters = req.query.filters
+      const filters = req.query.filters;
       Object.keys(filters)
         .filter(f => filters[f]) // remove empty filters
-        .forEach(operator => {
+        .forEach((operator) => {
           // console.log('operator', operator);
           // REMOVE INCLUDE $relation FROM query because it's managed elsewhere
           if (operator === '$relation') {
-            delete req.query.filters[operator]
+            delete req.query.filters[operator];
           }
           if (filters[operator]) {
-            const myFilterValue = req.query.filters[operator]
+            const myFilterValue = req.query.filters[operator];
 
             if (Array.isArray(myFilterValue)) {
-              query[operator] = { [Op.in]: myFilterValue }
+              query[operator] = { [Op.in]: myFilterValue };
             } else if (_.isObject(myFilterValue)) {
               if (Object.keys(myFilterValue).length > 1) {
-                query[operator] = { [Op.and]: [] }
-                Object.keys(myFilterValue).forEach(filter => {
+                query[operator] = { [Op.and]: [] };
+                Object.keys(myFilterValue).forEach((filter) => {
                   query[operator][Op.and].push(
                     this.getQueryForFilter(filter, myFilterValue[filter])
-                  )
-                })
+                  );
+                });
               } else {
-                const key = Object.keys(myFilterValue)[0]
+                const key = Object.keys(myFilterValue)[0];
                 query[operator] = this.getQueryForFilter(
                   key,
                   myFilterValue[key],
                   options.searchMode
-                )
+                );
               }
             } else {
               query[operator] = this.sqlFormatForSearchMode(
                 myFilterValue,
                 options.searchMode
-              )
+              );
             }
 
             if (operator.includes('.')) {
               if (!query[Op.and]) {
-                query[Op.and] = []
+                query[Op.and] = [];
               }
-              const isMysql = axel.sqldb.options.dialect === 'mysql'
+              const isMysql = axel.sqldb.options.dialect === 'mysql';
               if (isMysql) {
                 query[Op.and].push(
                   Sequelize.where(
@@ -186,91 +185,91 @@ const Utils = {
                     ),
                     query[operator]
                   )
-                )
+                );
               }
-              delete query[operator]
+              delete query[operator];
               // i = Sequelize.fn('JSON_EXTRACT', Sequelize.col(i.split('.')[0]), `$.${i.split('.')[1]}`);
             }
           }
-        })
+        });
     }
 
     // filters from the ui. Ex table fields
     if (req.query._filters && _.isObject(req.query._filters)) {
-      const filters = req.query._filters
+      const filters = req.query._filters;
       Object.keys(filters)
         .filter(f => filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (filters[i]) {
-            query[i] = { [Op.like]: `${filters[i]}%` }
+            query[i] = { [Op.like]: `${filters[i]}%` };
           }
-        })
+        });
     }
 
     if (req.query.tags && _.isObject(req.query.tags)) {
-      let tags
+      let tags;
       if (_.isArray(req.query.tags)) {
-        tags = req.query.tags
+        tags = req.query.tags;
       } else {
-        tags = _.isString(req.query.tags) ? req.query.tags.split(',') : []
+        tags = _.isString(req.query.tags) ? req.query.tags.split(',') : [];
       }
       query.tags = {
         $all: tags
-      }
+      };
     }
 
     if (req.query.range && _.isObject(req.query.range)) {
-      const { startDate, endDate } = req.query.range
+      const { startDate, endDate } = req.query.range;
       if (startDate && (_.isString(startDate) || _.isNumber(startDate))) {
         if (!query.createdOn) {
-          query.createdOn = {}
+          query.createdOn = {};
         }
-        query.createdOn[Op.gte] = new Date(startDate)
+        query.createdOn[Op.gte] = new Date(startDate);
       }
 
       if (endDate && (_.isString(endDate) || _.isNumber(endDate))) {
         if (!query.createdOn) {
-          query.createdOn = {}
+          query.createdOn = {};
         }
-        query.createdOn[Op.lte] = new Date(endDate)
+        query.createdOn[Op.lte] = new Date(endDate);
       }
     }
 
-    const userId = req.params.userId || req.query.userId
+    const userId = req.params.userId || req.query.userId;
     if (userId) {
-      query.userId = userId
+      query.userId = userId;
     }
 
     // automatic override of all queries params
     // if (req.query.query) {
     //   query = req.query.query;
     // }
-    return query
+    return query;
   },
 
-  getQueryForFilter (filter, value, searchMode = 'start') {
+  getQueryForFilter(filter, value, searchMode = 'start') {
     switch (filter) {
       case '$isNull':
-        return { [Op.is]: null }
+        return { [Op.is]: null };
       case '$isNotNull':
-        return { [Op.not]: null }
+        return { [Op.not]: null };
       case '$isDefined':
         return {
           [Op.not]: null,
           [Op.ne]: ''
-        }
+        };
       case '$isNotDefined':
         return {
           [Op.or]: [{ [Op.is]: null }, { [Op.eq]: '' }]
-        }
+        };
       case '$startsWith':
-        return { [Op[filter.replace('$', '')]]: `${value}%` }
+        return { [Op[filter.replace('$', '')]]: `${value}%` };
       case '$endsWith':
-        return { [Op[filter.replace('$', '')]]: `%${value}` }
+        return { [Op[filter.replace('$', '')]]: `%${value}` };
       case '$like':
       case '$notLike':
       case '$substring':
-        return { [Op[filter.replace('$', '')]]: `%${value}%` }
+        return { [Op[filter.replace('$', '')]]: `%${value}%` };
       case '$eq':
       case '$ne':
       case '$gt':
@@ -279,17 +278,17 @@ const Utils = {
       case '$lte':
       case '$in':
       case '$notIn':
-        return { [Op[filter.replace('$', '')]]: value }
+        return { [Op[filter.replace('$', '')]]: value };
       case '$between':
       case '$notBetween':
-        return { [Op[filter.replace('$', '')]]: [value.from, value.to] }
+        return { [Op[filter.replace('$', '')]]: [value.from, value.to] };
       case '$custom':
-        return value
+        return value;
       default:
         if (searchMode === 'exact') {
-          return this.sqlFormatForSearchMode(value, searchMode)
+          return this.sqlFormatForSearchMode(value, searchMode);
         }
-        return this.sqlFormatForSearchMode(value, searchMode)
+        return this.sqlFormatForSearchMode(value, searchMode);
     }
   },
 
@@ -299,35 +298,35 @@ const Utils = {
    * @param include
    * @returns {*[]}
    */
-  injectIncludeParams (req, include = []) {
+  injectIncludeParams(req, include = []) {
     if (
-      req &&
-      req.query &&
-      req.query.filters &&
-      _.isObject(req.query.filters)
+      req
+      && req.query
+      && req.query.filters
+      && _.isObject(req.query.filters)
     ) {
       Object.keys(req.query.filters)
         .filter(f => req.query.filters[f])
-        .forEach(i => {
+        .forEach((i) => {
           if (i === '$relation') {
-            const filtersInclude = req.query.filters[i]
+            const filtersInclude = req.query.filters[i];
             if (_.isObject(filtersInclude)) {
-              let tempInclude = {}
-              Object.keys(filtersInclude).forEach(filterInclude => {
+              let tempInclude = {};
+              Object.keys(filtersInclude).forEach((filterInclude) => {
                 tempInclude = _.merge(
                   tempInclude,
                   this.convertPathToInclude(
                     filterInclude,
                     filtersInclude[filterInclude].$eq
                   )
-                )
-              })
-              include.push(tempInclude)
+                );
+              });
+              include.push(tempInclude);
             }
           }
-        })
+        });
     }
-    return include
+    return include;
   },
 
   /**
@@ -353,64 +352,64 @@ const Utils = {
    * @param {String} dataValue
    * @returns
    */
-  convertPathToInclude (dataPath, dataValue) {
-    let baseInclude
-    const segments = dataPath.split('.')
-    let previousSegment = null
+  convertPathToInclude(dataPath, dataValue) {
+    let baseInclude;
+    const segments = dataPath.split('.');
+    let previousSegment = null;
     for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i]
+      const segment = segments[i];
       const inc = {
         association: segment,
         unscoped: true,
         required: true,
         include: []
-      }
+      };
       if (i === 0) {
-        inc.association = segment
-        previousSegment = inc
-        baseInclude = previousSegment
+        inc.association = segment;
+        previousSegment = inc;
+        baseInclude = previousSegment;
         // eslint-disable-next-line
         continue
       }
       if (i >= segments.length - 1) {
         if (!previousSegment.attributes) {
-          previousSegment.attributes = []
+          previousSegment.attributes = [];
         }
-        previousSegment.attributes.push(segment)
+        previousSegment.attributes.push(segment);
         if (!previousSegment.where) {
-          previousSegment.where = {}
+          previousSegment.where = {};
         }
-        previousSegment.where[segment] = dataValue
+        previousSegment.where[segment] = dataValue;
         // eslint-disable-next-line
         continue
       }
       if (!previousSegment.include) {
-        previousSegment.include = []
+        previousSegment.include = [];
       }
-      previousSegment.include.push(inc)
-      previousSegment = inc
+      previousSegment.include.push(inc);
+      previousSegment = inc;
     }
-    return baseInclude
+    return baseInclude;
   },
 
-  injectMongoSortParams (req, options = {}) {
+  injectMongoSortParams(req, options = {}) {
     if (!options.sort) {
       if (req.query.sort && _.isObject(req.query.sort)) {
-        const sort = req.query.sort
-        options.sort = {}
-        Object.keys(sort).forEach(i => {
-          options.sort[i] = parseInt(sort[i])
-        })
+        const sort = req.query.sort;
+        options.sort = {};
+        Object.keys(sort).forEach((i) => {
+          options.sort[i] = parseInt(sort[i]);
+        });
       } else {
         options.sort = {
           createdOn: -1
-        }
+        };
       }
     }
-    return options
+    return options;
   },
 
-  injectPaginationQuery (
+  injectPaginationQuery(
     req,
     options = {
       sort: null,
@@ -419,32 +418,32 @@ const Utils = {
   ) {
     const isListOfValues = req.query.listOfValues
       ? !!req.query.listOfValues
-      : false
-    const startPage = req.query.page ? _.toNumber(req.query.page) : 0
-    const endpoint = req.endpoint || req.params.endpoint || req.modelName
-    let limit
+      : false;
+    const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
+    const endpoint = req.endpoint || req.params.endpoint || req.modelName;
+    let limit;
     if (isListOfValues) {
-      limit = axel.config.framework.defaultLovPagination
+      limit = axel.config.framework.defaultLovPagination;
     } else {
       limit = req.query.perPage
         ? req.query.perPage
-        : axel.config.framework.defaultPagination
+        : axel.config.framework.defaultPagination;
     }
-    limit = _.toNumber(limit)
-    let offset = 0
+    limit = _.toNumber(limit);
+    let offset = 0;
     if (axel.config.paginationStartsAtZero) {
-      offset = startPage * limit
+      offset = startPage * limit;
     } else {
-      offset = (startPage > 0 ? startPage - 1 : 0) * limit
+      offset = (startPage > 0 ? startPage - 1 : 0) * limit;
     }
 
-    const sortOptions = req.query.sort || options.sort
-    let order = sortOptions ? _.toPairs(sortOptions) : []
+    const sortOptions = req.query.sort || options.sort;
+    let order = sortOptions ? _.toPairs(sortOptions) : [];
 
     // skip nested attributes for sorting.
     order = order.filter(
       o => !o[0].includes('.') && ['asc', 'ASC', 'desc', 'DESC'].includes(o[1])
-    )
+    );
     /*
     order = order.map((o) => {
       if (o[0].includes('.')) {
@@ -468,9 +467,9 @@ const Utils = {
     });
     */
 
-    let attributes = req.query.fields
+    let attributes = req.query.fields;
     if (req.query.excludeFields) {
-      attributes = { exclude: attributes }
+      attributes = { exclude: attributes };
     }
     return {
       listOfValues: isListOfValues,
@@ -479,21 +478,21 @@ const Utils = {
       offset,
       order,
       attributes
-    }
+    };
   },
 
-  injectSearchParams (req, query = {}) {
+  injectSearchParams(req, query = {}) {
     if (req.query.search) {
       if (typeof req.query.search === 'string') {
-        req.query.search = req.query.search.trim()
+        req.query.search = req.query.search.trim();
       }
       query.$text = {
         $search: req.query.search,
         $language: req.query.locale || 'en'
-      }
+      };
     }
 
-    return query
+    return query;
   },
 
   /**
@@ -504,7 +503,7 @@ const Utils = {
    * @param {{modelName?:string; fields?:string[]}} options
    * @returns {Object}
    */
-  injectSqlSearchParams (
+  injectSqlSearchParams(
     searchParam,
     query = {},
     options = {
@@ -513,49 +512,48 @@ const Utils = {
     }
   ) {
     if (
-      (!options.modelName || !axel.models[options.modelName]) &&
-      !options.fields
+      (!options.modelName || !axel.models[options.modelName])
+      && !options.fields
     ) {
-      throw new Error('search_params_injections_missing_model_name')
+      throw new Error('search_params_injections_missing_model_name');
     }
-    let search = searchParam
+    let search = searchParam;
     if (typeof search === 'object' && !Array.isArray(search)) {
       console.warn(
         'search_params_injections_search_is_object. This is not supported anymore. Please use a string.',
         search
-      )
-      searchParam =
-        search && search.query && search.query.search
+      );
+      searchParam = search && search.query && search.query.search
           ? search.query.search
-          : JSON.stringify(search)
+          : JSON.stringify(search);
     }
-    const isPg = axel.sqldb.options.dialect === 'postgres'
+    const isPg = axel.sqldb.options.dialect === 'postgres';
     if (search) {
-      search = Array.isArray(search) ? search : [search]
+      search = Array.isArray(search) ? search : [search];
 
-      const params = {}
+      const params = {};
       if (!query[Op.or]) {
-        query[Op.or] = []
+        query[Op.or] = [];
       }
-      let fields
+      let fields;
       if (options.modelName) {
-        const dataModel = axel.models[options.modelName].entity
-        fields = Object.keys(dataModel.attributes)
+        const dataModel = axel.models[options.modelName].entity;
+        fields = Object.keys(dataModel.attributes);
       }
       // if we have a searchable fields list, we use it
       if (
-        axel.models[options.modelName].searchableFields &&
-        Array.isArray(axel.models[options.modelName].searchableFields) &&
-        axel.models[options.modelName].searchableFields.length > 0
+        axel.models[options.modelName].searchableFields
+        && Array.isArray(axel.models[options.modelName].searchableFields)
+        && axel.models[options.modelName].searchableFields.length > 0
       ) {
-        fields = axel.models[options.modelName].searchableFields
+        fields = axel.models[options.modelName].searchableFields;
       }
       if (options.fields) {
-        fields = options.fields
+        fields = options.fields;
       }
       if (fields) {
-        search.forEach(s => {
-          fields.forEach(i => {
+        search.forEach((s) => {
+          fields.forEach((i) => {
             query[Op.or].push(
               isPg
                 ? Sequelize.where(Sequelize.cast(Sequelize.col(i), 'text'), {
@@ -566,13 +564,13 @@ const Utils = {
                       [Op.like]: `%${s}%`
                     }
                   }
-            )
-          })
-        })
+            );
+          });
+        });
       }
     }
 
-    return query
+    return query;
   },
 
   /**
@@ -580,70 +578,70 @@ const Utils = {
    * @param query
    * @return {Object} query
    */
-  cleanSqlQuery (query) {
+  cleanSqlQuery(query) {
     if (!query) {
-      return query
+      return query;
     }
-    Object.keys(query).forEach(key => {
+    Object.keys(query).forEach((key) => {
       if (query[key] === undefined) {
-        delete query[key]
+        delete query[key];
       }
-    })
-    return query
+    });
+    return query;
   },
 
-  removeAdditionalProperty (scheme, data) {
-    return _.pick(data, _.keys(scheme.schema.properties))
+  removeAdditionalProperty(scheme, data) {
+    return _.pick(data, _.keys(scheme.schema.properties));
   },
 
-  dashedToNormal (str) {
-    return str.replace(/\s+/g, '-').toLowerCase()
+  dashedToNormal(str) {
+    return str.replace(/\s+/g, '-').toLowerCase();
   },
 
-  formatName (
+  formatName(
     firstname = null,
     lastname = null,
     company = null,
     optional = false
   ) {
-    let name = ''
+    let name = '';
     if (!firstname && !lastname && !company) {
-      return name
+      return name;
     }
 
     if (firstname || lastname) {
-      name = `${firstname} ${lastname}`
+      name = `${firstname} ${lastname}`;
       if (company && !optional) {
-        name += ` [${company}]`
+        name += ` [${company}]`;
       }
     } else {
-      name = company
+      name = company;
     }
 
-    return name ? name.trim() : ''
+    return name ? name.trim() : '';
   },
 
-  objectTrim (item) {
-    Object.keys(item).forEach(key => {
+  objectTrim(item) {
+    Object.keys(item).forEach((key) => {
       if (_.isString(item[key])) {
-        item[key] = item[key].trim()
+        item[key] = item[key].trim();
       }
-    })
-    return item
+    });
+    return item;
   },
 
-  validateDate (date) {
-    const timestamp = Date.parse(date)
+  validateDate(date) {
+    const timestamp = Date.parse(date);
     if (Number.isNaN(timestamp) === true) {
-      return false
+      return false;
     }
-    return true
+    return true;
   },
 
-  getEntityManager (req, res) {
+  getEntityManager(req, res) {
     const endpoint = _.isString(req)
       ? req
-      : req.params.endpoint || req.endpoint || req.modelName
+      : req.params.endpoint || req.endpoint || req.modelName;
     if (!axel.models[endpoint] || !axel.models[endpoint].em) {
       console.warn(
         'THE REQUESTED ENDPOINT [',
@@ -651,42 +649,40 @@ const Utils = {
         '] DOES NOT EXISTS. source: ',
         req.method,
         req.url
-      )
+      );
       if (res) {
         res.status(404).json({
           errors: ['model_not_found_error'],
           message: 'model_not_found_error'
-        })
+        });
       }
 
-      return false
+      return false;
     }
-    return axel.models[endpoint].em
+    return axel.models[endpoint].em;
   },
 
-  getRawObject (item) {
+  getRawObject(item) {
     if (Array.isArray(item)) {
-      return item.map(Utils.getRawObject)
+      return item.map(Utils.getRawObject);
     }
 
     if (item.rows && Array.isArray(item.rows)) {
-      return item.rows.map(Utils.getRawObject)
+      return item.rows.map(Utils.getRawObject);
     }
 
-    const output = item.get()
+    const output = item.get();
     /* eslint-disable no-underscore-dangle,no-unused-expressions */
-    item._options.includeNames &&
-      item._options.includeNames.forEach(inc => {
-        output[inc] = Utils.getRawObject(item[inc])
-      })
-    return output
+    item._options.includeNames
+      && item._options.includeNames.forEach((inc) => {
+        output[inc] = Utils.getRawObject(item[inc]);
+      });
+    return output;
   },
 
-  sanitizeUser (user) {
-    return _.omitBy(user, (value, field) =>
-      field.match(/(password|token|google|facebook|passwd)/gi)
-    )
+  sanitizeUser(user) {
+    return _.omitBy(user, (value, field) => field.match(/(password|token|google|facebook|passwd)/gi));
   }
-}
+};
 
-module.exports = Utils
+module.exports = Utils;
