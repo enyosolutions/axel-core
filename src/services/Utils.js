@@ -14,13 +14,13 @@ const axel = require('../axel.js');
 
 const Utils = {
   md5(str) {
-    return crypto
-      .createHash('md5')
-      .update(str)
-      .digest('hex');
+    return crypto.createHash('md5').update(str).digest('hex');
   },
   formUrlEncoded(x) {
-    return Object.keys(x).reduce((p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`, '');
+    return Object.keys(x).reduce(
+      (p, c) => `${p}&${c}=${encodeURIComponent(x[c])}`,
+      ''
+    );
   },
   slugify(text) {
     const a = 'àáäâèéëêìíïîòóöôùúüûñçßÿœæŕśńṕẃǵǹḿǘẍźḧ·/_,:;';
@@ -128,50 +128,66 @@ const Utils = {
     options = {}
   ) {
     if (req.query.options) {
-      options.searchMode = options.searchMode || (req.query.options && req.query.options.searchMode);
+      options.searchMode = options.searchMode
+        || (req.query.options && req.query.options.searchMode);
     }
     // filters from the ui. Ex table fields
     if (req.query.filters && _.isObject(req.query.filters)) {
       const filters = req.query.filters;
       Object.keys(filters)
-        .filter(f => filters[f])
-        .forEach((i) => {
-          // REMOVE INCLUDE $relation FROM query because it's managed else where
-          if (i === '$relation') {
-            delete req.query.filters[i];
+        .filter(f => filters[f]) // remove empty filters
+        .forEach((operator) => {
+          // console.log('operator', operator);
+          // REMOVE INCLUDE $relation FROM query because it's managed elsewhere
+          if (operator === '$relation') {
+            delete req.query.filters[operator];
           }
-          if (filters[i]) {
-            const myFilters = req.query.filters[i];
+          if (filters[operator]) {
+            const myFilterValue = req.query.filters[operator];
 
-            if (Array.isArray(myFilters)) {
-              query[i] = { [Op.in]: myFilters };
-            } else if (_.isObject(myFilters)) {
-              if (Object.keys(myFilters).length > 1) {
-                query[i] = { [Op.and]: [] };
-                Object.keys(myFilters).forEach((filter) => {
-                  query[i][Op.and].push(this.getQueryForFilter(filter, myFilters[filter]));
+            if (Array.isArray(myFilterValue)) {
+              query[operator] = { [Op.in]: myFilterValue };
+            } else if (_.isObject(myFilterValue)) {
+              if (Object.keys(myFilterValue).length > 1) {
+                query[operator] = { [Op.and]: [] };
+                Object.keys(myFilterValue).forEach((filter) => {
+                  query[operator][Op.and].push(
+                    this.getQueryForFilter(filter, myFilterValue[filter])
+                  );
                 });
               } else {
-                const key = Object.keys(myFilters)[0];
-                query[i] = this.getQueryForFilter(key, myFilters[key], options.searchMode);
+                const key = Object.keys(myFilterValue)[0];
+                query[operator] = this.getQueryForFilter(
+                  key,
+                  myFilterValue[key],
+                  options.searchMode
+                );
               }
             } else {
-              query[i] = this.sqlFormatForSearchMode(myFilters, options.searchMode);
+              query[operator] = this.sqlFormatForSearchMode(
+                myFilterValue,
+                options.searchMode
+              );
             }
 
-            if (i.includes('.')) {
+            if (operator.includes('.')) {
               if (!query[Op.and]) {
                 query[Op.and] = [];
               }
               const isMysql = axel.sqldb.options.dialect === 'mysql';
               if (isMysql) {
-                query[Op.and].push(Sequelize.where(
-                  Sequelize.fn('JSON_EXTRACT',
-                    Sequelize.col(i.split('.')[0]),
-                    Sequelize.literal(`'$.${i.split('.')[1]}'`)), query[i]
-                ));
+                query[Op.and].push(
+                  Sequelize.where(
+                    Sequelize.fn(
+                      'JSON_EXTRACT',
+                      Sequelize.col(operator.split('.')[0]),
+                      Sequelize.literal(`'$.${operator.split('.')[1]}'`)
+                    ),
+                    query[operator]
+                  )
+                );
               }
-              delete query[i];
+              delete query[operator];
               // i = Sequelize.fn('JSON_EXTRACT', Sequelize.col(i.split('.')[0]), `$.${i.split('.')[1]}`);
             }
           }
@@ -195,9 +211,7 @@ const Utils = {
       if (_.isArray(req.query.tags)) {
         tags = req.query.tags;
       } else {
-        tags = _.isString(req.query.tags)
-          ? req.query.tags.split(',')
-          : [];
+        tags = _.isString(req.query.tags) ? req.query.tags.split(',') : [];
       }
       query.tags = {
         $all: tags
@@ -233,7 +247,6 @@ const Utils = {
     return query;
   },
 
-
   getQueryForFilter(filter, value, searchMode = 'start') {
     switch (filter) {
       case '$isNull':
@@ -247,10 +260,7 @@ const Utils = {
         };
       case '$isNotDefined':
         return {
-          [Op.or]: [
-            { [Op.is]: null },
-            { [Op.eq]: '' }
-          ]
+          [Op.or]: [{ [Op.is]: null }, { [Op.eq]: '' }]
         };
       case '$startsWith':
         return { [Op[filter.replace('$', '')]]: `${value}%` };
@@ -282,7 +292,6 @@ const Utils = {
     }
   },
 
-
   /**
    * Inject params from the request into the include array that we'll user to include relation from the database
    * @param req
@@ -290,19 +299,32 @@ const Utils = {
    * @returns {*[]}
    */
   injectIncludeParams(req, include = []) {
-    if (req && req.query && req.query.filters && _.isObject(req.query.filters)) {
-      Object.keys(req.query.filters).filter(f => req.query.filters[f]).forEach((i) => {
-        if (i === '$relation') {
-          const filtersInclude = req.query.filters[i];
-          if (_.isObject(filtersInclude)) {
-            let tempInclude = {};
-            Object.keys(filtersInclude).forEach((filterInclude) => {
-              tempInclude = _.merge(tempInclude, this.convertPathToInclude(filterInclude, filtersInclude[filterInclude].$eq));
-            });
-            include.push(tempInclude);
+    if (
+      req
+      && req.query
+      && req.query.filters
+      && _.isObject(req.query.filters)
+    ) {
+      Object.keys(req.query.filters)
+        .filter(f => req.query.filters[f])
+        .forEach((i) => {
+          if (i === '$relation') {
+            const filtersInclude = req.query.filters[i];
+            if (_.isObject(filtersInclude)) {
+              let tempInclude = {};
+              Object.keys(filtersInclude).forEach((filterInclude) => {
+                tempInclude = _.merge(
+                  tempInclude,
+                  this.convertPathToInclude(
+                    filterInclude,
+                    filtersInclude[filterInclude].$eq
+                  )
+                );
+              });
+              include.push(tempInclude);
+            }
           }
-        }
-      });
+        });
     }
     return include;
   },
@@ -347,9 +369,9 @@ const Utils = {
         previousSegment = inc;
         baseInclude = previousSegment;
         // eslint-disable-next-line
-        continue;
+        continue
       }
-      if (i >= (segments.length - 1)) {
+      if (i >= segments.length - 1) {
         if (!previousSegment.attributes) {
           previousSegment.attributes = [];
         }
@@ -359,7 +381,7 @@ const Utils = {
         }
         previousSegment.where[segment] = dataValue;
         // eslint-disable-next-line
-        continue;
+        continue
       }
       if (!previousSegment.include) {
         previousSegment.include = [];
@@ -394,7 +416,9 @@ const Utils = {
       model: null
     }
   ) {
-    const isListOfValues = req.query.listOfValues ? !!req.query.listOfValues : false;
+    const isListOfValues = req.query.listOfValues
+      ? !!req.query.listOfValues
+      : false;
     const startPage = req.query.page ? _.toNumber(req.query.page) : 0;
     const endpoint = req.endpoint || req.params.endpoint || req.modelName;
     let limit;
@@ -417,7 +441,9 @@ const Utils = {
     let order = sortOptions ? _.toPairs(sortOptions) : [];
 
     // skip nested attributes for sorting.
-    order = order.filter(o => !o[0].includes('.'));
+    order = order.filter(
+      o => !o[0].includes('.') && ['asc', 'ASC', 'desc', 'DESC'].includes(o[1])
+    );
     /*
     order = order.map((o) => {
       if (o[0].includes('.')) {
@@ -451,7 +477,7 @@ const Utils = {
       limit,
       offset,
       order,
-      attributes,
+      attributes
     };
   },
 
@@ -485,13 +511,21 @@ const Utils = {
       fields: undefined
     }
   ) {
-    if ((!options.modelName || !axel.models[options.modelName]) && !options.fields) {
+    if (
+      (!options.modelName || !axel.models[options.modelName])
+      && !options.fields
+    ) {
       throw new Error('search_params_injections_missing_model_name');
     }
     let search = searchParam;
     if (typeof search === 'object' && !Array.isArray(search)) {
-      console.warn('search_params_injections_search_is_object. This is not supported anymore. Please use a string.', search);
-      searchParam = search && search.query && search.query.search ? search.query.search : JSON.stringify(search);
+      console.warn(
+        'search_params_injections_search_is_object. This is not supported anymore. Please use a string.',
+        search
+      );
+      searchParam = search && search.query && search.query.search
+          ? search.query.search
+          : JSON.stringify(search);
     }
     const isPg = axel.sqldb.options.dialect === 'postgres';
     if (search) {
@@ -507,9 +541,11 @@ const Utils = {
         fields = Object.keys(dataModel.attributes);
       }
       // if we have a searchable fields list, we use it
-      if (axel.models[options.modelName].searchableFields
+      if (
+        axel.models[options.modelName].searchableFields
         && Array.isArray(axel.models[options.modelName].searchableFields)
-        && axel.models[options.modelName].searchableFields.length > 0) {
+        && axel.models[options.modelName].searchableFields.length > 0
+      ) {
         fields = axel.models[options.modelName].searchableFields;
       }
       if (options.fields) {
@@ -520,15 +556,14 @@ const Utils = {
           fields.forEach((i) => {
             query[Op.or].push(
               isPg
-                ? Sequelize.where(
-                  Sequelize.cast(Sequelize.col(i), 'text'),
-                  { [Op.iLike]: `%${s}%` }
-                )
+                ? Sequelize.where(Sequelize.cast(Sequelize.col(i), 'text'), {
+                    [Op.iLike]: `%${s}%`
+                  })
                 : {
-                  [i]: {
-                    [Op.like]: `%${s}%`
+                    [i]: {
+                      [Op.like]: `%${s}%`
+                    }
                   }
-                }
             );
           });
         });
@@ -539,10 +574,10 @@ const Utils = {
   },
 
   /**
- * Removes undefined fields from the object query since the cause sequelize to crash
- * @param query
- * @return {Object} query
- */
+   * Removes undefined fields from the object query since the cause sequelize to crash
+   * @param query
+   * @return {Object} query
+   */
   cleanSqlQuery(query) {
     if (!query) {
       return query;
@@ -563,7 +598,12 @@ const Utils = {
     return str.replace(/\s+/g, '-').toLowerCase();
   },
 
-  formatName(firstname = null, lastname = null, company = null, optional = false) {
+  formatName(
+    firstname = null,
+    lastname = null,
+    company = null,
+    optional = false
+  ) {
     let name = '';
     if (!firstname && !lastname && !company) {
       return name;
@@ -599,9 +639,17 @@ const Utils = {
   },
 
   getEntityManager(req, res) {
-    const endpoint = _.isString(req) ? req : (req.params.endpoint || req.endpoint || req.modelName);
+    const endpoint = _.isString(req)
+      ? req
+      : req.params.endpoint || req.endpoint || req.modelName;
     if (!axel.models[endpoint] || !axel.models[endpoint].em) {
-      console.warn('THE REQUESTED ENDPOINT [', endpoint, '] DOES NOT EXISTS. source: ', req.method, req.url);
+      console.warn(
+        'THE REQUESTED ENDPOINT [',
+        endpoint,
+        '] DOES NOT EXISTS. source: ',
+        req.method,
+        req.url
+      );
       if (res) {
         res.status(404).json({
           errors: ['model_not_found_error'],
@@ -635,8 +683,6 @@ const Utils = {
   sanitizeUser(user) {
     return _.omitBy(user, (value, field) => field.match(/(password|token|google|facebook|passwd)/gi));
   }
-
-
 };
 
 module.exports = Utils;
