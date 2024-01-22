@@ -23,25 +23,25 @@
       <h6 class="text-primary">Expression examples</h6>
       <small v-pre>
         {{ currentItem.price && !currentItem.price > 1000 }}<br />
-        {{ context.mode !== 'create' }}<br />
-        {{ userHasRole('ADMIN') }}<br />
+        {{ context.mode !== "create" }}<br />
+        {{ userHasRole("ADMIN") }}<br />
       </small>
       <small>
-        > The expression must resolve to a boolean. use !! if needed. <
+        [ The expression must resolve to a boolean. use !! if needed. ]
       </small>
     </div>
   </div>
 </template>
 <script>
-import VEC from 'vue-aw-components';
+import VEC from "vue-aw-components";
 
 export default {
   mixins: [VEC.abstractField],
   components: {},
   data() {
     return {
-      warning: '',
-      expressionType: '',
+      warning: "",
+      expressionType: "",
     };
   },
   computed: {
@@ -53,8 +53,8 @@ export default {
     // eslint-disable-next-line
     value(change) {
       if (change !== undefined) {
-        if (typeof change === 'string') {
-          this.expressionType = 'expression';
+        if (typeof change === "string") {
+          this.expressionType = "expression";
         } else {
           this.expressionType = change;
         }
@@ -62,8 +62,8 @@ export default {
     },
     expressionType(change) {
       if (change !== undefined) {
-        if (change === 'expression') {
-          this.value = '{{ currentItem.lastName }}';
+        if (change === "expression") {
+          this.value = "{{ currentItem.lastName }}";
         } else {
           this.value = !!change;
         }
@@ -72,8 +72,8 @@ export default {
   },
   mounted() {
     if (this.value !== undefined) {
-      if (typeof change === 'string') {
-        this.expressionType = 'expression';
+      if (typeof change === "string") {
+        this.expressionType = "expression";
       } else {
         this.expressionType = this.value;
       }
